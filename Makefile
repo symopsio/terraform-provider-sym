@@ -1,7 +1,9 @@
-VERSION  				:= 			$(shell cat ./VERSION)
-
 install:
 	go install -v
+
+build: 
+	mkdir -p dist
+	go build -o dist/terraform-provider-sym
 
 test:
 	go test ./... -v
@@ -9,4 +11,4 @@ test:
 fmt:
 	go fmt ./... -v
 
-.PHONY: install test fmt
+.PHONY: install build test fmt

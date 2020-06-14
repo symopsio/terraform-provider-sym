@@ -4,9 +4,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
-// Provider is required boilerplate
+// Provider defines the schema this provider supports
 func Provider() *schema.Provider {
 	return &schema.Provider{
-		ResourcesMap: map[string]*schema.Resource{},
+		ResourcesMap: map[string]*schema.Resource{
+			"sym_workflow": resourceWorkflow(),
+		},
 	}
 }
