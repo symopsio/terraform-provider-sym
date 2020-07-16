@@ -1,4 +1,12 @@
-version: 2
+version: 2.1
+
+commands:
+  restore_pkg_cache:
+    steps:
+      - restore_cache:
+          keys:
+            - v1-pkg-cache
+
 jobs:
   build:
     docker:
@@ -7,9 +15,7 @@ jobs:
     steps:
       - checkout
 
-      - restore_cache:
-          keys:
-            - v1-pkg-cache
+      - restore_pkg_cache
 
       - run: make
 
@@ -25,9 +31,7 @@ jobs:
     steps:
       - checkout
 
-      - restore_cache:
-          keys:
-            - v1-pkg-cache
+      - restore_pkg_cache
 
       - run: curl -sL https://git.io/goreleaser | bash
 
@@ -36,7 +40,7 @@ workflows:
   build_and_release:
     jobs:
       - build:
-          filters:  # required since `deploy` has tag filters AND requires `build`
+          filters:
             tags:
               only: /.*/
       - release:
