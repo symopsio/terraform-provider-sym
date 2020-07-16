@@ -5,7 +5,7 @@ commands:
     steps:
       - restore_cache:
           keys:
-            - v1-pkg-cache
+            - &cache_name v1-pkg-cache
 
 jobs:
   build:
@@ -20,7 +20,7 @@ jobs:
       - run: make
 
       - save_cache:
-          key: v1-pkg-cache
+          key: *cache_name
           paths:
             - "/go/pkg"
 
