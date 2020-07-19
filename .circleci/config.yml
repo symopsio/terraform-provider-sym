@@ -1,0 +1,53 @@
+version: 2.1
+
+commands:
+  restore_pkg_cache:
+    steps:
+      - restore_cache:
+          keys:
+            - &cache_name v1-pkg-cache
+
+jobs:
+  build:
+    docker:
+      - image: circleci/golang:1.14
+
+    steps:
+      - checkout
+
+      - restore_pkg_cache
+
+      - run: make
+
+      - save_cache:
+          key: *cache_name
+          paths:
+            - "/go/pkg"
+
+  release:
+    docker:
+      - image: circleci/golang:1.14
+
+    steps:
+      - checkout
+
+      - restore_pkg_cache
+
+      - run: curl -sL https://git.io/goreleaser | bash
+
+workflows:
+  version: 2
+  build_and_release:
+    jobs:
+      - build:
+          filters:
+            tags:
+              only: /.*/
+      - release:
+          requires:
+            - build
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /v.*/
