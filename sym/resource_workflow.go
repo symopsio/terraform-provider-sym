@@ -1,15 +1,18 @@
 package sym
 
 import (
+	"context"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func resourceWorkflow() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceWorkflowCreate,
-		Read:   resourceWorkflowRead,
-		Update: resourceWorkflowUpdate,
-		Delete: resourceWorkflowDelete,
+		CreateContext: resourceWorkflowCreate,
+		ReadContext:   resourceWorkflowRead,
+		UpdateContext: resourceWorkflowUpdate,
+		DeleteContext: resourceWorkflowDelete,
 
 		Schema: map[string]*schema.Schema{
 			"reducer": &schema.Schema{
@@ -20,18 +23,26 @@ func resourceWorkflow() *schema.Resource {
 	}
 }
 
-func resourceWorkflowCreate(d *schema.ResourceData, m interface{}) error {
-	return resourceWorkflowRead(d, m)
+func resourceWorkflowCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	var diags diag.Diagnostics
+
+	return diags
 }
 
-func resourceWorkflowRead(d *schema.ResourceData, m interface{}) error {
-	return nil
+func resourceWorkflowRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	var diags diag.Diagnostics
+
+	return diags
 }
 
-func resourceWorkflowUpdate(d *schema.ResourceData, m interface{}) error {
-	return resourceWorkflowRead(d, m)
+func resourceWorkflowUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	var diags diag.Diagnostics
+
+	return diags
 }
 
-func resourceWorkflowDelete(d *schema.ResourceData, m interface{}) error {
-	return nil
+func resourceWorkflowDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	var diags diag.Diagnostics
+
+	return diags
 }
