@@ -2,6 +2,7 @@ package sym
 
 import (
 	"context"
+	"fmt"
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -42,6 +43,8 @@ func resourceFlow() *schema.Resource {
 }
 
 func resourceFlowCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	c := m.(Client)
+
 	var diags diag.Diagnostics
 
 	handlers := d.Get("handler").([]interface{})
@@ -59,9 +62,19 @@ func resourceFlowCreate(ctx context.Context, d *schema.ResourceData, m interface
 		},
 	}
 
-	log.Printf("[DEBUG] Got flow: %+v", flow)
+	result, err := c.Exec(fmt.Sprintf("symflow create %v", flow))
+	if err != nil {
+		log.Printf("[ERROR] Flow creation failed: %v", err)
+		diags = append(diags, diag.Diagnostic{
+			Severity: diag.Error,
+			Summary:  "Unable to create flow",
+			Detail:   fmt.Sprintf("Flow creation failed with error: %s", err.Error()),
+		})
+	}
 
-	d.SetId("FOO")
+	log.Printf("[DEBUG] Created flow id: %s", result)
+
+	d.SetId(result)
 
 	return diags
 }
