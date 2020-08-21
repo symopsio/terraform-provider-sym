@@ -4,7 +4,7 @@ import (
 	"github.com/symopsio/protos/go/tf/models"
 )
 
-// Client shells out to symflow
+// Client interact with the Sym API
 type Client interface {
 
 	// CreateFlow returns the version of the new flow
