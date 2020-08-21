@@ -5,7 +5,7 @@
 First, build and install the provider.
 
 ```shell
-make
+make local
 ```
 
 Then, run the following command to initialize the workspace and apply the sample configuration.
@@ -30,4 +30,10 @@ export TF_LOG=TRACE
 export TF_LOG_PATH=/tmp/tf.log
 ```
 
+## Builds
 
+Build with goreleaser:
+
+```shell
+goreleaser --snapshot --skip-publish --rm-dist
+```
