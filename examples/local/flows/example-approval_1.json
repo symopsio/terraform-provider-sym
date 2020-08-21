@@ -1,0 +1,10 @@
+{
+	"name": "example-approval",
+	"version": 1,
+	"template": {
+		"name": "sym:approval:1.0"
+	},
+	"implementation": {
+		"body": "import re\n\nfrom sym import events, okta, pagerduty, rego, schedule, slack\nfrom sym.annotations import hook, reducer\n\n\n@reducer\ndef get_approver(request):\n    if re.search(r\"^arn:aws:s3\", request.values[\"arn\"]):\n        return okta.group(\"data-security\")\n    return slack.channel(\"#ops\")\n"
+	}
+}

@@ -7,7 +7,9 @@ terraform {
   }
 }
 
-provider "sym" {}
+provider "sym" {
+  local_path = "${path.module}/local"
+}
 
 module "sym" {
   source = "./sym"

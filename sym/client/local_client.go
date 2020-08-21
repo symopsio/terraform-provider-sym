@@ -1,0 +1,83 @@
+package client
+
+import (
+	"encoding/json"
+	"fmt"
+	"io/ioutil"
+	"log"
+	"os"
+	"strings"
+
+	"github.com/golang/protobuf/proto"
+	"github.com/symopsio/protos/go/tf/models"
+)
+
+type localClient struct {
+	Path string
+}
+
+func (c *localClient) CreateFlow(flow *models.Flow) (uint32, error) {
+	log.Printf("[DEBUG] CreateFlow: %+v", flow)
+	newFlow := proto.Clone(flow).(*models.Flow)
+	newFlow.Version = flow.Version + 1
+	path := c.flowPath(newFlow.Name, newFlow.Version)
+	err := c.writeMessage(path, newFlow)
+	if err != nil {
+		return 0, err
+	}
+	return newFlow.Version, nil
+}
+
+func (c *localClient) GetFlow(name string, version uint32) (*models.Flow, error) {
+	log.Printf("[DEBUG] GetFlow: %s:%v", name, version)
+	path := c.flowPath(name, version)
+	flow := &models.Flow{}
+	err := c.readMessage(path, flow)
+	return flow, err
+}
+
+func (c *localClient) flowPath(name string, version uint32) string {
+	return fmt.Sprintf("flows/%s_%v.json", name, version)
+}
+
+func (c *localClient) ensurePath(path string) (string, error) {
+	fullPath := fmt.Sprintf("%s/%s", c.Path, path)
+	lastSlash := strings.LastIndex(fullPath, "/")
+	var err error
+	if lastSlash > 0 {
+		err = os.MkdirAll(fullPath[0:lastSlash], os.ModePerm)
+	}
+	return fullPath, err
+}
+
+func (c *localClient) readMessage(path string, message proto.Message) error {
+	ensurePath, err := c.ensurePath(path)
+	if err != nil {
+		return err
+	}
+	bytes, err := ioutil.ReadFile(ensurePath)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(bytes, message)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (c *localClient) writeMessage(path string, message proto.Message) error {
+	ensurePath, err := c.ensurePath(path)
+	if err != nil {
+		return err
+	}
+
+	bytes, err := json.MarshalIndent(message, "", "\t")
+	if err != nil {
+		return err
+	}
+
+	return ioutil.WriteFile(ensurePath, bytes, 0644)
+}
