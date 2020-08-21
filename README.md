@@ -17,6 +17,10 @@ terraform init && terraform apply
 
 Running `terraform apply` in the examples folder will create a local `terraform.tfstate` file. You can safely remove this file if you are testing and want to redo something.
 
+## Local files
+
+The example uses a local file provider, which expects to find json protos in the `examples/local` directory.
+
 ## Debugging
 
 To turn on terraform logging, set env vars. Note that provider logs all get jumbled together so you have to search for your log messages:

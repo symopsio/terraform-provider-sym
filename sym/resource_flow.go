@@ -20,9 +20,6 @@ func resourceFlow() *schema.Resource {
 		UpdateContext: resourceFlowUpdate,
 		DeleteContext: resourceFlowDelete,
 
-		// You currently can't represent nested structures (like handler) without
-		// wrapping in a single-element list:
-		// https://github.com/hashicorp/terraform-plugin-sdk/issues/155
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:     schema.TypeString,
@@ -32,6 +29,9 @@ func resourceFlow() *schema.Resource {
 				Type:     schema.TypeInt,
 				Computed: true,
 			},
+			// You currently can't represent nested structures (like handler) without
+			// wrapping in a single-element list:
+			// https://github.com/hashicorp/terraform-plugin-sdk/issues/155
 			"handler": {
 				Type:     schema.TypeList,
 				Required: true,
