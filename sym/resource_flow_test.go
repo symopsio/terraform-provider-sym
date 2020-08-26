@@ -14,11 +14,11 @@ func TestFormatID(t *testing.T) {
 }
 
 func TestParseNameAndVersion(t *testing.T) {
-	name, version, err := parseNameAndVersion("foo:1")
+	name, version, err := parseNameAndVersion("org:foo:1")
 	if err != nil {
 		t.Errorf("Expected to parse foo:1, got err: %v", err)
 	}
-	if name != "foo" {
+	if name != "org:foo" {
 		t.Errorf("Expected foo, got: %s", name)
 	}
 	if version != 1 {

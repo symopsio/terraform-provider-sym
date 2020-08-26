@@ -13,19 +13,22 @@ import (
 )
 
 type localClient struct {
+	org  string
 	Path string
 }
 
-func (c *localClient) CreateFlow(flow *models.Flow) (uint32, error) {
+func (c *localClient) GetOrg() string {
+	return c.org
+}
+
+func (c *localClient) CreateFlow(flow *models.Flow) error {
 	log.Printf("[DEBUG] CreateFlow: %+v", flow)
-	newFlow := proto.Clone(flow).(*models.Flow)
-	newFlow.Version = flow.Version + 1
-	path := c.flowPath(newFlow.Name, newFlow.Version)
-	err := c.writeMessage(path, newFlow)
+	path := c.flowPath(flow.Name, flow.Version)
+	err := c.writeMessage(path, flow)
 	if err != nil {
-		return 0, err
+		return err
 	}
-	return newFlow.Version, nil
+	return nil
 }
 
 func (c *localClient) GetFlow(name string, version uint32) (*models.Flow, error) {

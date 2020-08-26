@@ -8,11 +8,16 @@ import (
 )
 
 type cliClient struct {
+	org string
 }
 
-func (c *cliClient) CreateFlow(flow *models.Flow) (uint32, error) {
+func (c *cliClient) GetOrg() string {
+	return c.org
+}
+
+func (c *cliClient) CreateFlow(flow *models.Flow) error {
 	log.Printf("[DEBUG] CreateFlow: %+v", flow)
-	return 0, fmt.Errorf("Not implemented")
+	return fmt.Errorf("Not implemented")
 }
 
 func (c *cliClient) GetFlow(name string, version uint32) (*models.Flow, error) {

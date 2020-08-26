@@ -16,6 +16,10 @@ func Provider() *schema.Provider {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+			"org": {
+				Type:     schema.TypeString,
+				Required: true,
+			},
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"sym_flow": resourceFlow(),
@@ -27,9 +31,10 @@ func Provider() *schema.Provider {
 func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
+	org := d.Get("org").(string)
 	localPath := d.Get("local_path").(string)
 
-	c, err := client.NewClient(localPath)
+	c, err := client.NewClient(org, localPath)
 	if err != nil {
 		return nil, diag.FromErr(err)
 	}

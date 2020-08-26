@@ -27,7 +27,7 @@ func resourceFlow() *schema.Resource {
 			},
 			"version": {
 				Type:     schema.TypeInt,
-				Computed: true,
+				Required: true,
 			},
 			// You currently can't represent nested structures (like handler) without
 			// wrapping in a single-element list:
@@ -59,6 +59,13 @@ func resourceFlowCreate(ctx context.Context, d *schema.ResourceData, m interface
 	var diags diag.Diagnostics
 
 	name := d.Get("name").(string)
+	qualifiedName := qualifyName(c.GetOrg(), name)
+
+	versionString := d.Get("version").(string)
+	version, err := parseVersion(versionString)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	handlers := d.Get("handler").([]interface{})
 	handler := handlers[0].(map[string]interface{})
@@ -67,7 +74,8 @@ func resourceFlowCreate(ctx context.Context, d *schema.ResourceData, m interface
 	template := handler["template"].(string)
 
 	flow := &models.Flow{
-		Name: name,
+		Name:    qualifiedName,
+		Version: version,
 		Template: &models.Template{
 			Name: template,
 		},
@@ -76,12 +84,12 @@ func resourceFlowCreate(ctx context.Context, d *schema.ResourceData, m interface
 		},
 	}
 
-	version, err := c.CreateFlow(flow)
+	err = c.CreateFlow(flow)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	id := formatID(name, version)
+	id := formatID(qualifiedName, version)
 
 	log.Printf("[DEBUG] Created flow with id: %s", id)
 
@@ -137,18 +145,30 @@ func flattenHandler(flow *models.Flow) []interface{} {
 	return []interface{}{h}
 }
 
+func qualifyName(org string, name string) string {
+	return fmt.Sprintf("%s:%s", org, name)
+}
+
+func parseVersion(s string) (uint32, error) {
+	version, err := strconv.Atoi(s)
+	if err != nil {
+		return 0, err
+	}
+	return uint32(version), nil
+}
+
 func formatID(name string, version uint32) string {
 	return fmt.Sprintf("%s:%v", name, version)
 }
 
 func parseNameAndVersion(id string) (string, uint32, error) {
-	split := strings.SplitN(id, ":", 2)
-	if len(split) < 2 {
+	split := strings.SplitN(id, ":", 3)
+	if len(split) < 3 {
 		return "", 0, fmt.Errorf("Unsupported id: %s", id)
 	}
-	version, err := strconv.Atoi(split[1])
+	version, err := parseVersion(split[2])
 	if err != nil {
 		return "", 0, err
 	}
-	return split[0], uint32(version), nil
+	return qualifyName(split[0], split[1]), version, nil
 }
