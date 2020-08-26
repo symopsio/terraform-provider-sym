@@ -37,8 +37,8 @@ func TestFlattenHandler(t *testing.T) {
 	}
 
 	flowData := flattenHandler(flow)[0].(map[string]interface{})
-	if impl := flowData["impl"]; impl != "foo" {
-		t.Errorf("Expected foo, got: %s", impl)
+	if body := flowData["body"]; body != "foo" {
+		t.Errorf("Expected foo, got: %s", body)
 	}
 	if template := flowData["template"]; template != "bar" {
 		t.Errorf("Expected bar, got: %s", template)

@@ -8,6 +8,7 @@ require (
 	github.com/golang/protobuf v1.4.2
 	github.com/hashicorp/hcl/v2 v2.6.0 // indirect
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.0.1
+	github.com/mitchellh/go-homedir v1.1.0
 	github.com/stretchr/testify v1.5.1 // indirect
 	github.com/symopsio/protos/go v0.0.0-20200817191320-9309c1d62abe
 	github.com/zclconf/go-cty v1.5.1 // indirect

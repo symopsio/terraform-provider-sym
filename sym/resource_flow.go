@@ -3,9 +3,15 @@ package sym
 import (
 	"context"
 	"fmt"
+	"io/ioutil"
 	"log"
+	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
+	"unicode/utf8"
+
+	homedir "github.com/mitchellh/go-homedir"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -42,9 +48,13 @@ func resourceFlow() *schema.Resource {
 							Type:     schema.TypeString,
 							Required: true,
 						},
-						"impl": {
+						"source": {
 							Type:     schema.TypeString,
 							Required: true,
+						},
+						"body": {
+							Type:     schema.TypeString,
+							Computed: true,
 						},
 					},
 				},
@@ -61,16 +71,18 @@ func resourceFlowCreate(ctx context.Context, d *schema.ResourceData, m interface
 	name := d.Get("name").(string)
 	qualifiedName := qualifyName(c.GetOrg(), name)
 
-	versionString := d.Get("version").(string)
-	version, err := parseVersion(versionString)
-	if err != nil {
-		return diag.FromErr(err)
-	}
+	version := uint32(d.Get("version").(int))
 
 	handlers := d.Get("handler").([]interface{})
 	handler := handlers[0].(map[string]interface{})
 
-	impl := handler["impl"].(string)
+	source := handler["source"].(string)
+	body, err := readUTF8(source)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	handler["body"] = body
+
 	template := handler["template"].(string)
 
 	flow := &models.Flow{
@@ -80,7 +92,8 @@ func resourceFlowCreate(ctx context.Context, d *schema.ResourceData, m interface
 			Name: template,
 		},
 		Implementation: &models.Source{
-			Body: impl,
+			Body:     body,
+			Filename: source,
 		},
 	}
 
@@ -136,7 +149,8 @@ func resourceFlowDelete(ctx context.Context, d *schema.ResourceData, m interface
 func flattenHandler(flow *models.Flow) []interface{} {
 	h := make(map[string]interface{})
 	if flow.Implementation != nil {
-		h["impl"] = flow.Implementation.Body
+		h["source"] = flow.Implementation.Filename
+		h["body"] = flow.Implementation.Body
 	}
 	if flow.Template != nil {
 		h["template"] = flow.Template.Name
@@ -171,4 +185,43 @@ func parseNameAndVersion(id string) (string, uint32, error) {
 		return "", 0, err
 	}
 	return qualifyName(split[0], split[1]), version, nil
+}
+
+func readUTF8(path string) (string, error) {
+	src, err := readFileBytes(".", path)
+	if err != nil {
+		return "", err
+	}
+	if !utf8.Valid(src) {
+		return "", fmt.Errorf("contents of %s are not valid UTF-8; use the filebase64 function to obtain the Base64 encoded contents or the other file functions (e.g. filemd5, filesha256) to obtain file hashing results instead", path)
+	}
+	return string(src), nil
+}
+
+// Reusing the file function's implementation from here
+// https://github.com/hashicorp/terraform/blob/master/lang/funcs/filesystem.go#L355
+func readFileBytes(baseDir, path string) ([]byte, error) {
+	path, err := homedir.Expand(path)
+	if err != nil {
+		return nil, fmt.Errorf("failed to expand ~: %s", err)
+	}
+
+	if !filepath.IsAbs(path) {
+		path = filepath.Join(baseDir, path)
+	}
+
+	// Ensure that the path is canonical for the host OS
+	path = filepath.Clean(path)
+
+	src, err := ioutil.ReadFile(path)
+	if err != nil {
+		// ReadFile does not return Terraform-user-friendly error
+		// messages, so we'll provide our own.
+		if os.IsNotExist(err) {
+			return nil, fmt.Errorf("no file exists at %s; this function works only with files that are distributed as part of the configuration source code, so if this file will be created by a resource in this configuration you must instead obtain this result from an attribute of that resource", path)
+		}
+		return nil, fmt.Errorf("failed to read %s", path)
+	}
+
+	return src, nil
 }
