@@ -8,7 +8,7 @@ First, build and install the provider.
 make local
 ```
 
-Then, run the following command to initialize the workspace and apply the sample configuration.
+Then, run the following command to initialize the workspace and apply the sample configuration. Note: you must have Terraform 12 installed (not 13, the default now). You can find the latest releases for 12 [here](https://releases.hashicorp.com/terraform/0.12.29/).
 
 ```shell
 cd examples
