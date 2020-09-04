@@ -23,6 +23,8 @@ pushd examples &> /dev/null
 export TF_LOG=TRACE
 export TF_LOG_PATH=./tf.log
 
+sed -i 's; local_path;//local_path;' main.tf
+
 rm -f "$TF_LOG_PATH" terraform.tfstate
 rm -rf ~/git/symopsio/mocks/symflow/out
 
