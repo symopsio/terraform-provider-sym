@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -eu
+
 TF=$(which terraform12 || which terraform)
 
 TF_VERSION=$($TF --version | head -n 1 | awk '{print $2}')
@@ -25,8 +27,11 @@ export TF_LOG_PATH=./tf.log
 
 sed -i 's; local_path;//local_path;' main.tf
 
-rm -f "$TF_LOG_PATH" terraform.tfstate
-rm -rf ~/git/symopsio/mocks/symflow/out
+if [ -z "${TEST_NO_CLEAN:-}" ]
+then
+    rm -f "$TF_LOG_PATH" terraform.tfstate
+    rm -rf ~/git/symopsio/mocks/symflow/out
+fi
 
 $TF init && $TF apply
 
