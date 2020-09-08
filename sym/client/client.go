@@ -10,10 +10,12 @@ type Client interface {
 	GetOrg() string
 
 	// CreateFlow returns the version of the new flow
-	CreateFlow(flow *models.Flow) error
+	// TODO: pick a UUID type and use it
+	CreateFlow(flow *models.Flow) (*string, error)
 
-	// GetFlow finds a flow given a name and version
-	GetFlow(name string, version uint32) (*models.Flow, error)
+	// GetFlow finds a flow given a UUID string
+	// TODO: pick a UUID type and use it
+	GetFlow(uuid string) (*models.Flow, error)
 }
 
 // NewClient creates a new symflow client
