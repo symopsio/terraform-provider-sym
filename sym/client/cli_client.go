@@ -54,7 +54,7 @@ func (c *cliClient) GetFlow(uuid string) (*models.Flow, error) {
 	}
 	defer os.Remove(tempfile.Name())
 
-	_, err = exec.Command("symflow", "get", "flow", tempfile.Name(), uuid).Output()
+	_, err = exec.Command("symflow", "get", "flow", uuid, tempfile.Name()).Output()
 	if err != nil {
 		exitError, isExitError := err.(*exec.ExitError)
 		// Exit status 101 indicates resource does not exist
