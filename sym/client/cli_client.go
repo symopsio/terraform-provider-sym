@@ -56,6 +56,10 @@ func (c *cliClient) GetFlow(name string, version uint32) (*models.Flow, error) {
 		exitError, isExitError := err.(*exec.ExitError)
 		// Exit status 101 indicates resource does not exist
 		if isExitError && exitError.ExitCode() == 101 {
+			// TODO: a question came up of what the right way is to signal that
+			// an error didn't occur but taht the resource didn't exist. Terraform
+			// seems to treat a nil flow/nil error as flow does not exist, so this
+			// seems like the right approach for now, but it does look weird.
 			return nil, nil
 		} else if isExitError {
 			return nil, fmt.Errorf("failed to call symflow CLI: %s", string(exitError.Stderr))
