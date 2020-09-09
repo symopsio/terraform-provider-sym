@@ -21,19 +21,20 @@ func (c *localClient) GetOrg() string {
 	return c.org
 }
 
-func (c *localClient) CreateFlow(flow *models.Flow) error {
+func (c *localClient) CreateFlow(flow *models.Flow) (string, error) {
 	log.Printf("[DEBUG] CreateFlow: %+v", flow)
 	path := c.flowPath(flow.Name, flow.Version)
 	err := c.writeMessage(path, flow)
 	if err != nil {
-		return err
+		return "", err
 	}
-	return nil
+	// Abuse the fact that we're using strings rather than a UUID type
+	// to use the path as the id
+	return path, nil
 }
 
-func (c *localClient) GetFlow(name string, version uint32) (*models.Flow, error) {
-	log.Printf("[DEBUG] GetFlow: %s:%v", name, version)
-	path := c.flowPath(name, version)
+func (c *localClient) GetFlow(path string) (*models.Flow, error) {
+	log.Printf("[DEBUG] GetFlow: %s", path)
 	flow := &models.Flow{}
 	err := c.readMessage(path, flow)
 	return flow, err

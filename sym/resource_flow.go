@@ -71,8 +71,6 @@ func resourceFlowCreate(ctx context.Context, d *schema.ResourceData, m interface
 	name := d.Get("name").(string)
 	qualifiedName := qualifyName(c.GetOrg(), name)
 
-	version := uint32(d.Get("version").(int))
-
 	handlers := d.Get("handler").([]interface{})
 	handler := handlers[0].(map[string]interface{})
 
@@ -87,7 +85,6 @@ func resourceFlowCreate(ctx context.Context, d *schema.ResourceData, m interface
 
 	flow := &models.Flow{
 		Name:    qualifiedName,
-		Version: version,
 		Template: &models.Template{
 			Name: template,
 		},
@@ -97,15 +94,12 @@ func resourceFlowCreate(ctx context.Context, d *schema.ResourceData, m interface
 		},
 	}
 
-	err = c.CreateFlow(flow)
+	id, err := c.CreateFlow(flow)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	id := formatID(qualifiedName, version)
-
 	log.Printf("[DEBUG] Created flow with id: %s", id)
-
 	d.SetId(id)
 
 	resourceFlowRead(ctx, d, m)
@@ -118,12 +112,7 @@ func resourceFlowRead(ctx context.Context, d *schema.ResourceData, m interface{}
 
 	var diags diag.Diagnostics
 
-	name, version, err := parseNameAndVersion(d.Id())
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
-	flow, err := c.GetFlow(name, version)
+	flow, err := c.GetFlow(d.Id())
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -137,10 +126,12 @@ func resourceFlowRead(ctx context.Context, d *schema.ResourceData, m interface{}
 }
 
 func resourceFlowUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	// TODO: implement
 	return resourceFlowRead(ctx, d, m)
 }
 
 func resourceFlowDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	// TODO: implement
 	var diags diag.Diagnostics
 
 	return diags
