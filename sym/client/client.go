@@ -11,7 +11,7 @@ type Client interface {
 
 	// CreateFlow returns the version of the new flow
 	// TODO: pick a UUID type and use it
-	CreateFlow(flow *models.Flow) (*string, error)
+	CreateFlow(flow *models.Flow) (string, error)
 
 	// GetFlow finds a flow given a UUID string
 	// TODO: pick a UUID type and use it

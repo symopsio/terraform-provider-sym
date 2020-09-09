@@ -99,8 +99,8 @@ func resourceFlowCreate(ctx context.Context, d *schema.ResourceData, m interface
 		return diag.FromErr(err)
 	}
 
-	log.Printf("[DEBUG] Created flow with id: %s", *id)
-	d.SetId(*id)
+	log.Printf("[DEBUG] Created flow with id: %s", id)
+	d.SetId(id)
 
 	resourceFlowRead(ctx, d, m)
 

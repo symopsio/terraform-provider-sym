@@ -19,17 +19,17 @@ func (c *cliClient) GetOrg() string {
 	return c.org
 }
 
-func (c *cliClient) CreateFlow(flow *models.Flow) (*string, error) {
+func (c *cliClient) CreateFlow(flow *models.Flow) (string, error) {
 	log.Printf("[DEBUG] CreateFlow: %+v", flow)
 	tempfile, err := ioutil.TempFile("", "")
 	if err != nil {
-		return nil, fmt.Errorf("failed to create temporary file")
+		return "", fmt.Errorf("failed to create temporary file")
 	}
 	defer os.Remove(tempfile.Name())
 
 	bytes, err := proto.Marshal(flow)
 	if err != nil {
-		return nil, fmt.Errorf("failed to marhsal flow")
+		return "", fmt.Errorf("failed to marhsal flow")
 	}
 	tempfile.Write(bytes)
 
@@ -37,13 +37,13 @@ func (c *cliClient) CreateFlow(flow *models.Flow) (*string, error) {
 	if err != nil {
 		exitError, isExitError := err.(*exec.ExitError)
 		if isExitError {
-			return nil, fmt.Errorf("failed to call symflow CLI: %s", string(exitError.Stderr))
+			return "", fmt.Errorf("failed to call symflow CLI: %s", string(exitError.Stderr))
 		}
-		return nil, fmt.Errorf("failed to call symflow CLI")
+		return "", fmt.Errorf("failed to call symflow CLI")
 	}
 	uuid := strings.TrimSpace(string(outBytes))
 
-	return &uuid, nil
+	return uuid, nil
 }
 
 func (c *cliClient) GetFlow(uuid string) (*models.Flow, error) {
