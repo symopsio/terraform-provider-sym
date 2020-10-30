@@ -58,10 +58,6 @@ func resourceFlow() *schema.Resource {
 							Type:     schema.TypeString,
 							Required: true,
 						},
-						"group_label": {
-							Type:     schema.TypeString,
-							Required: true,
-						},
 					},
 				},
 			},
