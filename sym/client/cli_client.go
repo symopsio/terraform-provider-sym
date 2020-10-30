@@ -50,7 +50,11 @@ func (c *cliClient) CreateFlow(flow *models.Flow) (string, error) {
 		return "", fmt.Errorf("Failed to write flow to file: %s", err.Error())
 	}
 
-	outBytes, err := exec.Command("symflow", "--api-url", "http://localhost:3000/api", "create", "flow", tempfile.Name()).Output()
+	url, err := getApiUrl()
+	if err != nil {
+		return "", err
+	}
+	outBytes, err := exec.Command("symflow", "--api-url", url, "create", "flow", tempfile.Name()).Output()
 	if err != nil {
 		exitError, isExitError := err.(*exec.ExitError)
 		if isExitError {
@@ -63,6 +67,14 @@ func (c *cliClient) CreateFlow(flow *models.Flow) (string, error) {
 	return uuid, nil
 }
 
+func getApiUrl() (string, error) {
+	url := os.Getenv("SYM_API_URL")
+	if url == "" {
+		return "", fmt.Errorf("Please specify SYM_API_URL in environment (for example: http://localhost:3000/api)")
+	}
+	return url, nil
+}
+
 func (c *cliClient) GetFlow(uuid string) (*models.Flow, error) {
 	log.Printf("[DEBUG] GetFlow: %s", uuid)
 	tempfile, err := ioutil.TempFile("", "")
@@ -70,8 +82,11 @@ func (c *cliClient) GetFlow(uuid string) (*models.Flow, error) {
 		return nil, fmt.Errorf("failed to create temporary file")
 	}
 	defer os.Remove(tempfile.Name())
-
-	_, err = exec.Command("symflow", "--api-url", "http://localhost:3000/api", "get", "flow", uuid, tempfile.Name()).Output()
+	url, err := getApiUrl()
+	if err != nil {
+		return nil, err
+	}
+	_, err = exec.Command("symflow", "--api-url", url, "get", "flow", uuid, tempfile.Name()).Output()
 	if err != nil {
 		exitError, isExitError := err.(*exec.ExitError)
 		// Exit status 101 indicates resource does not exist
