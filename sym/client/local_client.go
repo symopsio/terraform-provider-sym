@@ -41,7 +41,7 @@ func (c *localClient) GetFlow(path string) (*models.Flow, error) {
 }
 
 func (c *localClient) flowPath(name string, version *models.Version) string {
-	return fmt.Sprintf("flows/%s_%v.json", name, version)
+	return fmt.Sprintf("flows/%s_%v.%v.%v.json", name, version.Major, version.Minor, version.Patch)
 }
 
 func (c *localClient) ensurePath(path string) (string, error) {

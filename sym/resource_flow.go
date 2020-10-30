@@ -13,6 +13,8 @@ import (
 
 	homedir "github.com/mitchellh/go-homedir"
 
+	"github.com/Masterminds/semver"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/symopsio/protos/go/tf/models"
@@ -32,19 +34,19 @@ func resourceFlow() *schema.Resource {
 				Required: true,
 			},
 			"version": {
-				Type:     schema.TypeInt,
+				Type:     schema.TypeString,
 				Required: true,
 			},
 			"template": {
-				Type: schema.TypeString,
+				Type:     schema.TypeString,
 				Required: true,
 			},
 			"handler": {
-				Type: schema.TypeString,
+				Type:     schema.TypeString,
 				Required: true,
 			},
 			"strategy_param": {
-				Type: schema.TypeList,
+				Type:     schema.TypeList,
 				Required: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -73,9 +75,14 @@ func resourceFlowCreate(ctx context.Context, d *schema.ResourceData, m interface
 	var diags diag.Diagnostics
 
 	name := d.Get("name").(string)
-	version := d.Get("version").(int)
 	qualifiedName := qualifyName(c.GetOrg(), name)
 	log.Printf("[DEBUG] Qualified name: %s", qualifiedName)
+
+	versionStr := d.Get("version").(string)
+	version, err := parseFlowVersion(versionStr)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	handler := d.Get("handler").(string)
 	body, err := readUTF8(handler)
@@ -84,16 +91,13 @@ func resourceFlowCreate(ctx context.Context, d *schema.ResourceData, m interface
 	}
 	template := d.Get("template").(string)
 	strategyParam := d.Get("strategy_param").([]interface{})[0].(map[string]interface{})
-	groupId := strategyParam["group_id"].(string)
-	fmt.Printf("Loaded group id: %s", groupId)
-
+	groupID := strategyParam["group_id"].(string)
+	fmt.Printf("Loaded group id: %s", groupID)
 
 	flow := &models.Flow{
 		Name:    qualifiedName,
-		Version: &models.Version{
-			Major: int32(version),
-		},
-		Uuid: "bd6b69bd-0d93-463e-b997-b19a8370da6e",
+		Version: version,
+		Uuid:    "bd6b69bd-0d93-463e-b997-b19a8370da6e",
 		Template: &models.Template{
 			Name: template,
 			Version: &models.Version{
@@ -109,10 +113,10 @@ func resourceFlowCreate(ctx context.Context, d *schema.ResourceData, m interface
 				Name: "okta_escalation_strategy",
 				Value: &models.SymValue{
 					Value: &models.SymValue_AtomicValue{
-						AtomicValue:  &models.AtomicValue{
+						AtomicValue: &models.AtomicValue{
 							Type: "str",
 							Kind: &models.AtomicValue_StringValue{
-								StringValue: groupId,
+								StringValue: groupID,
 							},
 						},
 					},
@@ -142,7 +146,7 @@ func resourceFlowCreate(ctx context.Context, d *schema.ResourceData, m interface
 											Strategy: &models.EscalationStrategy_Okta{
 												Okta: &models.OktaStrategy{
 													AllowedValues: []string{
-														groupId
+														groupID
 													},
 
 												},
@@ -157,7 +161,7 @@ func resourceFlowCreate(ctx context.Context, d *schema.ResourceData, m interface
 			},
 		},
 
-		 */
+		*/
 	}
 
 	id, err := c.CreateFlow(flow)
@@ -214,6 +218,18 @@ func flattenHandler(flow *models.Flow) []interface{} {
 
 func qualifyName(org string, name string) string {
 	return fmt.Sprintf("%s:%s", org, name)
+}
+
+func parseFlowVersion(str string) (*models.Version, error) {
+	v, err := semver.NewVersion(str)
+	if err != nil {
+		return nil, err
+	}
+	return &models.Version{
+		Major: int32(v.Major()),
+		Minor: int32(v.Minor()),
+		Patch: int32(v.Patch()),
+	}, nil
 }
 
 func parseVersion(s string) (uint32, error) {
