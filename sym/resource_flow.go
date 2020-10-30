@@ -76,6 +76,7 @@ func resourceFlowCreate(ctx context.Context, d *schema.ResourceData, m interface
 
 	name := d.Get("name").(string)
 	qualifiedName := qualifyName(c.GetOrg(), name)
+	log.Printf("[DEBUG] Qualified name: %s", qualifiedName)
 
 	versionStr := d.Get("version").(string)
 	version, err := parseFlowVersion(versionStr)
@@ -89,17 +90,78 @@ func resourceFlowCreate(ctx context.Context, d *schema.ResourceData, m interface
 		return diag.FromErr(err)
 	}
 	template := d.Get("template").(string)
+	strategyParam := d.Get("strategy_param").([]interface{})[0].(map[string]interface{})
+	groupID := strategyParam["group_id"].(string)
+	fmt.Printf("Loaded group id: %s", groupID)
 
 	flow := &models.Flow{
 		Name:    qualifiedName,
 		Version: version,
+		Uuid:    "bd6b69bd-0d93-463e-b997-b19a8370da6e",
 		Template: &models.Template{
 			Name: template,
+			Version: &models.Version{
+				Major: 1,
+			},
 		},
 		Implementation: &models.Source{
 			Body:     body,
 			Filename: handler,
 		},
+		Params: []*models.Param{
+			{
+				Name: "okta_escalation_strategy",
+				Value: &models.SymValue{
+					Value: &models.SymValue_AtomicValue{
+						AtomicValue: &models.AtomicValue{
+							Type: "str",
+							Kind: &models.AtomicValue_StringValue{
+								StringValue: groupID,
+							},
+						},
+					},
+				},
+			},
+		},
+		/**
+		Params: []*models.Param{
+			{
+				Name: "escalation",
+				Required: true,
+				//Type: enums.Type_GROUP,
+				Value: &models.SymValue{
+					Value: &models.SymValue_CompositeValue{
+						CompositeValue: &models.CompositeValue{
+							Name: "strategy_value",
+							//Children: []*models.CompositeValue{},
+							Fields: []*models.CompositeValue_Field{
+								{
+									Name: "strategies",
+									//Type: "",
+									Value: &models.CompositeValue_Field_EscalationStrategy{
+										EscalationStrategy: &models.EscalationStrategy{
+											//Type: "",
+											Name: "okta",
+											Required: true,
+											Strategy: &models.EscalationStrategy_Okta{
+												Okta: &models.OktaStrategy{
+													AllowedValues: []string{
+														groupID
+													},
+
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+
+		*/
 	}
 
 	id, err := c.CreateFlow(flow)
@@ -124,11 +186,7 @@ func resourceFlowRead(ctx context.Context, d *schema.ResourceData, m interface{}
 	if err != nil {
 		return diag.FromErr(err)
 	}
-
-	handlerData := flattenHandler(flow)
-	if err := d.Set("handler", handlerData); err != nil {
-		return diag.FromErr(err)
-	}
+	log.Printf("[DEBUG] %v", flow)
 
 	return diags
 }
