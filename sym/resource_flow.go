@@ -100,6 +100,44 @@ func resourceFlowCreate(ctx context.Context, d *schema.ResourceData, m interface
 			Body:     body,
 			Filename: handler,
 		},
+
+		Params: []*models.Param{
+			{
+				Name: "",
+				Required: true,
+				//Type: enums.Type_GROUP,
+				Value: &models.SymValue{
+					Value: &models.SymValue_CompositeValue{
+						CompositeValue: &models.CompositeValue{
+							Name: "",
+							Children: []*models.CompositeValue{},
+							Fields: []*models.CompositeValue_Field{
+								{
+									Name: "",
+									Type: "",
+									Value: &models.CompositeValue_Field_EscalationStrategy{
+										EscalationStrategy: &models.EscalationStrategy{
+											Type: "",
+											Name: "",
+											Required: true,
+											Strategy: &models.EscalationStrategy_Okta{
+												Okta: &models.OktaStrategy{
+													AllowedValues: []string{
+														"GroupOne",
+														"GroupTwo",
+													},
+
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
 	}
 
 	id, err := c.CreateFlow(flow)
