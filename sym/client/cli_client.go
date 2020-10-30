@@ -33,7 +33,7 @@ func (c *cliClient) CreateFlow(flow *models.Flow) (string, error) {
 	}
 	tempfile.Write(bytes)
 
-	outBytes, err := exec.Command("symflow", "create", "flow", tempfile.Name()).Output()
+	outBytes, err := exec.Command("symflow", "--api-url", "http://localhost:3000/api", "create", "flow", tempfile.Name()).Output()
 	if err != nil {
 		exitError, isExitError := err.(*exec.ExitError)
 		if isExitError {

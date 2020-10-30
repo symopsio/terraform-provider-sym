@@ -40,7 +40,7 @@ func (c *localClient) GetFlow(path string) (*models.Flow, error) {
 	return flow, err
 }
 
-func (c *localClient) flowPath(name string, version uint32) string {
+func (c *localClient) flowPath(name string, version *models.Version) string {
 	return fmt.Sprintf("flows/%s_%v.json", name, version)
 }
 

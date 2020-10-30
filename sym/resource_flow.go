@@ -35,26 +35,30 @@ func resourceFlow() *schema.Resource {
 				Type:     schema.TypeInt,
 				Required: true,
 			},
-			// You currently can't represent nested structures (like handler) without
-			// wrapping in a single-element list:
-			// https://github.com/hashicorp/terraform-plugin-sdk/issues/155
-			"handler": {
-				Type:     schema.TypeList,
+			"template": {
+				Type: schema.TypeString,
 				Required: true,
-				MaxItems: 1,
+			},
+			"handler": {
+				Type: schema.TypeString,
+				Required: true,
+			},
+			"strategy_param": {
+				Type: schema.TypeList,
+				Required: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"template": {
+						"strategy_type": {
 							Type:     schema.TypeString,
 							Required: true,
 						},
-						"source": {
+						"group_id": {
 							Type:     schema.TypeString,
 							Required: true,
 						},
-						"body": {
+						"group_label": {
 							Type:     schema.TypeString,
-							Computed: true,
+							Required: true,
 						},
 					},
 				},
@@ -71,17 +75,12 @@ func resourceFlowCreate(ctx context.Context, d *schema.ResourceData, m interface
 	name := d.Get("name").(string)
 	qualifiedName := qualifyName(c.GetOrg(), name)
 
-	handlers := d.Get("handler").([]interface{})
-	handler := handlers[0].(map[string]interface{})
-
-	source := handler["source"].(string)
-	body, err := readUTF8(source)
+	handler := d.Get("handler").(string)
+	body, err := readUTF8(handler)
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	handler["body"] = body
-
-	template := handler["template"].(string)
+	template := d.Get("template").(string)
 
 	flow := &models.Flow{
 		Name:    qualifiedName,
@@ -90,7 +89,7 @@ func resourceFlowCreate(ctx context.Context, d *schema.ResourceData, m interface
 		},
 		Implementation: &models.Source{
 			Body:     body,
-			Filename: source,
+			Filename: handler,
 		},
 	}
 

@@ -227,6 +227,8 @@ github.com/symopsio/protos v0.0.0-20201029195502-872c9627581d h1:Lisd+6qYBpH1xo/
 github.com/symopsio/protos v0.0.0-20201029195502-872c9627581d/go.mod h1:8fYyuM5QsnoW8rFXns2i3xDfmD//dZdh2LVlA8mohnE=
 github.com/symopsio/protos/go v0.0.0-20200817191320-9309c1d62abe h1:FTJfuZ6nWw+DVJGCdDkmF7rxIwr84Mho2sK7M2s1bQQ=
 github.com/symopsio/protos/go v0.0.0-20200817191320-9309c1d62abe/go.mod h1:jyvYkt9P+o3drCYJK6S5sgh34eajj5uIP16Fr3MB9R0=
+github.com/symopsio/protos/go v0.0.0-20201029195502-872c9627581d h1:8YTIf70rUiY1/PsqIGYjs0Gw317M7Rq/lxvU9KN27Zk=
+github.com/symopsio/protos/go v0.0.0-20201029195502-872c9627581d/go.mod h1:jyvYkt9P+o3drCYJK6S5sgh34eajj5uIP16Fr3MB9R0=
 github.com/ulikunitz/xz v0.5.5 h1:pFrO0lVpTBXLpYw+pnLj6TbvHuyjXMfjGeCwSqCVwok=
 github.com/ulikunitz/xz v0.5.5/go.mod h1:2bypXElzHzzJZwzH67Y6wb67pO62Rzfn7BSiF4ABRW8=
 github.com/ulikunitz/xz v0.5.7 h1:YvTNdFzX6+W5m9msiYg/zpkSURPPtOlzbqYjrFn7Yt4=

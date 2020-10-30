@@ -10,8 +10,7 @@ require (
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.0.1
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/stretchr/testify v1.5.1 // indirect
-	github.com/symopsio/protos v0.0.0-20201029195502-872c9627581d // indirect
-	github.com/symopsio/protos/go v0.0.0-20200817191320-9309c1d62abe
+	github.com/symopsio/protos/go v0.0.0-20201029195502-872c9627581d
 	github.com/zclconf/go-cty v1.5.1 // indirect
 	google.golang.org/protobuf v1.25.0
 	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect
