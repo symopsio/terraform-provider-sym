@@ -9,7 +9,7 @@ terraform {
 
 provider "sym" {
   local_path = "${path.module}/local"
-  org = "test"
+  org = "healthy-health"
 }
 
 module "sym" {

@@ -13,6 +13,8 @@ import (
 
 	homedir "github.com/mitchellh/go-homedir"
 
+	"github.com/Masterminds/semver"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/symopsio/protos/go/tf/models"
@@ -32,29 +34,33 @@ func resourceFlow() *schema.Resource {
 				Required: true,
 			},
 			"version": {
-				Type:     schema.TypeInt,
+				Type:     schema.TypeString,
 				Required: true,
 			},
-			// You currently can't represent nested structures (like handler) without
-			// wrapping in a single-element list:
-			// https://github.com/hashicorp/terraform-plugin-sdk/issues/155
+			"template": {
+				Type:     schema.TypeString,
+				Required: true,
+			},
 			"handler": {
+				Type:     schema.TypeString,
+				Required: true,
+			},
+			"strategy_param": {
 				Type:     schema.TypeList,
 				Required: true,
-				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"template": {
+						"strategy_type": {
 							Type:     schema.TypeString,
 							Required: true,
 						},
-						"source": {
+						"group_id": {
 							Type:     schema.TypeString,
 							Required: true,
 						},
-						"body": {
+						"group_label": {
 							Type:     schema.TypeString,
-							Computed: true,
+							Required: true,
 						},
 					},
 				},
@@ -70,28 +76,92 @@ func resourceFlowCreate(ctx context.Context, d *schema.ResourceData, m interface
 
 	name := d.Get("name").(string)
 	qualifiedName := qualifyName(c.GetOrg(), name)
+	log.Printf("[DEBUG] Qualified name: %s", qualifiedName)
 
-	handlers := d.Get("handler").([]interface{})
-	handler := handlers[0].(map[string]interface{})
-
-	source := handler["source"].(string)
-	body, err := readUTF8(source)
+	versionStr := d.Get("version").(string)
+	version, err := parseFlowVersion(versionStr)
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	handler["body"] = body
 
-	template := handler["template"].(string)
+	handler := d.Get("handler").(string)
+	body, err := readUTF8(handler)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	template := d.Get("template").(string)
+	strategyParam := d.Get("strategy_param").([]interface{})[0].(map[string]interface{})
+	groupID := strategyParam["group_id"].(string)
+	fmt.Printf("Loaded group id: %s", groupID)
 
 	flow := &models.Flow{
 		Name:    qualifiedName,
+		Version: version,
+		Uuid:    "bd6b69bd-0d93-463e-b997-b19a8370da6e",
 		Template: &models.Template{
 			Name: template,
+			Version: &models.Version{
+				Major: 1,
+			},
 		},
 		Implementation: &models.Source{
 			Body:     body,
-			Filename: source,
+			Filename: handler,
 		},
+		Params: []*models.Param{
+			{
+				Name: "okta_escalation_strategy",
+				Value: &models.SymValue{
+					Value: &models.SymValue_AtomicValue{
+						AtomicValue: &models.AtomicValue{
+							Type: "str",
+							Kind: &models.AtomicValue_StringValue{
+								StringValue: groupID,
+							},
+						},
+					},
+				},
+			},
+		},
+		/**
+		Params: []*models.Param{
+			{
+				Name: "escalation",
+				Required: true,
+				//Type: enums.Type_GROUP,
+				Value: &models.SymValue{
+					Value: &models.SymValue_CompositeValue{
+						CompositeValue: &models.CompositeValue{
+							Name: "strategy_value",
+							//Children: []*models.CompositeValue{},
+							Fields: []*models.CompositeValue_Field{
+								{
+									Name: "strategies",
+									//Type: "",
+									Value: &models.CompositeValue_Field_EscalationStrategy{
+										EscalationStrategy: &models.EscalationStrategy{
+											//Type: "",
+											Name: "okta",
+											Required: true,
+											Strategy: &models.EscalationStrategy_Okta{
+												Okta: &models.OktaStrategy{
+													AllowedValues: []string{
+														groupID
+													},
+
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+
+		*/
 	}
 
 	id, err := c.CreateFlow(flow)
@@ -116,11 +186,7 @@ func resourceFlowRead(ctx context.Context, d *schema.ResourceData, m interface{}
 	if err != nil {
 		return diag.FromErr(err)
 	}
-
-	handlerData := flattenHandler(flow)
-	if err := d.Set("handler", handlerData); err != nil {
-		return diag.FromErr(err)
-	}
+	log.Printf("[DEBUG] %v", flow)
 
 	return diags
 }
@@ -152,6 +218,18 @@ func flattenHandler(flow *models.Flow) []interface{} {
 
 func qualifyName(org string, name string) string {
 	return fmt.Sprintf("%s:%s", org, name)
+}
+
+func parseFlowVersion(str string) (*models.Version, error) {
+	v, err := semver.NewVersion(str)
+	if err != nil {
+		return nil, err
+	}
+	return &models.Version{
+		Major: int32(v.Major()),
+		Minor: int32(v.Minor()),
+		Patch: int32(v.Patch()),
+	}, nil
 }
 
 func parseVersion(s string) (uint32, error) {
