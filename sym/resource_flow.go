@@ -73,7 +73,9 @@ func resourceFlowCreate(ctx context.Context, d *schema.ResourceData, m interface
 	var diags diag.Diagnostics
 
 	name := d.Get("name").(string)
+	version := d.Get("version").(int)
 	qualifiedName := qualifyName(c.GetOrg(), name)
+	log.Printf("[DEBUG] Qualified name: %s", qualifiedName)
 
 	handler := d.Get("handler").(string)
 	body, err := readUTF8(handler)
@@ -84,8 +86,15 @@ func resourceFlowCreate(ctx context.Context, d *schema.ResourceData, m interface
 
 	flow := &models.Flow{
 		Name:    qualifiedName,
+		Version: &models.Version{
+			Major: int32(version),
+		},
+		Uuid: "bd6b69bd-0d93-463e-b997-b19a8370da6e",
 		Template: &models.Template{
 			Name: template,
+			Version: &models.Version{
+				Major: 1,
+			},
 		},
 		Implementation: &models.Source{
 			Body:     body,

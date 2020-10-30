@@ -1,6 +1,7 @@
 package client
 
 import (
+	"encoding/base64"
 	"fmt"
 	"github.com/symopsio/protos/go/tf/models"
 	"google.golang.org/protobuf/proto"
@@ -19,6 +20,18 @@ func (c *cliClient) GetOrg() string {
 	return c.org
 }
 
+func serializeFlow(flow *models.Flow) ([]byte, error) {
+	bytes, err := proto.Marshal(flow)
+	if err != nil {
+		return nil, err
+	}
+	enc := base64.StdEncoding.EncodeToString(bytes)
+	tag := "sym.tf.models.Flow;template"
+	sep := "---FIELD_SEP---"
+	repr := fmt.Sprintf("%s\n%s\n%s", tag, sep, enc)
+	return []byte(repr), nil
+}
+
 func (c *cliClient) CreateFlow(flow *models.Flow) (string, error) {
 	log.Printf("[DEBUG] CreateFlow: %+v", flow)
 	tempfile, err := ioutil.TempFile("", "")
@@ -27,11 +40,13 @@ func (c *cliClient) CreateFlow(flow *models.Flow) (string, error) {
 	}
 	defer os.Remove(tempfile.Name())
 
-	bytes, err := proto.Marshal(flow)
+	bytes, err := serializeFlow(flow)
 	if err != nil {
-		return "", fmt.Errorf("failed to marhsal flow")
+		return "", fmt.Errorf("Failed to serialize flow: %s", err.Error())
 	}
-	tempfile.Write(bytes)
+	if _, err = tempfile.Write(bytes); err != nil {
+		return "", fmt.Errorf("Failed to write flow to file: %s", err.Error())
+	}
 
 	outBytes, err := exec.Command("symflow", "--api-url", "http://localhost:3000/api", "create", "flow", tempfile.Name()).Output()
 	if err != nil {
