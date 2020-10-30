@@ -83,6 +83,10 @@ func resourceFlowCreate(ctx context.Context, d *schema.ResourceData, m interface
 		return diag.FromErr(err)
 	}
 	template := d.Get("template").(string)
+	strategyParam := d.Get("strategy_param").([]interface{})[0].(map[string]interface{})
+	groupId := strategyParam["group_id"].(string)
+	fmt.Printf("Loaded group id: %s", groupId)
+
 
 	flow := &models.Flow{
 		Name:    qualifiedName,
@@ -100,31 +104,45 @@ func resourceFlowCreate(ctx context.Context, d *schema.ResourceData, m interface
 			Body:     body,
 			Filename: handler,
 		},
-
 		Params: []*models.Param{
 			{
-				Name: "",
+				Name: "okta_escalation_strategy",
+				Value: &models.SymValue{
+					Value: &models.SymValue_AtomicValue{
+						AtomicValue:  &models.AtomicValue{
+							Type: "str",
+							Kind: &models.AtomicValue_StringValue{
+								StringValue: groupId,
+							},
+						},
+					},
+				},
+			},
+		},
+		/**
+		Params: []*models.Param{
+			{
+				Name: "escalation",
 				Required: true,
 				//Type: enums.Type_GROUP,
 				Value: &models.SymValue{
 					Value: &models.SymValue_CompositeValue{
 						CompositeValue: &models.CompositeValue{
-							Name: "",
-							Children: []*models.CompositeValue{},
+							Name: "strategy_value",
+							//Children: []*models.CompositeValue{},
 							Fields: []*models.CompositeValue_Field{
 								{
-									Name: "",
-									Type: "",
+									Name: "strategies",
+									//Type: "",
 									Value: &models.CompositeValue_Field_EscalationStrategy{
 										EscalationStrategy: &models.EscalationStrategy{
-											Type: "",
-											Name: "",
+											//Type: "",
+											Name: "okta",
 											Required: true,
 											Strategy: &models.EscalationStrategy_Okta{
 												Okta: &models.OktaStrategy{
 													AllowedValues: []string{
-														"GroupOne",
-														"GroupTwo",
+														groupId
 													},
 
 												},
@@ -138,6 +156,8 @@ func resourceFlowCreate(ctx context.Context, d *schema.ResourceData, m interface
 				},
 			},
 		},
+
+		 */
 	}
 
 	id, err := c.CreateFlow(flow)
@@ -162,11 +182,7 @@ func resourceFlowRead(ctx context.Context, d *schema.ResourceData, m interface{}
 	if err != nil {
 		return diag.FromErr(err)
 	}
-
-	handlerData := flattenHandler(flow)
-	if err := d.Set("handler", handlerData); err != nil {
-		return diag.FromErr(err)
-	}
+	log.Printf("[DEBUG] %v", flow)
 
 	return diags
 }

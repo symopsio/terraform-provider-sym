@@ -1,8 +1,10 @@
 package client
 
 import (
+	"bytes"
 	"encoding/base64"
 	"fmt"
+	"github.com/golang/protobuf/jsonpb"
 	"github.com/symopsio/protos/go/tf/models"
 	"google.golang.org/protobuf/proto"
 	"io/ioutil"
@@ -65,11 +67,11 @@ func (c *cliClient) GetFlow(uuid string) (*models.Flow, error) {
 	log.Printf("[DEBUG] GetFlow: %s", uuid)
 	tempfile, err := ioutil.TempFile("", "")
 	if err != nil {
-		fmt.Errorf("failed to create temporary file")
+		return nil, fmt.Errorf("failed to create temporary file")
 	}
 	defer os.Remove(tempfile.Name())
 
-	_, err = exec.Command("symflow", "get", "flow", uuid, tempfile.Name()).Output()
+	_, err = exec.Command("symflow", "--api-url", "http://localhost:3000/api", "get", "flow", uuid, tempfile.Name()).Output()
 	if err != nil {
 		exitError, isExitError := err.(*exec.ExitError)
 		// Exit status 101 indicates resource does not exist
@@ -91,7 +93,9 @@ func (c *cliClient) GetFlow(uuid string) (*models.Flow, error) {
 	}
 
 	flow := &models.Flow {}
-	err = proto.Unmarshal(flowBytes, flow)
+
+	err = jsonpb.Unmarshal(bytes.NewReader(flowBytes), flow)
+	//err = proto.Unmarshal(flowBytes, flow)
 	if err != nil {
 		return nil, fmt.Errorf("failed to unmarshal bytes to proto")
 	}
