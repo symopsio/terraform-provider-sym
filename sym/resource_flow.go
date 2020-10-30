@@ -13,6 +13,8 @@ import (
 
 	homedir "github.com/mitchellh/go-homedir"
 
+	"github.com/Masterminds/semver"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/symopsio/protos/go/tf/models"
@@ -32,19 +34,19 @@ func resourceFlow() *schema.Resource {
 				Required: true,
 			},
 			"version": {
-				Type:     schema.TypeInt,
+				Type:     schema.TypeString,
 				Required: true,
 			},
 			"template": {
-				Type: schema.TypeString,
+				Type:     schema.TypeString,
 				Required: true,
 			},
 			"handler": {
-				Type: schema.TypeString,
+				Type:     schema.TypeString,
 				Required: true,
 			},
 			"strategy_param": {
-				Type: schema.TypeList,
+				Type:     schema.TypeList,
 				Required: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -75,6 +77,12 @@ func resourceFlowCreate(ctx context.Context, d *schema.ResourceData, m interface
 	name := d.Get("name").(string)
 	qualifiedName := qualifyName(c.GetOrg(), name)
 
+	versionStr := d.Get("version").(string)
+	version, err := parseFlowVersion(versionStr)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
 	handler := d.Get("handler").(string)
 	body, err := readUTF8(handler)
 	if err != nil {
@@ -84,6 +92,7 @@ func resourceFlowCreate(ctx context.Context, d *schema.ResourceData, m interface
 
 	flow := &models.Flow{
 		Name:    qualifiedName,
+		Version: version,
 		Template: &models.Template{
 			Name: template,
 		},
@@ -151,6 +160,18 @@ func flattenHandler(flow *models.Flow) []interface{} {
 
 func qualifyName(org string, name string) string {
 	return fmt.Sprintf("%s:%s", org, name)
+}
+
+func parseFlowVersion(str string) (*models.Version, error) {
+	v, err := semver.NewVersion(str)
+	if err != nil {
+		return nil, err
+	}
+	return &models.Version{
+		Major: int32(v.Major()),
+		Minor: int32(v.Minor()),
+		Patch: int32(v.Patch()),
+	}, nil
 }
 
 func parseVersion(s string) (uint32, error) {
