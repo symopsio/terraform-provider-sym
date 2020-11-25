@@ -35,14 +35,6 @@ func Provider() *schema.Provider {
 
 func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
 	var diags diag.Diagnostics
-
-	org := d.Get("org").(string)
-	localPath := d.Get("local_path").(string)
-
-	c, err := client.NewClient(org, localPath)
-	if err != nil {
-		return nil, diag.FromErr(err)
-	}
-
+	c := client.New()
 	return c, diags
 }
