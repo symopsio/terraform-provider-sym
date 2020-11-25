@@ -17,13 +17,6 @@ func Integration() *schema.Resource {
 }
 
 
-//resource "sym_integration" "sso_main" {
-//  type = "aws_sso"
-//  settings = {
-//    instance_arn = "arn:aws:::instance/ssoinst-abcdefghi12314135325"
-//    aws = sym_integration.aws.id
-//  }
-//}
 func integrationSchema() map[string]*schema.Schema{
 	return map[string]*schema.Schema{
 		"type": required(schema.TypeString),

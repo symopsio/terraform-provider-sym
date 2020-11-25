@@ -16,12 +16,6 @@ func Secret() *schema.Resource {
 	}
 }
 
-//resource "sym_secrets" "flow" {
-//  type = "aws-secrets-manager"
-//  settings = {
-//    aws = sym_integration.aws.id
-//  }
-//}
 func secretSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"type":     required(schema.TypeString),

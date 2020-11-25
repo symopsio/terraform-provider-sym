@@ -41,34 +41,6 @@ func param() *schema.Resource {
 	}
 }
 
-//resource "sym_flow" "sso" {
-//  name = "sso_access"
-//  label = "SSO Access"
-//
-//  template = "sym:approval:1.0"
-//  implementation = "impl.py"
-//
-//  params = {
-//    strategy = sym_strategy.sso_main.id
-//    fields = [
-//      {
-//        name = "reason"
-//        type = "string"
-//        required = true
-//      },
-//      {
-//        name = "urgency"
-//        type = "list"
-//        label = "Urgency"
-//        required = false
-//        allowed_values = [
-//          "Low",
-//          "Medium",
-//          "High"]
-//      }
-//    ]
-//  }
-//}
 func flowSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"name":           required(schema.TypeString),
