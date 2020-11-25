@@ -49,7 +49,7 @@ func (c *cliClient) CreateFlow(flow *models.Flow) (string, error) {
 	if _, err = tempfile.Write(bytes); err != nil {
 		return "", fmt.Errorf("Failed to write flow to file: %s", err.Error())
 	}
-
+	ioutil.WriteFile("/Users/rick/example.proto", bytes, 0644)
 	url, err := getApiUrl()
 	if err != nil {
 		return "", err

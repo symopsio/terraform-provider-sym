@@ -174,15 +174,15 @@ func resourceFlowCreate(ctx context.Context, d *schema.ResourceData, m interface
 }
 
 func resourceFlowRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	c := m.(client.Client)
+	//c := m.(client.Client)
 
 	var diags diag.Diagnostics
 
-	flow, err := c.GetFlow(d.Id())
-	if err != nil {
-		return diag.FromErr(err)
-	}
-	log.Printf("[DEBUG] %v", flow)
+	//flow, err := c.GetFlow(d.Id())
+	//if err != nil {
+	//	return diag.FromErr(err)
+	//}
+	//log.Printf("[DEBUG] %v", flow)
 
 	return diags
 }
