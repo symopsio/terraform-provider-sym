@@ -2,6 +2,7 @@ package sym
 
 import (
 	"context"
+	"github.com/symopsio/terraform-provider-sym/sym/resources"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -22,7 +23,11 @@ func Provider() *schema.Provider {
 			},
 		},
 		ResourcesMap: map[string]*schema.Resource{
-			"sym_flow": resourceFlow(),
+			"sym_flow": resources.Flow(),
+			"sym_strategy": resources.Strategy(),
+			"sym_target": resources.Target(),
+			"sym_secrets": resources.Secret(),
+			"sym_integration": resources.Integration(),
 		},
 		ConfigureContextFunc: providerConfigure,
 	}

@@ -120,27 +120,27 @@ func resourceFlowCreate(ctx context.Context, d *schema.ResourceData, m interface
 			},
 		},
 		/**
-		Params: []*models.Param{
+		Params: []*tf.Param{
 			{
 				Name: "escalation",
 				Required: true,
 				//Type: enums.Type_GROUP,
-				Value: &models.SymValue{
-					Value: &models.SymValue_CompositeValue{
-						CompositeValue: &models.CompositeValue{
+				Value: &tf.SymValue{
+					Value: &tf.SymValue_CompositeValue{
+						CompositeValue: &tf.CompositeValue{
 							Name: "strategy_value",
-							//Children: []*models.CompositeValue{},
-							Fields: []*models.CompositeValue_Field{
+							//Children: []*tf.CompositeValue{},
+							Fields: []*tf.CompositeValue_Field{
 								{
 									Name: "strategies",
 									//Type: "",
-									Value: &models.CompositeValue_Field_EscalationStrategy{
-										EscalationStrategy: &models.EscalationStrategy{
+									Value: &tf.CompositeValue_Field_EscalationStrategy{
+										EscalationStrategy: &tf.EscalationStrategy{
 											//Type: "",
 											Name: "okta",
 											Required: true,
-											Strategy: &models.EscalationStrategy_Okta{
-												Okta: &models.OktaStrategy{
+											Strategy: &tf.EscalationStrategy_Okta{
+												Okta: &tf.OktaStrategy{
 													AllowedValues: []string{
 														groupID
 													},

@@ -28,7 +28,7 @@ func serializeFlow(flow *models.Flow) ([]byte, error) {
 		return nil, err
 	}
 	enc := base64.StdEncoding.EncodeToString(bytes)
-	tag := "sym.tf.models.Flow;template"
+	tag := "sym.tf.tf.Flow;template"
 	sep := "---FIELD_SEP---"
 	repr := fmt.Sprintf("%s\n%s\n%s", tag, sep, enc)
 	return []byte(repr), nil
