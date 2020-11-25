@@ -7,7 +7,11 @@ type ApiClient struct {
 
 // New creates a new symflow client
 func New() *ApiClient {
+	httpClient := NewSymHttpClient()
 	return &ApiClient{
-		Integration: NewIntegrationClient(),
+		Integration: NewIntegrationClient(httpClient),
 	}
 }
+
+
+
