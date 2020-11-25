@@ -34,7 +34,7 @@ type integrationClient struct {
 func (i *integrationClient) Create(integration SymIntegration) (string, error) {
 	log.Printf("Creating integration: %v", integration)
 
-	integration.OrganizationId = "2R1cIKwV9zEGbWp0guPEDTCBLdi6Zg8H"
+	integration.OrganizationId = "fake"
 	body, err := i.HttpClient.Do("POST", "/integrations/", &integration)
 	if err != nil {
 		return "", err
