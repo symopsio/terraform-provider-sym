@@ -11,6 +11,7 @@ resource "sym_integration" "aws" {
     # The role is created by a TF module independent of this config (for now)
     role = "arn:aws:iam::123456789012:role/sym/SymExecutionRole"
     region = "us-east-1"
+    fake = "foo"
   }
 }
 
