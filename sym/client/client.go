@@ -6,6 +6,7 @@ type ApiClient struct {
 	Secret      SecretClient
 	Target      TargetClient
 	Strategy    StrategyClient
+	Flow        FlowClient
 }
 
 // New creates a new symflow client
@@ -16,5 +17,6 @@ func New() *ApiClient {
 		Secret:      NewSecretClient(httpClient),
 		Target:      NewTargetClient(httpClient),
 		Strategy:    NewStrategyClient(httpClient),
+		Flow:        NewFlowClient(httpClient),
 	}
 }
