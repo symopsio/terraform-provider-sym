@@ -36,9 +36,9 @@ func targetList() *schema.Schema {
 
 func strategySchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-		"type":        required(schema.TypeString),
-		"integration": required(schema.TypeString),
-		"targets":     targetList(),
+		"type":           required(schema.TypeString),
+		"integration_id": required(schema.TypeString),
+		"targets":        targetList(),
 	}
 }
 
@@ -49,8 +49,8 @@ func createStrategy(ctx context.Context, data *schema.ResourceData, meta interfa
 		Targets: []client.StrategyTarget{
 
 		},
-		Type:        data.Get("type").(string),
-		Integration: data.Get("integration").(string),
+		Type:          data.Get("type").(string),
+		IntegrationId: data.Get("integration_id").(string),
 	}
 
 	id, err := c.Strategy.Create(strategy)

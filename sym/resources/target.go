@@ -19,10 +19,10 @@ func Target() *schema.Resource {
 
 func targetSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-		"type":        required(schema.TypeString),
-		"label":       required(schema.TypeString),
-		"integration": required(schema.TypeString),
-		"settings":    settingsMap(),
+		"type":           required(schema.TypeString),
+		"label":          required(schema.TypeString),
+		"integration_id": required(schema.TypeString),
+		"settings":       settingsMap(),
 	}
 }
 
@@ -30,10 +30,10 @@ func createTarget(ctx context.Context, data *schema.ResourceData, meta interface
 	var diags diag.Diagnostics
 	c := meta.(*client.ApiClient)
 	target := client.SymTarget{
-		Label:       data.Get("label").(string),
-		Integration: data.Get("integration").(string),
-		Type:        data.Get("type").(string),
-		Settings:    getSettings(data),
+		Label:         data.Get("label").(string),
+		IntegrationId: data.Get("integration_id").(string),
+		Type:          data.Get("type").(string),
+		Settings:      getSettings(data),
 	}
 
 	id, err := c.Target.Create(target)

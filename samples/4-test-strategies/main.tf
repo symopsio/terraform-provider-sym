@@ -5,7 +5,7 @@ provider "sym" {
 # A strategy uses an integration to grant people access to targets
 resource "sym_strategy" "sso_main" {
   type = "aws_sso"
-  integration = sym_integration.sso_main.id
+  integration_id = sym_integration.sso_main.id
   targets {
     target = sym_target.prod_break_glass.id
     # tags are arbitrary key/value pairs that get passed to the handler
@@ -21,7 +21,7 @@ resource "sym_strategy" "sso_main" {
 resource "sym_target" "prod_break_glass" {
   type = "aws_sso"
   label = "Prod Break Glass"
-  integration = sym_integration.aws.id
+  integration_id = sym_integration.aws.id
   settings = {
     permission_set_arn = "arn:aws:sso:::permissionSet/ins-abcdefghijklmnop/ps-111111111111"
     # AWS Account IDs

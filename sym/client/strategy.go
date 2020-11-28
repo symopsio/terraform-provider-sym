@@ -17,14 +17,14 @@ func (s StrategyTarget) String() string {
 }
 
 type SymStrategy struct {
-	Id          string           `json:"id,omitempty"`
-	Type        string           `json:"type"`
-	Integration string           `json:"integration"`
-	Targets     []StrategyTarget `json:"targets"`
+	Id            string           `json:"id,omitempty"`
+	Type          string           `json:"type"`
+	IntegrationId string           `json:"integration_id"`
+	Targets       []StrategyTarget `json:"targets"`
 }
 
 func (s SymStrategy) String() string {
-	return fmt.Sprintf("{id=%s, type=%s, integration=%s, targets=%v}", s.Id, s.Type, s.Integration, s.Targets)
+	return fmt.Sprintf("{id=%s, type=%s, integration_id=%s, targets=%v}", s.Id, s.Type, s.IntegrationId, s.Targets)
 }
 
 type StrategyClient interface {

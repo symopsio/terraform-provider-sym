@@ -17,6 +17,8 @@ resource "sym_integration" "aws" {
 resource "sym_secrets" "flow" {
   type = "aws_secrets_manager"
   settings = {
+    // TODO: should be "aws" not "integration_id", but this returns:
+    // {"non_field_errors":["1 validation error for Secret\nsettings -> integration_id\n  field required (type=value_error.missing)"]}
     aws = sym_integration.aws.id
   }
 }

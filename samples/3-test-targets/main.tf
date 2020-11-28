@@ -19,7 +19,7 @@ resource "sym_integration" "aws" {
 resource "sym_target" "prod_break_glass" {
   type = "aws_sso"
   label = "Prod Break Glass"
-  integration = sym_integration.aws.id
+  integration_id = sym_integration.aws.id
   settings = {
     permission_set_arn = "arn:aws:sso:::permissionSet/ins-abcdefghijklmnop/ps-111111111111"
     # AWS Account IDs
