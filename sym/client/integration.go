@@ -21,8 +21,6 @@ func (s SymIntegration) String() string {
 type IntegrationClient interface {
 	Create(integration SymIntegration) (string, error)
 	Read(id string) (*SymIntegration, error)
-	Update(id string, integration SymIntegration) error
-	Delete(id string) error
 }
 
 func NewIntegrationClient(httpClient SymHttpClient) IntegrationClient {
@@ -65,12 +63,4 @@ func (i *integrationClient) Read(id string) (*SymIntegration, error) {
 		log.Printf("got integration: %v", result)
 		return &result, nil
 	}
-}
-
-func (i *integrationClient) Update(id string, integration SymIntegration) error {
-	panic("implement me")
-}
-
-func (i *integrationClient) Delete(id string) error {
-	panic("implement me")
 }

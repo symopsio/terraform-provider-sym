@@ -3,7 +3,9 @@ package client
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"strings"
 )
@@ -16,6 +18,8 @@ func NewSymHttpClient() SymHttpClient {
 
 type SymHttpClient interface {
 	Do(method, path string, payload interface{}) (string, error)
+	Create(path string, payload interface{}, result interface{}) (string, error)
+	Read(path string, result interface{}) error
 }
 
 type symHttpClient struct {
@@ -50,6 +54,30 @@ func (c *symHttpClient) Do(method string, path string, payload interface{}) (str
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return "", err
+	} else if resp.StatusCode >= 400 {
+		return "", fmt.Errorf("error response: %v\n%s", resp, string(body))
 	}
 	return string(body), nil
+}
+
+func (c *symHttpClient) Create(path string, payload interface{}, result interface{}) (string, error) {
+	body, err := c.Do("POST", path, payload)
+	if err != nil {
+		return "", err
+	}
+
+	if err := json.Unmarshal([]byte(body), result); err != nil {
+		return "", err
+	}
+
+	log.Printf("got response: %v", result)
+	return body, nil
+}
+
+func (c *symHttpClient) Read(path string, result interface{}) error {
+	body, err := c.Do("GET", path, nil)
+	if err != nil {
+		return err
+	}
+	return json.Unmarshal([]byte(body), result)
 }
