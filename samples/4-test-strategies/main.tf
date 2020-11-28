@@ -7,7 +7,7 @@ resource "sym_strategy" "sso_main" {
   type = "aws_sso"
   integration_id = sym_integration.sso_main.id
   targets {
-    target = sym_target.prod_break_glass.id
+    target_id = sym_target.prod_break_glass.id
     # tags are arbitrary key/value pairs that get passed to the handler
     # We have no built-in logic that understands MemberOf. The implementer can
     # use the tags to do custom biz logic.

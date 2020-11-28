@@ -20,8 +20,8 @@ func Strategy() *schema.Resource {
 func strategyTarget() *schema.Resource {
 	return &schema.Resource{
 		Schema: map[string]*schema.Schema{
-			"target": required(schema.TypeString),
-			"tags":   tagsMap(),
+			"target_id": required(schema.TypeString),
+			"tags":      tagsMap(),
 		},
 	}
 }
@@ -42,15 +42,29 @@ func strategySchema() map[string]*schema.Schema {
 	}
 }
 
+func toTags(input map[string]interface{}) client.Tags {
+	t := make(map[string]string, len(input))
+	for k, v := range input {
+		t[k] = v.(string)
+	}
+	return t
+}
+
 func createStrategy(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 	c := meta.(*client.ApiClient)
 	strategy := client.SymStrategy{
-		Targets: []client.StrategyTarget{
-
-		},
 		Type:          data.Get("type").(string),
 		IntegrationId: data.Get("integration_id").(string),
+	}
+	targets := data.Get("targets").([]interface{})
+	for _, target := range targets {
+		t := target.(map[string]interface{})
+		strategyTarget := client.StrategyTarget{
+			TargetId: t["target_id"].(string),
+			Tags:     toTags(t["tags"].(map[string]interface{})),
+		}
+		strategy.Targets = append(strategy.Targets, strategyTarget)
 	}
 
 	id, err := c.Strategy.Create(strategy)

@@ -8,12 +8,12 @@ import (
 type Tags map[string]string
 
 type StrategyTarget struct {
-	Target string `json:"target"`
-	Tags   Tags   `json:"tags"`
+	TargetId string `json:"target_id"`
+	Tags     Tags   `json:"tags"`
 }
 
 func (s StrategyTarget) String() string {
-	return fmt.Sprintf("{target=%s, tags=%v}", s.Target, s.Tags)
+	return fmt.Sprintf("{target_id=%s, tags=%v}", s.TargetId, s.Tags)
 }
 
 type SymStrategy struct {
