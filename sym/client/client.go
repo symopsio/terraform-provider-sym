@@ -4,6 +4,8 @@ package client
 type ApiClient struct {
 	Integration IntegrationClient
 	Secret      SecretClient
+	Target      TargetClient
+	Strategy    StrategyClient
 }
 
 // New creates a new symflow client
@@ -12,5 +14,7 @@ func New() *ApiClient {
 	return &ApiClient{
 		Integration: NewIntegrationClient(httpClient),
 		Secret:      NewSecretClient(httpClient),
+		Target:      NewTargetClient(httpClient),
+		Strategy:    NewStrategyClient(httpClient),
 	}
 }

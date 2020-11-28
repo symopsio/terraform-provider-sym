@@ -12,11 +12,11 @@ type SymSecret struct {
 }
 
 func (s SymSecret) String() string {
-	return fmt.Sprintf("{id=%s, type=%s, settings=%v", s.Id, s.Type, s.Settings)
+	return fmt.Sprintf("{id=%s, type=%s, settings=%v}", s.Id, s.Type, s.Settings)
 }
 
 type SecretClient interface {
-	Create(integration SymSecret) (string, error)
+	Create(secret SymSecret) (string, error)
 	Read(id string) (*SymSecret, error)
 }
 

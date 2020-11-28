@@ -1,0 +1,65 @@
+package client
+
+import (
+	"fmt"
+	"log"
+)
+
+type Tags map[string]string
+
+type StrategyTarget struct {
+	Target string `json:"target"`
+	Tags   Tags   `json:"tags"`
+}
+
+func (s StrategyTarget) String() string {
+	return fmt.Sprintf("{target=%s, tags=%v}", s.Target, s.Tags)
+}
+
+type SymStrategy struct {
+	Id          string           `json:"id,omitempty"`
+	Type        string           `json:"type"`
+	Integration string           `json:"integration"`
+	Targets     []StrategyTarget `json:"targets"`
+	Settings    Settings         `json:"settings"`
+}
+
+func (s SymStrategy) String() string {
+	return fmt.Sprintf("{id=%s, type=%s, integration=%s, targets=%v, settings=%v}", s.Id, s.Type, s.Integration, s.Targets, s.Settings)
+}
+
+type StrategyClient interface {
+	Create(target SymStrategy) (string, error)
+	Read(id string) (*SymStrategy, error)
+}
+
+func NewStrategyClient(httpClient SymHttpClient) StrategyClient {
+	return &strategyClient{
+		HttpClient: httpClient,
+	}
+}
+
+type strategyClient struct {
+	HttpClient SymHttpClient
+}
+
+func (c *strategyClient) Create(strategy SymStrategy) (string, error) {
+	log.Printf("Creating strategy: %v", strategy)
+	result := SymStrategy{}
+	if _, err := c.HttpClient.Create("/strategies/", &strategy, &result); err != nil {
+		return "", err
+	}
+	if result.Id == "" {
+		return "", fmt.Errorf("response indicates target was not created")
+	}
+	return result.Id, nil
+}
+
+func (c *strategyClient) Read(id string) (*SymStrategy, error) {
+	log.Printf("Getting target: %s", id)
+	result := SymStrategy{}
+	if err := c.HttpClient.Read(fmt.Sprintf("/strategies/%s", id), &result); err != nil {
+		return nil, err
+	}
+	return &result, nil
+}

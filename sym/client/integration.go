@@ -15,7 +15,7 @@ type SymIntegration struct {
 }
 
 func (s SymIntegration) String() string {
-	return fmt.Sprintf("{id=%s, type=%s, settings=%v", s.Id, s.Type, s.Settings)
+	return fmt.Sprintf("{id=%s, type=%s, settings=%v}", s.Id, s.Type, s.Settings)
 }
 
 type IntegrationClient interface {
