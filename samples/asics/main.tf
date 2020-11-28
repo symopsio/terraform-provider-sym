@@ -12,7 +12,7 @@ resource "sym_flow" "sso" {
   implementation = "impl.py"
 
   params {
-    strategy = sym_strategy.sso_main.id
+    strategy_id = sym_strategy.sso_main.id
     fields {
         name = "reason"
         type = "string"
@@ -35,9 +35,9 @@ resource "sym_flow" "sso" {
 # A strategy uses an integration to grant people access to targets
 resource "sym_strategy" "sso_main" {
   type = "aws_sso"
-  integration = sym_integration.sso_main.id
+  integration_id = sym_integration.sso_main.id
   targets {
-    target = sym_target.prod_break_glass.id
+    target_id = sym_target.prod_break_glass.id
     # tags are arbitrary key/value pairs that get passed to the handler
     # We have no built-in logic that understands MemberOf. The implementer can
     # use the tags to do custom biz logic.
@@ -47,7 +47,7 @@ resource "sym_strategy" "sso_main" {
   }
 
   targets {
-    target = sym_target.staging_break_glass.id
+    target_id = sym_target.staging_break_glass.id
     tags = {
       MemberOf = "Eng,Ops"
     }
@@ -58,7 +58,7 @@ resource "sym_strategy" "sso_main" {
 resource "sym_target" "prod_break_glass" {
   type = "aws_sso"
   label = "Prod Break Glass"
-  integration = sym_integration.aws.id
+  integration_id = sym_integration.aws.id
   settings = {
     permission_set_arn = "arn:aws:sso:::permissionSet/ins-abcdefghijklmnop/ps-111111111111"
     # AWS Account IDs
@@ -70,7 +70,7 @@ resource "sym_target" "prod_break_glass" {
 resource "sym_target" "staging_break_glass" {
   type = "aws_sso"
   label = "Staging Break Glass"
-  integration = sym_integration.aws.id
+  integration_id = sym_integration.aws.id
   settings = {
     permission_set_arn = "arn:aws:sso:::permissionSet/ins-abcdefghijklmnop/ps-2222222222222"
     # AWS Account IDs
@@ -91,7 +91,7 @@ resource "sym_integration" "aws" {
 }
 
 resource "sym_secrets" "flow" {
-  type = "aws-secrets-manager"
+  type = "aws_secrets_manager"
   settings = {
     aws = sym_integration.aws.id
   }

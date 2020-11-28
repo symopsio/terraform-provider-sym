@@ -32,7 +32,7 @@ func field() *schema.Resource {
 func param() *schema.Resource {
 	return &schema.Resource{
 		Schema: map[string]*schema.Schema{
-			"strategy": required(schema.TypeString),
+			"strategy_id": required(schema.TypeString),
 			"fields": {
 				Type: schema.TypeList,
 				Required: true,
@@ -61,11 +61,11 @@ func createFlow(ctx context.Context, data *schema.ResourceData, meta interface{}
 		Template: data.Get("template").(string),
 		Implementation: data.Get("implementation").(string),
 	}
-	params := data.Get("params").([]interface{})
+	params := data.Get("params").(*schema.Set).List()
 	for _, param := range params {
 		p := param.(map[string]interface{})
 		flowParam := client.FlowParam{
-			Strategy: p["strategy"].(string),
+			StrategyId: p["strategy_id"].(string),
 		}
 
 		// fields

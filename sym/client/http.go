@@ -41,6 +41,7 @@ func (c *symHttpClient) Do(method string, path string, payload interface{}) (str
 	if err != nil {
 		return "", err
 	}
+	log.Printf("submitting request: %s %s %s", method, path, string(b))
 	req, err := http.NewRequest(method, url, bytes.NewReader(b))
 	if err != nil {
 		return "", err

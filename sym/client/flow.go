@@ -18,12 +18,12 @@ func (p ParamField) String() string {
 }
 
 type FlowParam struct {
-	Strategy string       `json:"strategy"`
-	Fields   []ParamField `json:"fields"`
+	StrategyId string       `json:"strategy_id"`
+	Fields     []ParamField `json:"fields"`
 }
 
 func (f FlowParam) String() string {
-	return fmt.Sprintf("{strategy=%s, fields=%v}", f.Strategy, f.Fields)
+	return fmt.Sprintf("{strategy_id=%s, fields=%v}", f.StrategyId, f.Fields)
 }
 
 type SymFlow struct {
@@ -54,10 +54,10 @@ type flowClient struct {
 	HttpClient SymHttpClient
 }
 
-func (c *flowClient) Create(secret SymFlow) (string, error) {
-	log.Printf("Creating flow: %v", secret)
+func (c *flowClient) Create(flow SymFlow) (string, error) {
+	log.Printf("Creating flow: %v", flow)
 	result := SymFlow{}
-	if _, err := c.HttpClient.Create("/flows/", &secret, &result); err != nil {
+	if _, err := c.HttpClient.Create("/flows/", &flow, &result); err != nil {
 		return "", err
 	}
 	if result.Id == "" {
