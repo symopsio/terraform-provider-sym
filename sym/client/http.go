@@ -10,9 +10,10 @@ import (
 	"strings"
 )
 
-func NewSymHttpClient() SymHttpClient {
+func NewSymHttpClient(apiUrl string) SymHttpClient {
 	return &symHttpClient{
-		apiUrl: "http://localhost:8000/api/v1",
+		apiUrl: apiUrl,
+		configReader: NewConfigReader(),
 	}
 }
 
@@ -23,11 +24,12 @@ type SymHttpClient interface {
 }
 
 type symHttpClient struct {
-	apiUrl string
+	apiUrl       string
+	configReader ConfigReader
 }
 
-func (c *symHttpClient) getJwt() string {
-	return "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImtDbWVNQ0M0OGYxUDZmMTExM3hkdSJ9.eyJpc3MiOiJodHRwczovL3N5bW9wcy51cy5hdXRoMC5jb20vIiwic3ViIjoiMlIxY0lLd1Y5ekVHYldwMGd1UEVEVENCTGRpNlpnOEhAY2xpZW50cyIsImF1ZCI6Imh0dHBzOi8vYXBpLnN5bW9wcy5jb20iLCJpYXQiOjE2MDY1ODk0ODUsImV4cCI6MTYwNjY3NTg4NSwiYXpwIjoiMlIxY0lLd1Y5ekVHYldwMGd1UEVEVENCTGRpNlpnOEgiLCJndHkiOiJjbGllbnQtY3JlZGVudGlhbHMifQ.iuvEJrnxAQGZ3qt_T6a2grM-1ebKhTByjBpRVIraFXQ21uhuEFj5tG8NjS3g0yztaUK_nqJg2mOKoqQBiplImeEjyptUpS_KhpUJsElUUN5uuu-EYHxC63Xa57CMTwNnDRN_9NlZ_2ut5eEhyKJN_L2FImZisTMdRhqrGrG6JA_mzpwIvhDNN_8Tncxo8h5gvcswJo-BW7OaM30TGZzT0EY2zVDYiq_qz6v054SWgRKaIZStSDfCuTIYG2c8WeUvXGzoSs6emwnZVuZl0Nm7Vjr96QybYZkGM4vcf295po-Wtjr6S0EeO2O3n1hwDd3d6L7ikaEoepdGgTc0asvtBQ"
+func (c *symHttpClient) getJwt() (string, error) {
+	return c.configReader.GetJwt()
 }
 
 func (c *symHttpClient) getUrl(path string) string {
@@ -36,6 +38,10 @@ func (c *symHttpClient) getUrl(path string) string {
 }
 
 func (c *symHttpClient) Do(method string, path string, payload interface{}) (string, error) {
+	jwt, err := c.getJwt()
+	if err != nil {
+		return "", err
+	}
 	url := c.getUrl(path)
 	b, err := json.Marshal(payload)
 	if err != nil {
@@ -46,7 +52,7 @@ func (c *symHttpClient) Do(method string, path string, payload interface{}) (str
 	if err != nil {
 		return "", err
 	}
-	req.Header.Set("Authorization", "Bearer " + c.getJwt())
+	req.Header.Set("Authorization", "Bearer " + jwt)
 	req.Header.Set("Content-Type", "application/json")
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {

@@ -1,6 +1,7 @@
 package client
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 )
@@ -56,14 +57,17 @@ type flowClient struct {
 
 func (c *flowClient) Create(flow SymFlow) (string, error) {
 	log.Printf("Creating flow: %v", flow)
-	result := SymFlow{}
-	if _, err := c.HttpClient.Create("/flows/", &flow, &result); err != nil {
+	result, err := c.HttpClient.Do("POST", "/flows/", &flow)
+	if err != nil {
 		return "", err
 	}
-	if result.Id == "" {
-		return "", fmt.Errorf("response indicates secret was not created")
+	parsed := make(map[string]interface{})
+	err = json.Unmarshal([]byte(result), &parsed)
+	if err != nil {
+		return "", err
 	}
-	return result.Id, nil
+
+	return parsed["id"].(string), nil
 }
 
 func (c *flowClient) Read(id string) (*SymFlow, error) {
