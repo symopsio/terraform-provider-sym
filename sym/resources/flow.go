@@ -5,6 +5,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/symopsio/terraform-provider-sym/sym/client"
+	"io/ioutil"
 )
 
 func Flow() *schema.Resource {
@@ -55,11 +56,20 @@ func flowSchema() map[string]*schema.Schema {
 func createFlow(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 	c := meta.(*client.ApiClient)
+	implementation := data.Get("implementation").(string)
+	b, err := ioutil.ReadFile(implementation)
+	if err != nil {
+		diags = append(diags, diag.Diagnostic{
+			Severity: diag.Error,
+			Summary:  "Unable to read sym flow implementation: " + err.Error(),
+		})
+		return diags
+	}
 	flow := client.SymFlow{
 		Name: data.Get("name").(string),
 		Label: data.Get("label").(string),
 		Template: data.Get("template").(string),
-		Implementation: data.Get("implementation").(string),
+		Implementation: string(b),
 	}
 	params := data.Get("params").(*schema.Set).List()
 	for _, param := range params {
