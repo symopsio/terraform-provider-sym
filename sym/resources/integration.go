@@ -54,19 +54,13 @@ func createIntegration(ctx context.Context, data *schema.ResourceData, meta inte
 }
 
 func readIntegration(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	var d diag.Diagnostics
-
-	return d
+	return notYetImplemented
 }
 
 func updateIntegration(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	var d diag.Diagnostics
-
-	return d
+	return notYetImplemented
 }
 
 func deleteIntegration(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	var d diag.Diagnostics
-
-	return d
+	return notYetImplemented
 }

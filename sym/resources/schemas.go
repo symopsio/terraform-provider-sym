@@ -1,6 +1,9 @@
 package resources
 
-import "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+import (
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+)
 
 var (
 	required = func(valueType schema.ValueType) *schema.Schema {
@@ -59,5 +62,12 @@ var (
 			Required: required,
 			Optional: !required,
 		}
+	}
+
+	notYetImplemented diag.Diagnostics = []diag.Diagnostic{
+		{
+			Severity: diag.Error,
+			Summary: "Not yet implemented",
+		},
 	}
 )
