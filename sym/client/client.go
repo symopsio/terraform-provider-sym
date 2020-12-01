@@ -1,27 +1,32 @@
 package client
 
-import (
-	"github.com/symopsio/protos/go/tf/models"
-)
+import "os"
 
-// Client interact with the Sym API
-type Client interface {
-	// Get the current org name
-	GetOrg() string
-
-	// CreateFlow returns the version of the new flow
-	// TODO: pick a UUID type and use it
-	CreateFlow(flow *models.Flow) (string, error)
-
-	// GetFlow finds a flow given a UUID string
-	// TODO: pick a UUID type and use it
-	GetFlow(uuid string) (*models.Flow, error)
+// ApiClient interact with the Sym API
+type ApiClient struct {
+	Integration IntegrationClient
+	Secret      SecretClient
+	Target      TargetClient
+	Strategy    StrategyClient
+	Flow        FlowClient
 }
 
-// NewClient creates a new symflow client
-func NewClient(org string, localPath string) (Client, error) {
-	if localPath != "" {
-		return &localClient{org: org, Path: localPath}, nil
+// New creates a new symflow client
+func New() *ApiClient {
+	httpClient := NewSymHttpClient(getApiUrl())
+	return &ApiClient{
+		Integration: NewIntegrationClient(httpClient),
+		Secret:      NewSecretClient(httpClient),
+		Target:      NewTargetClient(httpClient),
+		Strategy:    NewStrategyClient(httpClient),
+		Flow:        NewFlowClient(httpClient),
 	}
-	return &cliClient{org: org}, nil
+}
+
+func getApiUrl() string {
+	apiUrl := os.Getenv("SYM_API_URL")
+	if apiUrl == "" {
+		apiUrl = "http://localhost:8000/api/v1"
+	}
+	return apiUrl
 }
