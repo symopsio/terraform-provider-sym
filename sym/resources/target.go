@@ -49,18 +49,12 @@ func createTarget(ctx context.Context, data *schema.ResourceData, meta interface
 }
 
 func readTarget(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	var d diag.Diagnostics
-
-	return d
+	return notYetImplemented
 }
 
 func updateTarget(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	var d diag.Diagnostics
-
-	return d
+	return notYetImplemented
 }
 func deleteTarget(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	var d diag.Diagnostics
-
-	return d
+	return notYetImplemented
 }

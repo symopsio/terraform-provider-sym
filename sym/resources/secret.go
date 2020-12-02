@@ -45,26 +45,13 @@ func createSecret(ctx context.Context, data *schema.ResourceData, meta interface
 }
 
 func readSecret(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	var d diag.Diagnostics
-	c := meta.(*client.ApiClient)
-	id := data.Get("id").(string)
-	if _, err := c.Secret.Read(id); err != nil {
-		d = append(d, diag.Diagnostic{
-			Severity: diag.Error,
-			Summary: "Unable to read sym secret: " + err.Error(),
-		})
-	}
-	return d
+	return notYetImplemented
 }
 
 func updateSecret(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	var d diag.Diagnostics
-
-	return d
+	return notYetImplemented
 }
 
 func deleteSecret(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	var d diag.Diagnostics
-
-	return d
+	return notYetImplemented
 }

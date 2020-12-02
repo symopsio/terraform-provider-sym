@@ -80,14 +80,11 @@ func createStrategy(ctx context.Context, data *schema.ResourceData, meta interfa
 }
 
 func readStrategy(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	var d diag.Diagnostics
-	return d
+	return notYetImplemented
 }
 func updateStrategy(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	var d diag.Diagnostics
-	return d
+	return notYetImplemented
 }
 func deleteStrategy(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	var d diag.Diagnostics
-	return d
+	return notYetImplemented
 }

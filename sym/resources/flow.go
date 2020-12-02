@@ -115,19 +115,13 @@ func createFlow(ctx context.Context, data *schema.ResourceData, meta interface{}
 }
 
 func readFlow(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	var d diag.Diagnostics
-
-	return d
+	return notYetImplemented
 }
 
 func updateFlow(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	var d diag.Diagnostics
-
-	return d
+	return notYetImplemented
 }
 
 func deleteFlow(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	var d diag.Diagnostics
-
-	return d
+	return notYetImplemented
 }
