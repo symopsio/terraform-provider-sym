@@ -2,6 +2,7 @@ package resources
 
 import (
 	"context"
+	"encoding/base64"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/symopsio/terraform-provider-sym/sym/client"
@@ -69,7 +70,7 @@ func createFlow(ctx context.Context, data *schema.ResourceData, meta interface{}
 		Name: data.Get("name").(string),
 		Label: data.Get("label").(string),
 		Template: data.Get("template").(string),
-		Implementation: string(b),
+		Implementation: base64.StdEncoding.EncodeToString(b),
 	}
 	params := data.Get("params").(*schema.Set).List()
 	for _, param := range params {
