@@ -30,8 +30,7 @@ jobs:
       - run:
           name: import GPG key
           command: echo -e "$GPG_KEY" | gpg --import
-      - aws-cli/setup:
-          profile-name: release
+      - aws-cli/setup
       - run: curl -sL https://git.io/goreleaser | bash
       - run:
           name: sync to s3
