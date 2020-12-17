@@ -6,33 +6,27 @@ commands:
       - restore_cache:
           keys:
             - &cache_name v1-pkg-cache
-
 jobs:
   build:
     docker:
       - image: circleci/golang:1.14
-
     steps:
       - checkout
-
       - restore_pkg_cache
-
       - run: GOPRIVATE="github.com/symopsio" make
-
       - save_cache:
           key: *cache_name
           paths:
             - "/go/pkg"
-
   release:
     docker:
       - image: circleci/golang:1.14
-
     steps:
       - checkout
-
       - restore_pkg_cache
-
+      - run:
+          name: import GPG key
+          command: echo -e "$GPG_KEY" | gpg --import
       - run: curl -sL https://git.io/goreleaser | bash
 
 workflows:

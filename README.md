@@ -37,3 +37,23 @@ Build with goreleaser:
 ```shell
 goreleaser --snapshot --skip-publish --rm-dist
 ```
+
+## CI setup
+
+This repo uses `goreleaser` to publish releases that are signed and ready to 
+add to the terraform registry. 
+
+### GPG keys
+
+Followed [this guide](https://docs.github.com/en/free-pro-team@latest/github/authenticating-to-github/generating-a-new-gpg-key). 
+
+* Kind: RSA and RSA (default)
+* Keysize: 4096
+* Valid for: 0 (default)
+* Real name: Sym Engineering
+* Email: ci@symops.io
+* Comment: CI key for Sym
+
+The GPG public key is stored in `.circleci/gpg-key.pub`. The key id is `52387210CDE53E82`.
+
+The GPG private key is stored in [1password](https://start.1password.com/open/i?a=2TO6ZEW3SJD4LNVVDNSFUVV4EM&v=u22rzchdnmtttx65w2diswg5hu&i=n4dfszockvgxziiiznj6ogxstm&h=team-sym.1password.com).  
