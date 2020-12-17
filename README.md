@@ -1,55 +1,28 @@
 # terraform-provider-sym
 
-The terraform provider is published to GitHub using 
-normal GitHub releases and `goreleaser`, resulting in 
-the releasing having artifacts for each os and arch, 
-plus a checksum and signature file. To release a new version 
-of the provider, push a new tag to GitHub or draft a 
-release in the UI. To publish that release to the registry, 
-jump over to the registry repo and run a script to publish. 
+The sym terraform provider is released with the following steps:
+* Draft a new release or push a tag to github, resulting in a CircleCI build off of the tag
+* The CI build sets up GPG keys and AWS 
+* The CI build produces artifacts and uploads them via `goreleaser`
+* The CI build syncs the directory to s3
 
-## Test sample configuration
+At this point, the registry can be updated with the new release - check out the [repo](https://github.com/symopsio/terraform-registry) 
+for more details. 
 
-First, build and install the provider.
+## Dev setup
 
-```shell
-make local
-```
+* Install terraform 0.14 
+* Run `make build` to create the binary locally
 
-Then, run the following command to initialize the workspace and apply the sample configuration. Note: you must have Terraform 12 installed (not 13, the default now). You can find the latest releases for 12 [here](https://releases.hashicorp.com/terraform/0.12.29/).
+This binary can be used by placing it into the cache in the correct location and running `terraform init`.
 
-```shell
-cd examples
-terraform init && terraform apply
-```
+### Debugging
 
-Running `terraform apply` in the examples folder will create a local `terraform.tfstate` file. You can safely remove this file if you are testing and want to redo something.
-
-## Local files
-
-The example uses a local file provider, which expects to find json protos in the `examples/local` directory.
-
-## Debugging
-
-To turn on terraform logging, set env vars. Note that provider logs all get jumbled together so you have to search for your log messages:
-
-```shell
-export TF_LOG=TRACE
-export TF_LOG_PATH=/tmp/tf.log
-```
-
-## Builds
-
-Build with goreleaser:
-
-```shell
-goreleaser --snapshot --skip-publish --rm-dist
-```
+To debug problems, first turn on trace logging, for example: `TF_LOG=trace terraform init`. 
 
 ## CI setup
 
-This repo uses `goreleaser` to publish releases that are signed and ready to 
-add to the terraform registry. 
+This repo uses `goreleaser` to publish releases that are signed and ready to add to the terraform registry. 
 
 ### GPG keys
 
@@ -68,3 +41,18 @@ To export private key to a string:
 `gpg -a --export-secret-keys 52387210CDE53E82 | awk -v ORS='\\n' '1'`
 
 The GPG private key is stored in [1password](https://start.1password.com/open/i?a=2TO6ZEW3SJD4LNVVDNSFUVV4EM&v=u22rzchdnmtttx65w2diswg5hu&i=n4dfszockvgxziiiznj6ogxstm&h=team-sym.1password.com).  
+
+The following environment variables must be set in Circle: `GPG_KEY` (private key), and `GPG_FINGERPRINT` (see 1password).
+
+### AWS Credentials
+
+CI needs to be configured with AWS credentials that have permission to push artifacts to s3 to the `terraform-provider-sym` 
+bucket in the `releases` account. 
+
+An access key with these permissions can be found [here](https://start.1password.com/open/i?a=2TO6ZEW3SJD4LNVVDNSFUVV4EM&v=mmb6xlaf5eafg4r5btb4cqdrbi&i=mfjbvwhc6ndzxdquedk525v5oy&h=team-sym.1password.com).
+
+The following environment variables must be set in Circle: `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_DEFAULT_REGION`.
+
+### S3 conventions
+
+The `goreleaser` artifact directory is synced to the following location in s3: `s3://terraform-provider-sym/$CIRCLE_TAG/` 
