@@ -35,7 +35,7 @@ Followed [this guide](https://docs.github.com/en/free-pro-team@latest/github/aut
 * Email: ci@symops.io
 * Comment: CI key for Sym
 
-The GPG public key is stored in `.circleci/gpg-key.pub`. The key id is `52387210CDE53E82`.
+The key id is `52387210CDE53E82`.
 
 To export private key to a string: 
 `gpg -a --export-secret-keys 52387210CDE53E82 | awk -v ORS='\\n' '1'`
@@ -43,6 +43,8 @@ To export private key to a string:
 The GPG private key is stored in [1password](https://start.1password.com/open/i?a=2TO6ZEW3SJD4LNVVDNSFUVV4EM&v=u22rzchdnmtttx65w2diswg5hu&i=n4dfszockvgxziiiznj6ogxstm&h=team-sym.1password.com).  
 
 The following environment variables must be set in Circle: `GPG_KEY` (private key), and `GPG_FINGERPRINT` (see 1password).
+
+The 1password note also includes the ascii armor (necessary for the registry), key id (same), private key and fingerprint.
 
 ### AWS Credentials
 
