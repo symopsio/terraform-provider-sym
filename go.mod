@@ -8,8 +8,8 @@ require (
 	github.com/ghodss/yaml v1.0.0
 	github.com/hashicorp/hcl/v2 v2.6.0 // indirect
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.0.1
+	github.com/solo-io/go-utils v0.20.1 // indirect
 	github.com/stretchr/testify v1.5.1 // indirect
 	github.com/zclconf/go-cty v1.5.1 // indirect
 	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect
-	gopkg.in/yaml.v2 v2.2.8 // indirect
 )

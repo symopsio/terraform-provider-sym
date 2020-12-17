@@ -1,5 +1,13 @@
 # terraform-provider-sym
 
+The terraform provider is published to GitHub using 
+normal GitHub releases and `goreleaser`, resulting in 
+the releasing having artifacts for each os and arch, 
+plus a checksum and signature file. To release a new version 
+of the provider, push a new tag to GitHub or draft a 
+release in the UI. To publish that release to the registry, 
+jump over to the registry repo and run a script to publish. 
+
 ## Test sample configuration
 
 First, build and install the provider.
