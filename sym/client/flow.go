@@ -20,7 +20,7 @@ func (p ParamField) String() string {
 
 type FlowParam struct {
 	StrategyId string       `json:"strategy_id"`
-	Fields     []ParamField `json:"fields"`
+	Fields     []ParamField `json:"param_fields"`
 }
 
 func (f FlowParam) String() string {
