@@ -6,6 +6,7 @@ dist
 # Local .terraform directories
 **/.terraform/*
 .idea
+.vscode
 
 # .tfstate files
 *.tfstate

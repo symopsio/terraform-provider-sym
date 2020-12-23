@@ -1,0 +1,22 @@
+{
+  "name": "sso_access",
+  "label": "SSO Access",
+  "template": "sym:approval:1.0",
+  "handler": "base-64-encoded-or-raw-py-content",
+  "params": {
+    "strategy": "some-sym-strategy-uuid",
+    "fields": [
+      {
+        "name": "reason",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "urgency",
+        "label": "Urgency",
+        "required": true,
+        "allowed_values": [ "Low", "Medium", "High" ]
+      }
+    ]
+  }
+}

@@ -12,7 +12,7 @@ import (
 
 func NewSymHttpClient(apiUrl string) SymHttpClient {
 	return &symHttpClient{
-		apiUrl: apiUrl,
+		apiUrl:       apiUrl,
 		configReader: NewConfigReader(),
 	}
 }
@@ -52,7 +52,7 @@ func (c *symHttpClient) Do(method string, path string, payload interface{}) (str
 	if err != nil {
 		return "", err
 	}
-	req.Header.Set("Authorization", "Bearer " + jwt)
+	req.Header.Set("Authorization", "Bearer "+jwt)
 	req.Header.Set("Content-Type", "application/json")
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
