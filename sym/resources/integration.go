@@ -21,9 +21,10 @@ func integrationSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"type":     required(schema.TypeString),
 		"settings": settingsMap(),
-		//"name": 	required(schema.TypeString),
+		"name": 	required(schema.TypeString),
 	}
 }
+
 
 func getSettings(data *schema.ResourceData) client.Settings {
 	rawSettings := data.Get("settings").(map[string]interface{})
@@ -81,14 +82,14 @@ func readIntegration(ctx context.Context, data *schema.ResourceData, meta interf
 				Summary:  "Unable to set sym integration settings: " + err.Error(),
 			})
 		}
-		//
-		//err = data.Set("name", integration.Name)
-		//if err != nil {
-		//	diags = append(diags, diag.Diagnostic{
-		//		Severity: diag.Error,
-		//		Summary: "Unable to set sym integration name: " + err.Error(),
-		//	})
-		//}
+
+		err = data.Set("name", integration.Name)
+		if err != nil {
+			diags = append(diags, diag.Diagnostic{
+				Severity: diag.Error,
+				Summary: "Unable to set sym integration name: " + err.Error(),
+			})
+		}
 	}
 	return diags
 }
@@ -126,3 +127,4 @@ func deleteIntegration(ctx context.Context, data *schema.ResourceData, meta inte
 	}
 	return diags
 }
+

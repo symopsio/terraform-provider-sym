@@ -12,7 +12,7 @@ type SymIntegration struct {
 	Id       string   `json:"id,omitempty"`
 	Type     string   `json:"type"`
 	Settings Settings `json:"settings"`
-	//Name     string   `json:"name"`
+	Name     string   `json:"name"`
 }
 
 func (s SymIntegration) String() string {

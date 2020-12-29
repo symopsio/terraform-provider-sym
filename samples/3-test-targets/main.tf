@@ -26,12 +26,14 @@ resource "sym_integration" "aws" {
 
 # A target is a thing that we are managing access to
 resource "sym_target" "prod_break_glass" {
-  type = "aws_sso"
+  type = "aws_sso_permission_set"
   label = "Prod Break Glass"
   integration_id = sym_integration.aws.id
+
   settings = {
+    instance_arn = "arn:aws:sso:::instance12345"
     permission_set_arn = "arn:aws:sso:::permissionSet/ins-abcdefghijklmnop/ps-2"
-    # AWS Account IDs
-    account_ids = "012345678910"
+    # AWS Account ID
+    account_id = "012345678910"
   }
 }

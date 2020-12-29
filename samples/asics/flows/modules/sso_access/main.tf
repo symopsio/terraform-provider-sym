@@ -1,13 +1,3 @@
-terraform {
-  required_version = ">= 0.14"
-  required_providers {
-    sym = {
-      source = "terraform.symops.io/symopsio/sym"
-      version = "0.0.1"
-    }
-  }
-}
-
 data "sym_runtime" "this" {
   name = var.environment
 }
