@@ -3,13 +3,15 @@ package resources
 import (
 	"context"
 	"encoding/base64"
-	"encoding/json"
-	"github.com/hashicorp/go-cty/cty"
+	"errors"
+	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/symopsio/terraform-provider-sym/sym/client"
+	"github.com/symopsio/terraform-provider-sym/sym/templates"
+	"github.com/symopsio/terraform-provider-sym/sym/utils"
 	"io/ioutil"
+	"strings"
 )
 
 func Flow() *schema.Resource {
@@ -22,109 +24,61 @@ func Flow() *schema.Resource {
 	}
 }
 
-func field() *schema.Resource {
-	return &schema.Resource{
-		Schema: map[string]*schema.Schema{
-			"name":           required(schema.TypeString),
-			"type":           required(schema.TypeString),
-			"required":       required(schema.TypeBool),
-			"label":          optional(schema.TypeString),
-			"allowed_values": stringList(false),
-		},
-	}
-}
-
-func param() *schema.Resource {
-	return &schema.Resource{
-		Schema: map[string]*schema.Schema{
-			"strategy_id": required(schema.TypeString),
-			"fields":      requiredList(field()),
-		},
-	}
-}
-
 func flowSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-		"name":           required(schema.TypeString),
-		"label":          required(schema.TypeString),
-		"template":       required(schema.TypeString),
-		"implementation": required(schema.TypeString),
-		"settings":       settingsMap(),
+		"name":           utils.Required(schema.TypeString),
+		"label":          utils.Required(schema.TypeString),
+		"template":       utils.Required(schema.TypeString),
+		"implementation": utils.Required(schema.TypeString),
+		"settings":       utils.SettingsMap(),
 		"params": {
 			Type:             schema.TypeMap,
 			Required:         true,
-			ValidateDiagFunc: validateParams,
+			DiffSuppressFunc: utils.SuppressEquivalentJsonDiffs,
 		},
 	}
 }
 
-func validateParams(params interface{}, path cty.Path) diag.Diagnostics {
-	var diags diag.Diagnostics
-
-	paramMap := params.(map[string]interface{})
-	var fields interface{}
-	origFields := paramMap["fields"].(string)
-
-	// Decode the json encoded param fields in the flow.
-	if err := json.Unmarshal([]byte(origFields), &fields); err != nil {
-		diags = append(diags, diag.Diagnostic{
-			Severity: diag.Error,
-			Summary:  "Error decoding Sym Flow param fields for validation: " + err.Error(),
-		})
-	}
-
-	paramMap["fields"] = fields
-
-	// Turn the flow param data into a form schema.Resource understands, then
-	// call its validate method.
-	resourceConfig := terraform.NewResourceConfigRaw(paramMap)
-	validateDiags := param().Validate(resourceConfig)
-
-	for _, validateDiag := range validateDiags {
-		diags = append(diags, validateDiag)
-	}
-
-	return diags
+// Remove the version from our template type for handling
+// e.g. sym:approval:1.0 becomes just sym:approval
+func getTemplateNameWithoutVersion(templateName string) string {
+	splitTemplateName := strings.Split(templateName, ":")
+	return splitTemplateName[0] + ":" + splitTemplateName[1]
 }
 
-func buildFlowParamsFromData(data *schema.ResourceData) (error, client.FlowParam) {
+// Validate a SymFlow's parameters based on a Template's specifications
+func validateTemplateFlowParam(templateName string, paramMap map[string]interface{}) error {
+	switch templateName {
+	case "sym:approval":
+		return templates.ValidateSymApprovalParam(paramMap)
+	default:
+		// If we don't recognize the template, it may be user-defined
+		// in which case, we can't do any validation currently.
+		// Eventually, if we can get the expected schema for a user-defined
+		// template, we should do that and validate here as well.
+		return nil
+	}
+}
+
+// Build a SymFlow's FlowParam from ResourceData based on a Template's specifications
+func buildTemplateFlowParam(data *schema.ResourceData) (client.FlowParam, error) {
 	params := data.Get("params").(map[string]interface{})
-	flowParam := client.FlowParam{
-		StrategyId: params["strategy_id"].(string),
+	templateName := getTemplateNameWithoutVersion(data.Get("template").(string))
+
+	if err := validateTemplateFlowParam(templateName, params); err != nil {
+		return client.FlowParam{}, err
 	}
 
-	// Decode the json encoded param fields in the flow.
-	var fields interface{}
-	if err := json.Unmarshal([]byte(params["fields"].(string)), &fields); err != nil {
-		return err, flowParam
+	switch templateName {
+	case "sym:approval":
+		return templates.BuildSymApprovalParam(params)
+	default:
+		// TODO: FlowParam, ParamField structs should be refactored to be more
+		//  generic. They are currently specific to sym:approval. We can fill in
+		//  the future generic struct with whatever data the user may have provided.
+		errorMsg := fmt.Sprintf("unrecognized template name provided: %s", templateName)
+		return client.FlowParam{}, errors.New(errorMsg)
 	}
-
-	for _, field := range fields.([]interface{}) {
-		f := field.(map[string]interface{})
-		paramField := client.ParamField{
-			Name: f["name"].(string),
-			Type: f["type"].(string),
-		}
-
-		if val, ok := f["label"]; ok {
-			paramField.Label = val.(string)
-		}
-
-		if val, ok := f["required"]; ok {
-			paramField.Required = val.(bool)
-		}
-
-		if val, ok := f["allowed_values"]; ok {
-			allowedValues := val.([]interface{})
-			for _, allowedValue := range allowedValues {
-				paramField.AllowedValues = append(paramField.AllowedValues, allowedValue.(string))
-			}
-		}
-
-		flowParam.Fields = append(flowParam.Fields, paramField)
-	}
-
-	return nil, flowParam
 }
 
 func createFlow(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -147,7 +101,7 @@ func createFlow(ctx context.Context, data *schema.ResourceData, meta interface{}
 		Implementation: base64.StdEncoding.EncodeToString(b),
 	}
 
-	err, flowParams := buildFlowParamsFromData(data)
+	flowParams, err := buildTemplateFlowParam(data)
 	if err != nil {
 		diags = append(diags, diag.Diagnostic{
 			Severity: diag.Error,
@@ -201,7 +155,15 @@ func readFlow(ctx context.Context, data *schema.ResourceData, meta interface{}) 
 			})
 		}
 
-		if err = data.Set("params", flow.Params); err != nil {
+		flowParamsMap, err := templates.SymApprovalParamToMap(flow.Params)
+		if err != nil {
+			diags = append(diags, diag.Diagnostic{
+				Severity: diag.Error,
+				Summary:  "Unable to read Sym Flow params: " + err.Error(),
+			})
+		}
+
+		if err = data.Set("params", flowParamsMap); err != nil {
 			diags = append(diags, diag.Diagnostic{
 				Severity: diag.Error,
 				Summary:  "Unable to read Sym Flow params: " + err.Error(),
@@ -234,7 +196,7 @@ func updateFlow(ctx context.Context, data *schema.ResourceData, meta interface{}
 		Implementation: base64.StdEncoding.EncodeToString(b),
 	}
 
-	err, flowParams := buildFlowParamsFromData(data)
+	flowParams, err := buildTemplateFlowParam(data)
 	if err != nil {
 		diags = append(diags, diag.Diagnostic{
 			Severity: diag.Error,

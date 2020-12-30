@@ -1,4 +1,4 @@
-package resources
+package utils
 
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -6,28 +6,28 @@ import (
 )
 
 var (
-	required = func(valueType schema.ValueType) *schema.Schema {
+	Required = func(valueType schema.ValueType) *schema.Schema {
 		return &schema.Schema{
 			Type:     valueType,
 			Required: true,
 		}
 	}
 
-	optional = func(valueType schema.ValueType) *schema.Schema {
+	Optional = func(valueType schema.ValueType) *schema.Schema {
 		return &schema.Schema{
 			Type:     valueType,
 			Optional: true,
 		}
 	}
 
-	settingsMap = func() *schema.Schema {
+	SettingsMap = func() *schema.Schema {
 		return &schema.Schema{
-			Type: schema.TypeMap,
+			Type:     schema.TypeMap,
 			Required: true,
 		}
 	}
 
-	tagsMap = func() *schema.Schema {
+	TagsMap = func() *schema.Schema {
 		return &schema.Schema{
 			Type: schema.TypeMap,
 			Elem: &schema.Schema{
@@ -37,23 +37,23 @@ var (
 		}
 	}
 
-	requiredList = func(resource *schema.Resource) *schema.Schema {
+	RequiredList = func(resource *schema.Resource) *schema.Schema {
 		return &schema.Schema{
 			Type:     schema.TypeList,
 			Required: true,
-			Elem: resource,
+			Elem:     resource,
 		}
 	}
 
-	requiredSet = func(resource *schema.Resource) *schema.Schema {
+	RequiredSet = func(resource *schema.Resource) *schema.Schema {
 		return &schema.Schema{
 			Type:     schema.TypeSet,
 			Required: true,
-			Elem: resource,
+			Elem:     resource,
 		}
 	}
 
-	stringList = func(required bool) *schema.Schema {
+	StringList = func(required bool) *schema.Schema {
 		return &schema.Schema{
 			Type: schema.TypeList,
 			Elem: &schema.Schema{
@@ -64,10 +64,10 @@ var (
 		}
 	}
 
-	notYetImplemented diag.Diagnostics = []diag.Diagnostic{
+	NotYetImplemented diag.Diagnostics = []diag.Diagnostic{
 		{
 			Severity: diag.Error,
-			Summary: "Not yet implemented",
+			Summary:  "Not yet implemented",
 		},
 	}
 )

@@ -2,6 +2,7 @@ package resources
 
 import (
 	"context"
+	"github.com/symopsio/terraform-provider-sym/sym/utils"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -20,9 +21,9 @@ func Integration() *schema.Resource {
 
 func integrationSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-		"type":     required(schema.TypeString),
-		"settings": settingsMap(),
-		"name":     required(schema.TypeString),
+		"type":     utils.Required(schema.TypeString),
+		"settings": utils.SettingsMap(),
+		"name":     utils.Required(schema.TypeString),
 	}
 }
 
