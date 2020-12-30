@@ -2,6 +2,7 @@ package resources
 
 import (
 	"context"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/symopsio/terraform-provider-sym/sym/client"
@@ -21,10 +22,9 @@ func integrationSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"type":     required(schema.TypeString),
 		"settings": settingsMap(),
-		"name": 	required(schema.TypeString),
+		"name":     required(schema.TypeString),
 	}
 }
-
 
 func getSettings(data *schema.ResourceData) client.Settings {
 	rawSettings := data.Get("settings").(map[string]interface{})
@@ -41,7 +41,7 @@ func createIntegration(ctx context.Context, data *schema.ResourceData, meta inte
 	integration := client.SymIntegration{
 		Type:     data.Get("type").(string),
 		Settings: getSettings(data),
-		//Name: data.Get("name").(string),
+		Name:     data.Get("name").(string),
 	}
 
 	id, err := c.Integration.Create(integration)
@@ -87,7 +87,7 @@ func readIntegration(ctx context.Context, data *schema.ResourceData, meta interf
 		if err != nil {
 			diags = append(diags, diag.Diagnostic{
 				Severity: diag.Error,
-				Summary: "Unable to set sym integration name: " + err.Error(),
+				Summary:  "Unable to set sym integration name: " + err.Error(),
 			})
 		}
 	}
@@ -101,7 +101,7 @@ func updateIntegration(ctx context.Context, data *schema.ResourceData, meta inte
 		Id:       data.Id(),
 		Type:     data.Get("type").(string),
 		Settings: getSettings(data),
-		//Name: data.Get("name").(string),
+		Name:     data.Get("name").(string),
 	}
 	_, err := c.Integration.Update(integration)
 	if err != nil {
@@ -127,4 +127,3 @@ func deleteIntegration(ctx context.Context, data *schema.ResourceData, meta inte
 	}
 	return diags
 }
-

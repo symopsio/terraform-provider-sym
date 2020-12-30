@@ -1,9 +1,9 @@
 package data_sources
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	//"github.com/symopsio/terraform-provider-sym/sym/resources"
 	"log"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func DataSourceRuntime() *schema.Resource {

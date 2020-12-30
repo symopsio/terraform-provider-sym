@@ -2,6 +2,7 @@ package resources
 
 import (
 	"context"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/symopsio/terraform-provider-sym/sym/client"
@@ -38,8 +39,7 @@ func strategySchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"type":           required(schema.TypeString),
 		"integration_id": required(schema.TypeString),
-		//"targets":        targetList(),
-		"targets": stringList(true),
+		"targets":        stringList(true),
 	}
 }
 
@@ -57,27 +57,12 @@ func createStrategy(ctx context.Context, data *schema.ResourceData, meta interfa
 	strategy := client.SymStrategy{
 		Type:          data.Get("type").(string),
 		IntegrationId: data.Get("integration_id").(string),
-		//Targets: data.Get("targets").([]string),
 	}
 
 	targets := data.Get("targets").([]interface{})
 	for i := range targets {
 		strategy.Targets = append(strategy.Targets, targets[i].(string))
 	}
-	//log.Printf("\n\n========== HERE ==========\n\n")
-	//log.Printf("Targets %v", targets)
-	//log.Printf("Target reflect %v", reflect.TypeOf(targets))
-	//log.Printf("Target[0] reflect %v", reflect.TypeOf(targets[0]))
-	//log.Printf("\n\n========== END ==========\n\n")
-	//targets := data.Get("targets").([]interface{})
-	//for _, target := range targets {
-	//	t := target.(map[string]interface{})
-	//	strategyTarget := client.StrategyTarget{
-	//		TargetId: t["target_id"].(string),
-	//		Tags:     toTags(t["tags"].(map[string]interface{})),
-	//	}
-	//	strategy.Targets = append(strategy.Targets, strategyTarget)
-	//}
 
 	id, err := c.Strategy.Create(strategy)
 	if err != nil {
@@ -100,14 +85,14 @@ func readStrategy(ctx context.Context, data *schema.ResourceData, meta interface
 	if err != nil {
 		diags = append(diags, diag.Diagnostic{
 			Severity: diag.Error,
-			Summary: "Unable to read Sym Strategy: " + err.Error(),
+			Summary:  "Unable to read Sym Strategy: " + err.Error(),
 		})
 	} else {
 		err = data.Set("type", strategy.Type)
 		if err != nil {
 			diags = append(diags, diag.Diagnostic{
 				Severity: diag.Error,
-				Summary: "Unable to read Sym Strategy type: " + err.Error(),
+				Summary:  "Unable to read Sym Strategy type: " + err.Error(),
 			})
 		}
 
@@ -115,7 +100,7 @@ func readStrategy(ctx context.Context, data *schema.ResourceData, meta interface
 		if err != nil {
 			diags = append(diags, diag.Diagnostic{
 				Severity: diag.Error,
-				Summary: "Unable to read Sym Strategy integration_id: " + err.Error(),
+				Summary:  "Unable to read Sym Strategy integration_id: " + err.Error(),
 			})
 		}
 
@@ -123,7 +108,7 @@ func readStrategy(ctx context.Context, data *schema.ResourceData, meta interface
 		if err != nil {
 			diags = append(diags, diag.Diagnostic{
 				Severity: diag.Error,
-				Summary: "Unable to read Sym Strategy targets: " + err.Error(),
+				Summary:  "Unable to read Sym Strategy targets: " + err.Error(),
 			})
 		}
 	}
@@ -135,17 +120,17 @@ func updateStrategy(ctx context.Context, data *schema.ResourceData, meta interfa
 	var diags diag.Diagnostics
 	c := meta.(*client.ApiClient)
 	strategy := client.SymStrategy{
-		Id: data.Id(),
-		Type: data.Get("type").(string),
+		Id:            data.Id(),
+		Type:          data.Get("type").(string),
 		IntegrationId: data.Get("integration_id").(string),
-		Targets: data.Get("targets").([]string),
+		Targets:       data.Get("targets").([]string),
 	}
 
 	_, err := c.Strategy.Update(strategy)
 	if err != nil {
 		diags = append(diags, diag.Diagnostic{
 			Severity: diag.Error,
-			Summary: "Unable to update Sym Strategy: " + err.Error(),
+			Summary:  "Unable to update Sym Strategy: " + err.Error(),
 		})
 	}
 
@@ -161,7 +146,7 @@ func deleteStrategy(ctx context.Context, data *schema.ResourceData, meta interfa
 	if err != nil {
 		diags = append(diags, diag.Diagnostic{
 			Severity: diag.Error,
-			Summary: "Unable to delete Sym Strategy: " + err.Error(),
+			Summary:  "Unable to delete Sym Strategy: " + err.Error(),
 		})
 	}
 
