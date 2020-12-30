@@ -3,8 +3,11 @@ package resources
 import (
 	"context"
 	"encoding/base64"
+	"encoding/json"
+	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/symopsio/terraform-provider-sym/sym/client"
 	"io/ioutil"
 )
@@ -35,24 +38,7 @@ func param() *schema.Resource {
 	return &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"strategy_id": required(schema.TypeString),
-			//"fields": requiredList(field()),
-			//"fields": {
-			//	Type:     schema.TypeList,
-			//	Required: true,
-			//	//Elem:     field(),
-			//	Elem: &schema.Resource{
-			//		Schema: map[string]*schema.Schema{
-			//			"name": {
-			//				Type:     schema.TypeString,
-			//				Required: true,
-			//			},
-			//			"type": {
-			//				Type: schema.TypeString,
-			//				Required: true,
-			//			},
-			//		},
-			//	},
-			//},
+			"fields": requiredList(field()),
 		},
 	}
 }
@@ -64,33 +50,41 @@ func flowSchema() map[string]*schema.Schema {
 		"template":       required(schema.TypeString),
 		"implementation": required(schema.TypeString),
 		"settings":       settingsMap(),
-		//"fields2":        requiredList(field()),
-		"params":         requiredSet(param()),
-		"fields2": &schema.Schema{
-			Type: schema.TypeList,
+		"params":		  {
+			Type: schema.TypeMap,
 			Required: true,
-			Elem: &schema.Resource{
-				Schema: map[string]*schema.Schema{
-					"name": &schema.Schema{
-						Type: schema.TypeString,
-						Required: true,
-					},
-					"type": &schema.Schema{
-						Type: schema.TypeString,
-						Required: true,
-					},
-				},
-			},
+			ValidateDiagFunc: validateParams,
 		},
-
-		// strategy + field params are top level fields to work around
-		// terraform-plugin-sdk not allowing wildcard types for the params bag.
-		// once either DynamicPseudoField is exposed in the sdk or Sym moves to
-		// terraform-plugin-go for the provider, these should become deprecated.
-		//"strategy_param": required(schema.TypeString),
-		//"field_params": requiredList(field()),
-		//"field_params": stringList(true),
 	}
+}
+
+func validateParams(params interface{}, path cty.Path) diag.Diagnostics {
+	var diags diag.Diagnostics
+
+	paramMap := params.(map[string]interface{})
+	var fields interface{}
+	origFields := paramMap["fields"].(string)
+
+	// Decode the json encoded param fields in the flow.
+	if err := json.Unmarshal([]byte(origFields), &fields); err != nil {
+		diags = append(diags, diag.Diagnostic{
+			Severity: diag.Error,
+			Summary: "Error decoding Sym Flow param fields for validation: " + err.Error(),
+		})
+	}
+
+	paramMap["fields"] = fields
+
+	// Turn the flow param data into a form schema.Resource understands, then
+	// call its validate method.
+	resourceConfig := terraform.NewResourceConfigRaw(paramMap)
+	validateDiags := param().Validate(resourceConfig)
+
+	for _, validateDiag := range validateDiags {
+		diags = append(diags, validateDiag)
+	}
+
+	return diags
 }
 
 func createFlow(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -112,17 +106,30 @@ func createFlow(ctx context.Context, data *schema.ResourceData, meta interface{}
 		Implementation: base64.StdEncoding.EncodeToString(b),
 	}
 
+	params := data.Get("params").(map[string]interface{})
 	flowParam := client.FlowParam{
-		StrategyId: data.Get("strategy_param").(string),
+		StrategyId: params["strategy_id"].(string),
 	}
 
-	fields := data.Get("field_params").([]interface{})
-	for _, field := range fields {
+
+	// Decode the json encoded param fields in the flow.
+	var fields interface{}
+	if err := json.Unmarshal([]byte(params["fields"].(string)), &fields); err != nil {
+		diags = append(diags, diag.Diagnostic{
+			Severity: diag.Error,
+			Summary: "Error decoding Sym Flow param fields for creation: " + err.Error(),
+		})
+	}
+
+	for _, field := range fields.([]interface{}) {
 		f := field.(map[string]interface{})
 		paramField := client.ParamField{
 			Name:  f["name"].(string),
-			Label: f["label"].(string),
 			Type:  f["type"].(string),
+		}
+
+		if val, ok := f["label"]; ok {
+			paramField.Label =  val.(string)
 		}
 
 		if val, ok := f["required"]; ok {
@@ -138,37 +145,6 @@ func createFlow(ctx context.Context, data *schema.ResourceData, meta interface{}
 
 		flowParam.Fields = append(flowParam.Fields, paramField)
 	}
-
-	//params := data.Get("params").(*schema.Set).List()
-	//for _, param := range params {
-	//	p := param.(map[string]interface{})
-	//	flowParam := client.FlowParam{
-	//		StrategyId: p["strategy_id"].(string),
-	//	}
-	//
-	//	// fields
-	//	fields := p["fields"].([]interface{})
-	//	for _, field := range fields {
-	//		f := field.(map[string]interface{})
-	//		paramField := client.ParamField{
-	//			Name:  f["name"].(string),
-	//			Label: f["label"].(string),
-	//			Type:  f["type"].(string),
-	//		}
-	//		if val, ok := f["required"]; ok {
-	//			paramField.Required = val.(bool)
-	//		}
-	//		if val, ok := f["allowed_values"]; ok {
-	//			allowedValues := val.([]interface{})
-	//			for _, allowedValue := range allowedValues {
-	//				paramField.AllowedValues = append(paramField.AllowedValues, allowedValue.(string))
-	//			}
-	//		}
-	//		flowParam.Fields = append(flowParam.Fields, paramField)
-	//	}
-	//
-	//	flow.Params = append(flow.Params, flowParam)
-	//}
 
 	flow.Params = append(flow.Params, flowParam)
 

@@ -31,21 +31,23 @@ resource "sym_flow" "this" {
   template = "sym:approval:1.0"
   implementation = "impl.py"
 
-  fields2 {
-    name = "reason"
-    type = "string"
-//    required = true
-  }
-
-
-  params {
+  params = {
     strategy_id = sym_strategy.this.id
 
-//    fields = [{
-//      name = "reason"
-//      type = "string"
-//      required = true
-//    }]
+    fields = jsonencode([
+      {
+        name = "reason"
+        type = "string"
+        required = true
+        label = "Reason"
+
+      },
+      {
+        name = "urgency"
+        type = "string"
+        required = true
+        allowed_values = ["Low", "Medium", "High"]
+      }])
   }
 
   settings = {
@@ -65,11 +67,10 @@ resource "sym_strategy" "this" {
   type = "aws_sso"
 
   // TODO: remove this, needs to be set by running tf apply on integrations
-  integration_id = "sso-id-${var.environment}"
+  integration_id = "dbfd237f-4341-46ba-b0c3-3c9c0ccb37be"
 //  integration_id = data.sym_integration.sso.id
 
   targets = [ for target in sym_target.targets : target.id ]
-  targets = ["id1", "id2"]
 }
 
 # A target is a thing that we are managing access to
@@ -79,7 +80,7 @@ resource "sym_target" "targets" {
   type = "aws_sso_permission_set"
 
   // TODO: remove this, needs to be set by running tf apply on integrations
-  integration_id = "sso-id-${var.environment}"
+  integration_id = "dbfd237f-4341-46ba-b0c3-3c9c0ccb37be"
 //  integration_id = data.sym_integration.sso.id
 
   label = each.key
