@@ -23,25 +23,7 @@ func runtimeSchema() map[string]*schema.Schema {
 }
 
 func dataSourceRuntimeRead(data *schema.ResourceData, meta interface{}) error {
-	//c := meta.(*client.ApiClient)
+	// TODO: need an API endpoint to retrieve this information
 	log.Printf("dataSourceRuntimeRead id %v", data.Id())
-	//repoName := d.Get("repository").(string)
-	//branchName := d.Get("branch").(string)
-	//branchRefName := "refs/heads/" + branchName
-	//
-	//log.Printf("[DEBUG] Reading GitHub branch reference %s/%s (%s)",
-	//	orgName, repoName, branchRefName)
-	//ref, resp, err := client.Git.GetRef(
-	//	context.TODO(), orgName, repoName, branchRefName)
-	//if err != nil {
-	//	return fmt.Errorf("Error reading GitHub branch reference %s/%s (%s): %s",
-	//		orgName, repoName, branchRefName, err)
-	//}
-	//
-	//d.SetId(buildTwoPartID(repoName, branchName))
-	//d.Set("etag", resp.Header.Get("ETag"))
-	//d.Set("ref", *ref.Ref)
-	//d.Set("sha", *ref.Object.SHA)
-
 	return nil
 }

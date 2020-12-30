@@ -139,6 +139,7 @@ func createFlow(ctx context.Context, data *schema.ResourceData, meta interface{}
 		})
 		return diags
 	}
+
 	flow := client.SymFlow{
 		Name:           data.Get("name").(string),
 		Label:          data.Get("label").(string),
@@ -200,8 +201,12 @@ func readFlow(ctx context.Context, data *schema.ResourceData, meta interface{}) 
 			})
 		}
 
-		// TODO settings
-		// TODO params???
+		if err = data.Set("params", flow.Params); err != nil {
+			diags = append(diags, diag.Diagnostic{
+				Severity: diag.Error,
+				Summary:  "Unable to read Sym Flow params: " + err.Error(),
+			})
+		}
 	}
 
 	return diags
@@ -210,12 +215,23 @@ func readFlow(ctx context.Context, data *schema.ResourceData, meta interface{}) 
 func updateFlow(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 	c := meta.(*client.ApiClient)
+
+	implementation := data.Get("implementation").(string)
+	b, err := ioutil.ReadFile(implementation)
+	if err != nil {
+		diags = append(diags, diag.Diagnostic{
+			Severity: diag.Error,
+			Summary:  "Unable to read Sym Flow implementation: " + err.Error(),
+		})
+		return diags
+	}
+
 	flow := client.SymFlow{
 		Id:             data.Id(),
 		Name:           data.Get("name").(string),
 		Label:          data.Get("label").(string),
 		Template:       data.Get("template").(string),
-		Implementation: data.Get("implementation").(string),
+		Implementation: base64.StdEncoding.EncodeToString(b),
 	}
 
 	err, flowParams := buildFlowParamsFromData(data)

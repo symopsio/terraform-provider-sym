@@ -51,13 +51,8 @@ resource "sym_flow" "this" {
   }
 
   settings = {
-    // TODO: remove this, needs to be set by running tf apply on integrations
-    runtime_id = "runtime-id-${var.environment}"
-    slack_id = "slack-id-${var.environment}"
-
-    // is the runtime a Service in the API?
-//    runtime_id = data.sym_runtime.this.id
-//    slack_id = data.sym_integration.slack.id
+    runtime_id = data.sym_runtime.this.id
+    slack_id = data.sym_integration.slack.id
   }
 }
 
@@ -66,11 +61,8 @@ resource "sym_flow" "this" {
 resource "sym_strategy" "this" {
   type = "aws_sso"
 
-  // TODO: remove this, needs to be set by running tf apply on integrations
-  integration_id = "dbfd237f-4341-46ba-b0c3-3c9c0ccb37be"
-//  integration_id = data.sym_integration.sso.id
-
-  targets = [ for target in sym_target.targets : target.id ]
+  integration_id = data.sym_integration.sso.id
+  targets = [for target in sym_target.targets : target.id]
 }
 
 # A target is a thing that we are managing access to
@@ -78,16 +70,13 @@ resource "sym_target" "targets" {
   for_each = var.permission_sets
 
   type = "aws_sso_permission_set"
-
-  // TODO: remove this, needs to be set by running tf apply on integrations
-  integration_id = "dbfd237f-4341-46ba-b0c3-3c9c0ccb37be"
-//  integration_id = data.sym_integration.sso.id
+  integration_id = data.sym_integration.sso.id
 
   label = each.key
 
   settings = {
-    instance_arn       = var.instance_arn
+    instance_arn = var.instance_arn
     permission_set_arn = each.value["arn"]
-    account_id         = each.value["account_id"]
+    account_id = each.value["account_id"]
   }
 }

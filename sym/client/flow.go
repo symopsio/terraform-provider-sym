@@ -28,11 +28,11 @@ func (f FlowParam) String() string {
 }
 
 type SymFlow struct {
-	Id             string      `json:"id,omitempty"`
-	Name           string      `json:"name"`
-	Label          string      `json:"label"`
-	Template       string      `json:"template"`
-	Implementation string      `json:"implementation"`
+	Id             string    `json:"id,omitempty"`
+	Name           string    `json:"name"`
+	Label          string    `json:"label"`
+	Template       string    `json:"template"`
+	Implementation string    `json:"implementation"`
 	Params         FlowParam `json:"params"`
 }
 
