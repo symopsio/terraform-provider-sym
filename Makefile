@@ -18,8 +18,6 @@ clean:
 build:
 	mkdir -p dist
 	go build -o dist/${BINARY}
-	mkdir -p ${PLUGIN_DIR}
-	cp dist/${BINARY} ${PLUGIN_DIR}/
 
 # Copy to plugin direction in v12 and v13 formats
 local: build
