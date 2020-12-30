@@ -33,7 +33,7 @@ type SymFlow struct {
 	Label          string      `json:"label"`
 	Template       string      `json:"template"`
 	Implementation string      `json:"implementation"`
-	Params         []FlowParam `json:"params"`
+	Params         FlowParam `json:"params"`
 }
 
 func (s SymFlow) String() string {
@@ -41,8 +41,10 @@ func (s SymFlow) String() string {
 }
 
 type FlowClient interface {
-	Create(secret SymFlow) (string, error)
+	Create(flow SymFlow) (string, error)
 	Read(id string) (*SymFlow, error)
+	Update(flow SymFlow) (string, error)
+	Delete(id string) (string, error)
 }
 
 func NewFlowClient(httpClient SymHttpClient) FlowClient {
@@ -56,7 +58,7 @@ type flowClient struct {
 }
 
 func (c *flowClient) Create(flow SymFlow) (string, error) {
-	log.Printf("Creating flow: %v", flow)
+	log.Printf("Creating Sym Flow: %v", flow)
 	result, err := c.HttpClient.Do("POST", "/flows/", &flow)
 	if err != nil {
 		return "", err
@@ -71,10 +73,40 @@ func (c *flowClient) Create(flow SymFlow) (string, error) {
 }
 
 func (c *flowClient) Read(id string) (*SymFlow, error) {
-	log.Printf("Getting flow: %s", id)
+	log.Printf("Getting Sym Flow: %s", id)
 	result := SymFlow{}
-	if err := c.HttpClient.Read(fmt.Sprintf("/flows/%s", id), &result); err != nil {
+	if err := c.HttpClient.Read(fmt.Sprintf("/flows/%s/", id), &result); err != nil {
 		return nil, err
 	}
+	log.Printf("Got Sym Flow: %s", id)
 	return &result, nil
+}
+
+func (c *flowClient) Update(flow SymFlow) (string, error) {
+	log.Printf("Updating Sym Flow: %v", flow)
+
+	body, err := c.HttpClient.Do("PATCH", fmt.Sprintf("/flows/%s/", flow.Id), &flow)
+	if err != nil {
+		return "", err
+	} else {
+		result := SymFlow{}
+		if err := json.Unmarshal([]byte(body), &result); err != nil {
+			return "", err
+		}
+
+		log.Printf("Updated Sym Flow: %v", result)
+		return result.Id, nil
+	}
+}
+
+func (c *flowClient) Delete(id string) (string, error) {
+	log.Printf("Deleting Sym Flow: %s", id)
+
+	_, err := c.HttpClient.Do("DELETE", fmt.Sprintf("/flows/%s/", id), nil)
+	if err != nil {
+		return "", err
+	} else {
+		log.Printf("Deleted Sym Flow: %s", id)
+		return id, nil
+	}
 }

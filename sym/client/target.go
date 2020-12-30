@@ -52,7 +52,7 @@ func (c *targetClient) Create(target SymTarget) (string, error) {
 func (c *targetClient) Read(id string) (*SymTarget, error) {
 	log.Printf("Getting Sym Target: %s", id)
 	result := SymTarget{}
-	if err := c.HttpClient.Read(fmt.Sprintf("/targets/%s", id), &result); err != nil {
+	if err := c.HttpClient.Read(fmt.Sprintf("/targets/%s/", id), &result); err != nil {
 		return nil, err
 	}
 

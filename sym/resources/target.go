@@ -118,6 +118,7 @@ func updateTarget(ctx context.Context, data *schema.ResourceData, meta interface
 
 	return diags
 }
+
 func deleteTarget(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 	c := meta.(*client.ApiClient)
