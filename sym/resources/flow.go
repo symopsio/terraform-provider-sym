@@ -5,13 +5,14 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"io/ioutil"
+	"strings"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/symopsio/terraform-provider-sym/sym/client"
 	"github.com/symopsio/terraform-provider-sym/sym/templates"
 	"github.com/symopsio/terraform-provider-sym/sym/utils"
-	"io/ioutil"
-	"strings"
 )
 
 func Flow() *schema.Resource {
@@ -81,11 +82,18 @@ func buildTemplateFlowParam(data *schema.ResourceData) (client.FlowParam, error)
 	}
 }
 
+// templateParamToMap turns the internal FlowParam struct into a map that can be set
+// on terraform's ResourceData so that the version from the API can be compared to the
+// version terraform pulls from the local files during diffs.
 func templateParamToMap(templateName string, flowParam client.FlowParam) (map[string]interface{}, error) {
 	switch templateName {
 	case "sym:approval":
 		return templates.SymApprovalParamToMap(flowParam)
 	default:
+		// TODO: FlowParam, ParamField structs should be refactored to be more
+		//  generic. They are currently specific to sym:approval. Once we have a generic
+		//  version of those structs, we should update this to parse out any and all
+		//  params provided by the API by default.
 		errorMsg := fmt.Sprintf("unrecognized template name provided: %s", templateName)
 		return make(map[string]interface{}), errors.New(errorMsg)
 	}

@@ -34,13 +34,23 @@ resource "sym_flow" "this" {
   params = {
     strategy_id = sym_strategy.this.id
 
+    // jsonencoding fields is not ideal, but is necessary to support params
+    // being a map instead of a block in terraform. here's why:
+    //
+    // when defining the schema in the provider, there is no way to set a field
+    // or value as a wildcard / "any" type. We must know the type for every key/value pair.
+    // however, since params are meant to accept any and all fields from users,
+    // we cannot know the type of each key/value pair.
+    //
+    // To generalize this, we've defined params as a map of string/string key/value pairs.
+    // so to get fields to comply with this structure, the value must be a string, so we
+    // end up json encoding the value.
     fields = jsonencode([
       {
         name = "reason"
         type = "string"
         required = true
         label = "Reason"
-
       },
       {
         name = "urgency"
