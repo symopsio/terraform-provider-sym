@@ -1,6 +1,18 @@
 from sym.annotations import hook, reducer
 from sym.integrations import pagerduty, slack, aws_sso
 
+# Whether or not to show a given target in slack
+@reducer
+def show_target(req):
+    # If the implementer did not tag a list of groups that this user should be a member of, then
+    # always let the user see the target
+    if not req.target.tags["MemberOf"]:
+        return True
+
+    # Check to see if the user is in one of the groups the implementer tagged the target with
+    return req.target.tags["MemberOf"] in aws_sso.user(req.user).groups()
+
+
 # Who are the approvers for this user + target request?
 @reducer
 def get_approver(req):
