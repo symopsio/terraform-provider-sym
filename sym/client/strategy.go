@@ -1,7 +1,6 @@
 package client
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 )
@@ -48,49 +47,51 @@ type strategyClient struct {
 func (c *strategyClient) Create(strategy SymStrategy) (string, error) {
 	log.Printf("Creating Sym Strategy: %v", strategy)
 	result := SymStrategy{}
+
 	if _, err := c.HttpClient.Create("/strategies/", &strategy, &result); err != nil {
 		return "", err
 	}
+
 	if result.Id == "" {
 		return "", fmt.Errorf("response indicates target was not created")
 	}
+
 	return result.Id, nil
 }
 
 func (c *strategyClient) Read(id string) (*SymStrategy, error) {
 	log.Printf("Getting Sym Strategy: %s", id)
 	result := SymStrategy{}
-	if err := c.HttpClient.Read(fmt.Sprintf("/strategies/%s", id), &result); err != nil {
+
+	if err := c.HttpClient.Read(fmt.Sprintf("/strategies/%s/", id), &result); err != nil {
 		return nil, err
 	}
+
 	return &result, nil
 }
 
 func (c *strategyClient) Update(strategy SymStrategy) (string, error) {
 	log.Printf("Updating Sym Strategy: %v", strategy)
+	result := SymStrategy{}
 
-	body, err := c.HttpClient.Do("PATCH", fmt.Sprintf("/strategies/%s/", strategy.Id), &strategy)
-	if err != nil {
+	if _, err := c.HttpClient.Update(fmt.Sprintf("/stragtegies/%s/", strategy.Id), &strategy, &result); err != nil {
 		return "", err
-	} else {
-		result := SymTarget{}
-		if err := json.Unmarshal([]byte(body), &result); err != nil {
-			return "", err
-		}
-
-		log.Printf("Updated Sym Strategy: %v", result)
-		return result.Id, nil
 	}
+
+	if result.Id == "" {
+		return "", fmt.Errorf("response indicates Sym Strategy was not updated")
+	}
+
+	log.Printf("Updated Sym Strategy: %s", result.Id)
+	return result.Id, nil
 }
 
 func (c *strategyClient) Delete(id string) (string, error) {
 	log.Printf("Deleting Sym Strategy: %s", id)
 
-	_, err := c.HttpClient.Do("DELETE", fmt.Sprintf("/strategies/%s/", id), nil)
-	if err != nil {
+	if err := c.HttpClient.Delete(fmt.Sprintf("/strategies/%s/", id)); err != nil {
 		return "", err
-	} else {
-		log.Printf("Deleted Sym Strategy: %s", id)
-		return id, nil
 	}
+
+	return id, nil
 }

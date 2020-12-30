@@ -1,7 +1,6 @@
 package client
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 )
@@ -59,54 +58,54 @@ type flowClient struct {
 
 func (c *flowClient) Create(flow SymFlow) (string, error) {
 	log.Printf("Creating Sym Flow: %v", flow)
-	result, err := c.HttpClient.Do("POST", "/flows/", &flow)
-	if err != nil {
-		return "", err
-	}
-	parsed := make(map[string]interface{})
-	err = json.Unmarshal([]byte(result), &parsed)
-	if err != nil {
+	result := SymFlow{}
+
+	if _, err := c.HttpClient.Create("/flows/", &flow, &result); err != nil {
 		return "", err
 	}
 
-	return parsed["id"].(string), nil
+	if result.Id == "" {
+		return "", fmt.Errorf("response indicates Sym Flow was not created")
+	}
+
+	log.Printf("Created Sym Flow: %s", result.Id)
+	return result.Id, nil
 }
 
 func (c *flowClient) Read(id string) (*SymFlow, error) {
 	log.Printf("Getting Sym Flow: %s", id)
 	result := SymFlow{}
+
 	if err := c.HttpClient.Read(fmt.Sprintf("/flows/%s/", id), &result); err != nil {
 		return nil, err
 	}
-	log.Printf("Got Sym Flow: %s", id)
+
+	log.Printf("Got Sym Flow: %s", result.Id)
 	return &result, nil
 }
 
 func (c *flowClient) Update(flow SymFlow) (string, error) {
 	log.Printf("Updating Sym Flow: %v", flow)
+	result := SymFlow{}
 
-	body, err := c.HttpClient.Do("PATCH", fmt.Sprintf("/flows/%s/", flow.Id), &flow)
-	if err != nil {
+	if _, err := c.HttpClient.Update(fmt.Sprintf("/flows/%s/", flow.Id), &flow, &result); err != nil {
 		return "", err
-	} else {
-		result := SymFlow{}
-		if err := json.Unmarshal([]byte(body), &result); err != nil {
-			return "", err
-		}
-
-		log.Printf("Updated Sym Flow: %v", result)
-		return result.Id, nil
 	}
+
+	if result.Id == "" {
+		return "", fmt.Errorf("response indicates Sym Flow was not updated")
+	}
+
+	log.Printf("Updated Sym Flow: %s", result.Id)
+	return result.Id, nil
 }
 
 func (c *flowClient) Delete(id string) (string, error) {
 	log.Printf("Deleting Sym Flow: %s", id)
 
-	_, err := c.HttpClient.Do("DELETE", fmt.Sprintf("/flows/%s/", id), nil)
-	if err != nil {
+	if err := c.HttpClient.Delete(fmt.Sprintf("/flows/%s/", id)); err != nil {
 		return "", err
-	} else {
-		log.Printf("Deleted Sym Flow: %s", id)
-		return id, nil
 	}
+
+	return id, nil
 }
