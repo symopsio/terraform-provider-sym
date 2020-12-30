@@ -81,6 +81,16 @@ func buildTemplateFlowParam(data *schema.ResourceData) (client.FlowParam, error)
 	}
 }
 
+func templateParamToMap(templateName string, flowParam client.FlowParam) (map[string]interface{}, error) {
+	switch templateName {
+	case "sym:approval":
+		return templates.SymApprovalParamToMap(flowParam)
+	default:
+		errorMsg := fmt.Sprintf("unrecognized template name provided: %s", templateName)
+		return make(map[string]interface{}), errors.New(errorMsg)
+	}
+}
+
 func createFlow(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 	c := meta.(*client.ApiClient)
@@ -155,7 +165,8 @@ func readFlow(ctx context.Context, data *schema.ResourceData, meta interface{}) 
 			})
 		}
 
-		flowParamsMap, err := templates.SymApprovalParamToMap(flow.Params)
+		templateName := getTemplateNameWithoutVersion(data.Get("template").(string))
+		flowParamsMap, err := templateParamToMap(templateName, flow.Params)
 		if err != nil {
 			diags = append(diags, diag.Diagnostic{
 				Severity: diag.Error,
