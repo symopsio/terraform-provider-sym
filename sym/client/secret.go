@@ -8,6 +8,7 @@ import (
 type SymSecret struct {
 	Id       string   `json:"id,omitempty"`
 	Type     string   `json:"type"`
+	Name     string   `json:"name"`
 	Settings Settings `json:"settings"`
 }
 

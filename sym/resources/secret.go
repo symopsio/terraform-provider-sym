@@ -22,6 +22,7 @@ func Secret() *schema.Resource {
 func secretSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"type":     utils.Required(schema.TypeString),
+		"name":     utils.Required(schema.TypeString),
 		"settings": utils.SettingsMap(),
 	}
 }
@@ -31,6 +32,7 @@ func createSecret(ctx context.Context, data *schema.ResourceData, meta interface
 	c := meta.(*client.ApiClient)
 	secret := client.SymSecret{
 		Type:     data.Get("type").(string),
+		Name:     data.Get("name").(string),
 		Settings: getSettings(data),
 	}
 
