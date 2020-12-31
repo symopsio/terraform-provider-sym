@@ -6,9 +6,9 @@ import (
 )
 
 type SymSecret struct {
-	Id             string   `json:"id,omitempty"`
-	Type           string   `json:"type"`
-	Settings       Settings `json:"settings"`
+	Id       string   `json:"id,omitempty"`
+	Type     string   `json:"type"`
+	Settings Settings `json:"settings"`
 }
 
 func (s SymSecret) String() string {

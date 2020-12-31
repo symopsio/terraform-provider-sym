@@ -8,6 +8,10 @@ terraform {
   }
 }
 
+provider "sym" {
+  org = "asics"
+}
+
 data "sym_runtime" "this" {
   name = var.environment
 }
@@ -45,7 +49,7 @@ resource "sym_flow" "this" {
     // To generalize this, we've defined params as a map of string/string key/value pairs.
     // so to get fields to comply with this structure, the value must be a string, so we
     // end up json encoding the value.
-    fields = jsonencode([
+    fields_json = jsonencode([
       {
         name = "reason"
         type = "string"

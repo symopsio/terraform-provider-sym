@@ -14,7 +14,14 @@ type ParamField struct {
 }
 
 func (p ParamField) String() string {
-	return fmt.Sprintf("{name=%s, type=%s, label=%s, required=%t, allowed_values=%v}", p.Name, p.Type, p.Label, p.Required, p.AllowedValues)
+	return fmt.Sprintf(
+		"{name=%s, type=%s, label=%s, required=%t, allowed_values=%v}",
+		p.Name,
+		p.Type,
+		p.Label,
+		p.Required,
+		p.AllowedValues,
+	)
 }
 
 type FlowParam struct {
@@ -36,7 +43,15 @@ type SymFlow struct {
 }
 
 func (s SymFlow) String() string {
-	return fmt.Sprintf("{id=%s, name=%s, label=%s, template=%s, implementation=%s, params=%v}", s.Id, s.Name, s.Label, s.Template, s.Implementation, s.Params)
+	return fmt.Sprintf(
+		"{id=%s, name=%s, label=%s, template=%s, implementation=%s, params=%v}",
+		s.Id,
+		s.Name,
+		s.Label,
+		s.Template,
+		s.Implementation,
+		s.Params,
+	)
 }
 
 type FlowClient interface {

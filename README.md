@@ -8,18 +8,18 @@ First, build and install the provider.
 make local
 ```
 
-Then, run the following command to initialize the workspace and apply the sample configuration. Note: you must have Terraform 12 installed (not 13, the default now). You can find the latest releases for 12 [here](https://releases.hashicorp.com/terraform/0.12.29/).
+Then, run the following command to initialize the workspace and apply the sample configuration. Note: you must have Terraform 14 installed (not 13, the default now).
 
 ```shell
-cd examples
+cd samples
 terraform init && terraform apply
 ```
 
-Running `terraform apply` in the examples folder will create a local `terraform.tfstate` file. You can safely remove this file if you are testing and want to redo something.
+Running `terraform apply` in the samples folder will create a local `terraform.tfstate` file. You can safely remove this file if you are testing and want to redo something.
 
 ## Local files
 
-The example uses a local file provider, which expects to find json protos in the `examples/local` directory.
+The example uses a local file provider, which expects to find json protos in the `samples/local` directory.
 
 ## Debugging
 

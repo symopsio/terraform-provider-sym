@@ -2,6 +2,7 @@ package resources
 
 import (
 	"context"
+
 	"github.com/symopsio/terraform-provider-sym/sym/utils"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -47,10 +48,7 @@ func createIntegration(ctx context.Context, data *schema.ResourceData, meta inte
 
 	id, err := c.Integration.Create(integration)
 	if err != nil {
-		diags = append(diags, diag.Diagnostic{
-			Severity: diag.Error,
-			Summary:  "Unable to create sym integration: " + err.Error(),
-		})
+		diags = utils.DiagsCheckError(diags, err, "Unable to create Integration")
 	} else {
 		data.SetId(id)
 	}
