@@ -24,25 +24,17 @@ func (p ParamField) String() string {
 	)
 }
 
-type FlowParam struct {
-	StrategyId string       `json:"strategy_id"`
-	Fields     []ParamField `json:"param_fields"`
-}
-
-func (f FlowParam) String() string {
-	return fmt.Sprintf("{strategy_id=%s, fields=%v}", f.StrategyId, f.Fields)
-}
-
-type SymFlow struct {
+type Flow struct {
 	Id             string    `json:"id,omitempty"`
 	Name           string    `json:"name"`
 	Label          string    `json:"label"`
 	Template       string    `json:"template"`
 	Implementation string    `json:"implementation"`
-	Params         FlowParam `json:"params"`
+	Environment    Settings  `json:"environment"`
+	Params         APIParams `json:"params"`
 }
 
-func (s SymFlow) String() string {
+func (s Flow) String() string {
 	return fmt.Sprintf(
 		"{id=%s, name=%s, label=%s, template=%s, implementation=%s, params=%v}",
 		s.Id,
@@ -55,9 +47,9 @@ func (s SymFlow) String() string {
 }
 
 type FlowClient interface {
-	Create(flow SymFlow) (string, error)
-	Read(id string) (*SymFlow, error)
-	Update(flow SymFlow) (string, error)
+	Create(flow Flow) (string, error)
+	Read(id string) (*Flow, error)
+	Update(flow Flow) (string, error)
 	Delete(id string) (string, error)
 }
 
@@ -71,9 +63,9 @@ type flowClient struct {
 	HttpClient SymHttpClient
 }
 
-func (c *flowClient) Create(flow SymFlow) (string, error) {
+func (c *flowClient) Create(flow Flow) (string, error) {
 	log.Printf("Creating Sym Flow: %v", flow)
-	result := SymFlow{}
+	result := Flow{}
 
 	if _, err := c.HttpClient.Create("/flows/", &flow, &result); err != nil {
 		return "", err
@@ -87,9 +79,9 @@ func (c *flowClient) Create(flow SymFlow) (string, error) {
 	return result.Id, nil
 }
 
-func (c *flowClient) Read(id string) (*SymFlow, error) {
+func (c *flowClient) Read(id string) (*Flow, error) {
 	log.Printf("Getting Sym Flow: %s", id)
-	result := SymFlow{}
+	result := Flow{}
 
 	if err := c.HttpClient.Read(fmt.Sprintf("/flows/%s/", id), &result); err != nil {
 		return nil, err
@@ -99,9 +91,9 @@ func (c *flowClient) Read(id string) (*SymFlow, error) {
 	return &result, nil
 }
 
-func (c *flowClient) Update(flow SymFlow) (string, error) {
+func (c *flowClient) Update(flow Flow) (string, error) {
 	log.Printf("Updating Sym Flow: %v", flow)
-	result := SymFlow{}
+	result := Flow{}
 
 	if _, err := c.HttpClient.Update(fmt.Sprintf("/flows/%s/", flow.Id), &flow, &result); err != nil {
 		return "", err

@@ -42,7 +42,7 @@ resource "sym_secrets" "flow" {
   name = "secrets"
 
   settings = {
-    context = sym_integration.runtime_context.id
+    context_id = sym_integration.runtime_context.id
   }
 }
 
@@ -50,7 +50,7 @@ resource "sym_secrets" "flow" {
 
 resource "sym_runtime" "this" {
   name     = "runtime"
-  context  = sym_integration.runtime_context.id
+  context_id  = sym_integration.runtime_context.id
 }
 
 

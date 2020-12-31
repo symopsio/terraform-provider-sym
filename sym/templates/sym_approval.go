@@ -32,7 +32,7 @@ func (t *SymApprovalTemplate) ParamResource() *schema.Resource {
 
 // ValidateSymApprovalParam will return an error if the provided ParamMap does not
 // match the expected specification for the sym:approval template.
-func (t *SymApprovalTemplate) ValidateParamMap(params *ParamMap) {
+func (t *SymApprovalTemplate) ValidateParamMap(params *HCLParamMap) {
 	// Extract various fields to put into a Resource, which will be validated.
 	mapToValidate := make(map[string]interface{})
 
@@ -40,7 +40,7 @@ func (t *SymApprovalTemplate) ValidateParamMap(params *ParamMap) {
 		var fields interface{}
 		field.checkError(
 			"Error decoding fields_json",
-			json.Unmarshal([]byte(field.StringValue()), &fields),
+			json.Unmarshal([]byte(field.Value()), &fields),
 		)
 		mapToValidate["fields"] = fields
 	}
@@ -57,15 +57,18 @@ func (t *SymApprovalTemplate) ValidateParamMap(params *ParamMap) {
 	params.importDiags(validateAgainstResource(t.ParamResource(), mapToValidate))
 }
 
-func (t *SymApprovalTemplate) ParamMapToFlowParam(params *ParamMap) (*client.FlowParam, error) {
+func (t *SymApprovalTemplate) HCLParamsToAPIParams(params *HCLParamMap) (*client.APIParams, error) {
 	// We can skip checking for missing params, type mismatches, or JSON parsing failure
 	// in this function because we know ValidateParamMap has already been called.
 
-	flowParam := client.FlowParam{StrategyId: params.Params["strategy_id"].(string)}
+	apiParams := client.APIParams{
+		"strategy_id": params.Params["strategy_id"],
+	}
 
 	var fields interface{}
-	json.Unmarshal([]byte(params.Params["fields_json"].(string)), &fields)
+	json.Unmarshal([]byte(params.Params["fields_json"]), &fields)
 
+	paramFields := make([]client.ParamField, 0)
 	for _, fieldInt := range fields.([]interface{}) {
 		field := fieldInt.(map[string]interface{})
 
@@ -89,20 +92,21 @@ func (t *SymApprovalTemplate) ParamMapToFlowParam(params *ParamMap) (*client.Flo
 			}
 		}
 
-		flowParam.Fields = append(flowParam.Fields, paramField)
+		paramFields = append(paramFields, paramField)
 	}
+	apiParams["fields"] = paramFields
 
-	return &flowParam, nil
+	return &apiParams, nil
 }
 
-func (t *SymApprovalTemplate) FlowParamToParamMap(flowParam *client.FlowParam) (*ParamMap, error) {
-	fieldsJSON, err := json.Marshal(flowParam.Fields)
+func (t *SymApprovalTemplate) APIParamsToHCLParams(apiParams client.APIParams) (*HCLParamMap, error) {
+	fieldsJSON, err := json.Marshal(apiParams["fields"].([]client.ParamField))
 	if err != nil {
 		return nil, err
 	}
-	params := map[string]interface{}{
-		"strategy_id": flowParam.StrategyId,
-		"fields":      string(fieldsJSON),
+	params := map[string]string{
+		"strategy_id": apiParams["strategy_id"].(string),
+		"fields_json": string(fieldsJSON),
 	}
-	return &ParamMap{Params: params}, nil
+	return &HCLParamMap{Params: params}, nil
 }

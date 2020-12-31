@@ -45,22 +45,14 @@ func strategySchema() map[string]*schema.Schema {
 	}
 }
 
-func toTags(input map[string]interface{}) client.Tags {
-	t := make(map[string]string, len(input))
-	for k, v := range input {
-		t[k] = v.(string)
-	}
-	return t
-}
-
 func createStrategy(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 	c := meta.(*client.ApiClient)
-	strategy := client.SymStrategy{
+
+	strategy := client.Strategy{
 		Type:          data.Get("type").(string),
 		IntegrationId: data.Get("integration_id").(string),
 	}
-
 	targets := data.Get("targets").([]interface{})
 	for i := range targets {
 		strategy.Targets = append(strategy.Targets, targets[i].(string))
@@ -68,10 +60,7 @@ func createStrategy(ctx context.Context, data *schema.ResourceData, meta interfa
 
 	id, err := c.Strategy.Create(strategy)
 	if err != nil {
-		diags = append(diags, diag.Diagnostic{
-			Severity: diag.Error,
-			Summary:  "Unable to create Sym Strategy: " + err.Error(),
-		})
+		diags = utils.DiagsCheckError(diags, err, "Unable to create Strategy")
 	} else {
 		data.SetId(id)
 	}
@@ -82,38 +71,16 @@ func readStrategy(ctx context.Context, data *schema.ResourceData, meta interface
 	var diags diag.Diagnostics
 	c := meta.(*client.ApiClient)
 	id := data.Id()
+
 	strategy, err := c.Strategy.Read(id)
-
 	if err != nil {
-		diags = append(diags, diag.Diagnostic{
-			Severity: diag.Error,
-			Summary:  "Unable to read Sym Strategy: " + err.Error(),
-		})
-	} else {
-		err = data.Set("type", strategy.Type)
-		if err != nil {
-			diags = append(diags, diag.Diagnostic{
-				Severity: diag.Error,
-				Summary:  "Unable to read Sym Strategy type: " + err.Error(),
-			})
-		}
-
-		err = data.Set("integration_id", strategy.IntegrationId)
-		if err != nil {
-			diags = append(diags, diag.Diagnostic{
-				Severity: diag.Error,
-				Summary:  "Unable to read Sym Strategy integration_id: " + err.Error(),
-			})
-		}
-
-		err = data.Set("targets", strategy.Targets)
-		if err != nil {
-			diags = append(diags, diag.Diagnostic{
-				Severity: diag.Error,
-				Summary:  "Unable to read Sym Strategy targets: " + err.Error(),
-			})
-		}
+		diags = append(diags, utils.DiagFromError(err, "Unable to read Strategy"))
+		return diags
 	}
+
+	diags = utils.DiagsCheckError(diags, data.Set("type", strategy.Type), "Unable to read Strategy type")
+	diags = utils.DiagsCheckError(diags, data.Set("integration_id", strategy.IntegrationId), "Unable to read Strategy integration_id")
+	diags = utils.DiagsCheckError(diags, data.Set("targets", strategy.Targets), "Unable to read Strategy targets")
 
 	return diags
 }
@@ -121,19 +88,17 @@ func readStrategy(ctx context.Context, data *schema.ResourceData, meta interface
 func updateStrategy(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 	c := meta.(*client.ApiClient)
-	strategy := client.SymStrategy{
-		Id:            data.Id(),
+
+	strategy := client.Strategy{
 		Type:          data.Get("type").(string),
 		IntegrationId: data.Get("integration_id").(string),
-		Targets:       data.Get("targets").([]string),
 	}
-
-	_, err := c.Strategy.Update(strategy)
-	if err != nil {
-		diags = append(diags, diag.Diagnostic{
-			Severity: diag.Error,
-			Summary:  "Unable to update Sym Strategy: " + err.Error(),
-		})
+	targets := data.Get("targets").([]interface{})
+	for i := range targets {
+		strategy.Targets = append(strategy.Targets, targets[i].(string))
+	}
+	if _, err := c.Strategy.Update(strategy); err != nil {
+		diags = append(diags, utils.DiagFromError(err, "Unable to update Strategy"))
 	}
 
 	return diags
@@ -144,12 +109,8 @@ func deleteStrategy(ctx context.Context, data *schema.ResourceData, meta interfa
 	c := meta.(*client.ApiClient)
 	id := data.Id()
 
-	_, err := c.Strategy.Delete(id)
-	if err != nil {
-		diags = append(diags, diag.Diagnostic{
-			Severity: diag.Error,
-			Summary:  "Unable to delete Sym Strategy: " + err.Error(),
-		})
+	if _, err := c.Strategy.Delete(id); err != nil {
+		diags = append(diags, utils.DiagFromError(err, "Unable to delete Strategy"))
 	}
 
 	return diags

@@ -29,7 +29,7 @@ func flowSchema() map[string]*schema.Schema {
 		"label":          utils.Required(schema.TypeString),
 		"template":       utils.Required(schema.TypeString),
 		"implementation": utils.Required(schema.TypeString),
-		"settings":       utils.SettingsMap(),
+		"environment":    utils.SettingsMap(),
 		"params": {
 			Type:             schema.TypeMap,
 			Required:         true,
@@ -55,39 +55,40 @@ func getTemplateFromTemplateID(templateID string) templates.Template {
 	}
 }
 
-// Build a SymFlow's FlowParam from ResourceData based on a Template's specifications
-func buildFlowParamFromResourceData(data *schema.ResourceData) (*client.FlowParam, diag.Diagnostics) {
+// Build a Flow's FlowParam from ResourceData based on a Template's specifications
+func buildAPIParamsFromResourceData(data *schema.ResourceData) (*client.APIParams, diag.Diagnostics) {
 	template := getTemplateFromTemplateID(data.Get("template").(string))
-	params := &templates.ParamMap{Params: data.Get("params").(map[string]interface{})}
+	params := &templates.HCLParamMap{Params: getSettingsMap(data, "params")}
 
 	template.ValidateParamMap(params)
 	if params.Diags.HasError() {
 		return nil, params.Diags
 	}
 
-	if fp, err := template.ParamMapToFlowParam(params); err != nil {
+	if apiParams, err := template.HCLParamsToAPIParams(params); err != nil {
 		return nil, utils.DiagsFromError(err, "Failed to create Flow")
 	} else {
-		return fp, nil
+		return apiParams, nil
 	}
 }
 
-// buildParamMapFromFlowParam turns the internal FlowParam struct into a map that can be set
+// buildHCLParamsfromAPIParams turns the internal FlowParam struct into a map that can be set
 // on terraform's ResourceData so that the version from the API can be compared to the
 // version terraform pulls from the local files during diffs.
-func buildParamMapFromFlowParam(data *schema.ResourceData, flowParam *client.FlowParam) (*templates.ParamMap, error) {
+func buildHCLParamsfromAPIParams(data *schema.ResourceData, flowParam client.APIParams) (*templates.HCLParamMap, error) {
 	template := getTemplateFromTemplateID(data.Get("template").(string))
-	return template.FlowParamToParamMap(flowParam)
+	return template.APIParamsToHCLParams(flowParam)
 }
 
 func createFlow(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 	c := meta.(*client.ApiClient)
 
-	flow := client.SymFlow{
-		Name:     data.Get("name").(string),
-		Label:    data.Get("label").(string),
-		Template: data.Get("template").(string),
+	flow := client.Flow{
+		Name:        data.Get("name").(string),
+		Label:       data.Get("label").(string),
+		Template:    data.Get("template").(string),
+		Environment: getSettingsMap(data, "environment"),
 	}
 
 	implementation := data.Get("implementation").(string)
@@ -97,7 +98,7 @@ func createFlow(ctx context.Context, data *schema.ResourceData, meta interface{}
 		flow.Implementation = base64.StdEncoding.EncodeToString(b)
 	}
 
-	if flowParams, d := buildFlowParamFromResourceData(data); d.HasError() {
+	if flowParams, d := buildAPIParamsFromResourceData(data); d.HasError() {
 		diags = append(diags, d...)
 	} else {
 		flow.Params = *flowParams
@@ -129,8 +130,9 @@ func readFlow(ctx context.Context, data *schema.ResourceData, meta interface{}) 
 	diags = utils.DiagsCheckError(diags, data.Set("name", flow.Name), "Unable to read Flow name")
 	diags = utils.DiagsCheckError(diags, data.Set("label", flow.Label), "Unable to read Flow label")
 	diags = utils.DiagsCheckError(diags, data.Set("template", flow.Template), "Unable to read Flow template")
+	diags = utils.DiagsCheckError(diags, data.Set("environment", flow.Environment), "Unable to read Flow environment")
 
-	flowParamsMap, err := buildParamMapFromFlowParam(data, &flow.Params)
+	flowParamsMap, err := buildHCLParamsfromAPIParams(data, flow.Params)
 	if flowParamsMap != nil {
 		err = data.Set("params", flowParamsMap)
 	}
@@ -143,10 +145,11 @@ func updateFlow(ctx context.Context, data *schema.ResourceData, meta interface{}
 	var diags diag.Diagnostics
 	c := meta.(*client.ApiClient)
 
-	flow := client.SymFlow{
-		Name:     data.Get("name").(string),
-		Label:    data.Get("label").(string),
-		Template: data.Get("template").(string),
+	flow := client.Flow{
+		Name:        data.Get("name").(string),
+		Label:       data.Get("label").(string),
+		Template:    data.Get("template").(string),
+		Environment: getSettingsMap(data, "environment"),
 	}
 
 	implementation := data.Get("implementation").(string)
@@ -156,7 +159,7 @@ func updateFlow(ctx context.Context, data *schema.ResourceData, meta interface{}
 		flow.Implementation = base64.StdEncoding.EncodeToString(b)
 	}
 
-	if flowParams, d := buildFlowParamFromResourceData(data); d.HasError() {
+	if flowParams, d := buildAPIParamsFromResourceData(data); d.HasError() {
 		diags = append(diags, d...)
 	} else {
 		flow.Params = *flowParams

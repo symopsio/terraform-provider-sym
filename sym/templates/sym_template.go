@@ -1,7 +1,6 @@
 package templates
 
 import (
-	"errors"
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -10,11 +9,11 @@ import (
 
 type Template interface {
 	ParamResource() *schema.Resource
-	ValidateParamMap(params *ParamMap)
+	ValidateParamMap(params *HCLParamMap)
 	// TF -> API:
-	ParamMapToFlowParam(params *ParamMap) (*client.FlowParam, error)
+	HCLParamsToAPIParams(params *HCLParamMap) (*client.APIParams, error)
 	// API -> TF:
-	FlowParamToParamMap(flowParam *client.FlowParam) (*ParamMap, error)
+	APIParamsToHCLParams(flowParam client.APIParams) (*HCLParamMap, error)
 }
 
 type UnknownTemplate struct {
@@ -27,26 +26,31 @@ func (t *UnknownTemplate) ParamResource() *schema.Resource {
 	}
 }
 
-func (t *UnknownTemplate) ValidateParamMap(params *ParamMap) {
+func (t *UnknownTemplate) ValidateParamMap(params *HCLParamMap) {
 	// If we don't recognize the template, it may be user-defined
 	// in which case, we can't do any validation currently.
 	// Eventually, if we can get the expected schema for a user-defined
 	// template, we should do that and validate here as well.
 }
 
-func (t *UnknownTemplate) ParamMapToFlowParam(params *ParamMap) (*client.FlowParam, error) {
-	// TODO: FlowParam, ParamField structs should be refactored to be more
-	//  generic. They are currently specific to sym:approval. We can fill in
-	//  the future generic struct with whatever data the user may have provided.
-	errorMsg := fmt.Sprintf("unrecognized template name provided: %s", t.Name)
-	return nil, errors.New(errorMsg)
+func (t *UnknownTemplate) HCLParamsToAPIParams(params *HCLParamMap) (*client.APIParams, error) {
+	// TODO: Look up the Template spec from a user template, and use it to convert
+	// HCL strings to the proper API types.
+	// For now, just pass everything through as strings.
+	apiParams := make(client.APIParams)
+	for k, v := range params.Params {
+		apiParams[k] = v
+	}
+	return &apiParams, nil
 }
 
-func (t *UnknownTemplate) FlowParamToParamMap(flowParam *client.FlowParam) (*ParamMap, error) {
-	// TODO: FlowParam, ParamField structs should be refactored to be more
-	//  generic. They are currently specific to sym:approval. Once we have a generic
-	//  version of those structs, we should update this to parse out any and all
-	//  params provided by the API by default.
-	errorMsg := fmt.Sprintf("unrecognized template name provided: %s", t.Name)
-	return nil, errors.New(errorMsg)
+func (t *UnknownTemplate) APIParamsToHCLParams(apiParams client.APIParams) (*HCLParamMap, error) {
+	// TODO: Look up the Template spec from a user template, and use it to convert
+	// API types to their HCL string representations.
+	// For now, just stringify everything.
+	params := make(map[string]string)
+	for k, v := range apiParams {
+		params[k] = fmt.Sprintf("%v", v)
+	}
+	return &HCLParamMap{Params: params}, nil
 }

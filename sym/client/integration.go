@@ -5,23 +5,21 @@ import (
 	"log"
 )
 
-type Settings map[string]string
-
-type SymIntegration struct {
+type Integration struct {
 	Id       string   `json:"id,omitempty"`
 	Type     string   `json:"type"`
 	Settings Settings `json:"settings"`
 	Name     string   `json:"name"`
 }
 
-func (s SymIntegration) String() string {
+func (s Integration) String() string {
 	return fmt.Sprintf("{id=%s, type=%s, settings=%v}", s.Id, s.Type, s.Settings)
 }
 
 type IntegrationClient interface {
-	Create(integration SymIntegration) (string, error)
-	Read(id string) (*SymIntegration, error)
-	Update(integration SymIntegration) (string, error)
+	Create(integration Integration) (string, error)
+	Read(id string) (*Integration, error)
+	Update(integration Integration) (string, error)
 	Delete(id string) (string, error)
 }
 
@@ -35,10 +33,10 @@ type integrationClient struct {
 	HttpClient SymHttpClient
 }
 
-func (i *integrationClient) Create(integration SymIntegration) (string, error) {
+func (i *integrationClient) Create(integration Integration) (string, error) {
 	log.Printf("Creating Sym Integration: %v", integration)
 
-	result := SymIntegration{}
+	result := Integration{}
 	if _, err := i.HttpClient.Create("/integrations/", &integration, &result); err != nil {
 		return "", err
 	}
@@ -51,9 +49,9 @@ func (i *integrationClient) Create(integration SymIntegration) (string, error) {
 	return result.Id, nil
 }
 
-func (i *integrationClient) Read(id string) (*SymIntegration, error) {
+func (i *integrationClient) Read(id string) (*Integration, error) {
 	log.Printf("Getting Sym Integration: %s", id)
-	result := SymIntegration{}
+	result := Integration{}
 
 	if err := i.HttpClient.Read(fmt.Sprintf("/integrations/%s/", id), &result); err != nil {
 		return nil, err
@@ -63,9 +61,9 @@ func (i *integrationClient) Read(id string) (*SymIntegration, error) {
 	return &result, nil
 }
 
-func (i *integrationClient) Update(integration SymIntegration) (string, error) {
+func (i *integrationClient) Update(integration Integration) (string, error) {
 	log.Printf("Updating Sym Integration: %v", integration)
-	result := SymIntegration{}
+	result := Integration{}
 
 	if _, err := i.HttpClient.Update(fmt.Sprintf("/integrations/%s/", integration.Id), &integration, &result); err != nil {
 		return "", err

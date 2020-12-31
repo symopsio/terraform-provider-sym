@@ -21,7 +21,7 @@ resource "sym_flow" "this" {
   template = "sym:approval:1.0"
   implementation = "impl.py"
 
-  settings = {
+  environment = {
     runtime_id = "sym_runtime.this.id"
     slack_id = "sym_integration.slack.id"
   }
