@@ -22,8 +22,12 @@ var (
 
 	SettingsMap = func() *schema.Schema {
 		return &schema.Schema{
-			Type:     schema.TypeMap,
-			Required: true,
+			Type: schema.TypeMap,
+			Elem: &schema.Schema{
+				Type: schema.TypeString,
+			},
+			Optional: true,
+			Default:  map[string]string{},
 		}
 	}
 

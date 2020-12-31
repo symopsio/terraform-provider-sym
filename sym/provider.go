@@ -29,6 +29,7 @@ func Provider() *schema.Provider {
 			"sym_target":      resources.Target(),
 			"sym_secrets":     resources.Secret(),
 			"sym_integration": resources.Integration(),
+			"sym_runtime":     resources.Runtime(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"sym_integration": data_sources.DataSourceIntegration(),

@@ -21,7 +21,7 @@ resource "sym_flow" "this" {
   template = "sym:approval:1.0"
   implementation = "impl.py"
 
-  settings = {
+  environment = {
     runtime_id = "sym_runtime.this.id"
     slack_id = "sym_integration.slack.id"
   }
@@ -30,7 +30,7 @@ resource "sym_flow" "this" {
     strategy_id = "sym_strategy.sso_main.id"
 
     # This is called `fields` in the API
-    fields_json2 = jsonencode([
+    fields_json = jsonencode([
       {
         name = "reason"
         type = "string"

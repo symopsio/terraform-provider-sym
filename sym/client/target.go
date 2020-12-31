@@ -5,29 +5,27 @@ import (
 	"log"
 )
 
-type SymTarget struct {
-	Id            string   `json:"id,omitempty"`
-	Type          string   `json:"type"`
-	Label         string   `json:"label"`
-	IntegrationId string   `json:"integration_id"`
-	Settings      Settings `json:"settings"`
+type Target struct {
+	Id       string   `json:"id,omitempty"`
+	Type     string   `json:"type"`
+	Label    string   `json:"label"`
+	Settings Settings `json:"settings"`
 }
 
-func (s SymTarget) String() string {
+func (s Target) String() string {
 	return fmt.Sprintf(
-		"{id=%s, type=%s, label=%s, integration_id=%s, settings=%v",
+		"{id=%s, type=%s, label=%s, settings=%v",
 		s.Id,
 		s.Type,
 		s.Label,
-		s.IntegrationId,
 		s.Settings,
 	)
 }
 
 type TargetClient interface {
-	Create(target SymTarget) (string, error)
-	Read(id string) (*SymTarget, error)
-	Update(target SymTarget) (string, error)
+	Create(target Target) (string, error)
+	Read(id string) (*Target, error)
+	Update(target Target) (string, error)
 	Delete(id string) (string, error)
 }
 
@@ -41,9 +39,9 @@ type targetClient struct {
 	HttpClient SymHttpClient
 }
 
-func (c *targetClient) Create(target SymTarget) (string, error) {
+func (c *targetClient) Create(target Target) (string, error) {
 	log.Printf("Creating Sym Target: %v", target)
-	result := SymTarget{}
+	result := Target{}
 
 	if _, err := c.HttpClient.Create("/targets/", &target, &result); err != nil {
 		return "", err
@@ -57,9 +55,9 @@ func (c *targetClient) Create(target SymTarget) (string, error) {
 	return result.Id, nil
 }
 
-func (c *targetClient) Read(id string) (*SymTarget, error) {
+func (c *targetClient) Read(id string) (*Target, error) {
 	log.Printf("Getting Sym Target: %s", id)
-	result := SymTarget{}
+	result := Target{}
 
 	if err := c.HttpClient.Read(fmt.Sprintf("/targets/%s/", id), &result); err != nil {
 		return nil, err
@@ -69,9 +67,9 @@ func (c *targetClient) Read(id string) (*SymTarget, error) {
 	return &result, nil
 }
 
-func (c *targetClient) Update(target SymTarget) (string, error) {
+func (c *targetClient) Update(target Target) (string, error) {
 	log.Printf("Updating Sym Target: %v", target)
-	result := SymTarget{}
+	result := Target{}
 
 	if _, err := c.HttpClient.Update(fmt.Sprintf("/targets/%s/", target.Id), &target, &result); err != nil {
 		return "", err

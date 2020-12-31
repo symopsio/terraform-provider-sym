@@ -1,16 +1,12 @@
 package templates
 
 type ParamMapKey struct {
-	Map *ParamMap
+	Map *HCLParamMap
 	Key string
 }
 
-func (pmf *ParamMapKey) Value() interface{} {
+func (pmf *ParamMapKey) Value() string {
 	return pmf.Map.Params[pmf.Key]
-}
-
-func (pmf *ParamMapKey) StringValue() string {
-	return pmf.Value().(string)
 }
 
 func (pmf *ParamMapKey) addDiagWithDetail(summary string, detail string) {

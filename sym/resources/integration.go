@@ -28,19 +28,10 @@ func integrationSchema() map[string]*schema.Schema {
 	}
 }
 
-func getSettings(data *schema.ResourceData) client.Settings {
-	rawSettings := data.Get("settings").(map[string]interface{})
-	settings := make(map[string]string)
-	for k, v := range rawSettings {
-		settings[k] = v.(string)
-	}
-	return settings
-}
-
 func createIntegration(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 	c := meta.(*client.ApiClient)
-	integration := client.SymIntegration{
+	integration := client.Integration{
 		Type:     data.Get("type").(string),
 		Settings: getSettings(data),
 		Name:     data.Get("name").(string),
@@ -59,55 +50,31 @@ func readIntegration(ctx context.Context, data *schema.ResourceData, meta interf
 	var diags diag.Diagnostics
 	c := meta.(*client.ApiClient)
 	id := data.Id()
+
 	integration, err := c.Integration.Read(id)
 	if err != nil {
-		diags = append(diags, diag.Diagnostic{
-			Severity: diag.Error,
-			Summary:  "Unable to read sym integration: " + err.Error(),
-		})
-	} else {
-		err = data.Set("type", integration.Type)
-		if err != nil {
-			diags = append(diags, diag.Diagnostic{
-				Severity: diag.Error,
-				Summary:  "Unable to set sym integration type: " + err.Error(),
-			})
-		}
-
-		err = data.Set("settings", integration.Settings)
-		if err != nil {
-			diags = append(diags, diag.Diagnostic{
-				Severity: diag.Error,
-				Summary:  "Unable to set sym integration settings: " + err.Error(),
-			})
-		}
-
-		err = data.Set("name", integration.Name)
-		if err != nil {
-			diags = append(diags, diag.Diagnostic{
-				Severity: diag.Error,
-				Summary:  "Unable to set sym integration name: " + err.Error(),
-			})
-		}
+		diags = append(diags, utils.DiagFromError(err, "Unable to read Integration"))
+		return diags
 	}
+
+	diags = utils.DiagsCheckError(diags, data.Set("type", integration.Type), "Unable to read Integration type")
+	diags = utils.DiagsCheckError(diags, data.Set("name", integration.Name), "Unable to read Integration name")
+	diags = utils.DiagsCheckError(diags, data.Set("settings", integration.Settings), "Unable to read Integration settings")
+
 	return diags
 }
 
 func updateIntegration(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 	c := meta.(*client.ApiClient)
-	integration := client.SymIntegration{
-		Id:       data.Id(),
+
+	integration := client.Integration{
 		Type:     data.Get("type").(string),
-		Settings: getSettings(data),
 		Name:     data.Get("name").(string),
+		Settings: getSettings(data),
 	}
-	_, err := c.Integration.Update(integration)
-	if err != nil {
-		diags = append(diags, diag.Diagnostic{
-			Severity: diag.Error,
-			Summary:  "Unable to update sym integration: " + err.Error(),
-		})
+	if _, err := c.Integration.Update(integration); err != nil {
+		diags = append(diags, utils.DiagFromError(err, "Unable to update Integration"))
 	}
 
 	return diags
@@ -117,12 +84,10 @@ func deleteIntegration(ctx context.Context, data *schema.ResourceData, meta inte
 	var diags diag.Diagnostics
 	c := meta.(*client.ApiClient)
 	id := data.Id()
-	_, err := c.Integration.Delete(id)
-	if err != nil {
-		diags = append(diags, diag.Diagnostic{
-			Severity: diag.Error,
-			Summary:  "Unable to delete sym integration: " + err.Error(),
-		})
+
+	if _, err := c.Integration.Delete(id); err != nil {
+		diags = append(diags, utils.DiagFromError(err, "Unable to delete Integration"))
 	}
+
 	return diags
 }

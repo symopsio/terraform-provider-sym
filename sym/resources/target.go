@@ -3,11 +3,10 @@ package resources
 import (
 	"context"
 
-	"github.com/symopsio/terraform-provider-sym/sym/utils"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/symopsio/terraform-provider-sym/sym/client"
+	"github.com/symopsio/terraform-provider-sym/sym/utils"
 )
 
 func Target() *schema.Resource {
@@ -22,79 +21,43 @@ func Target() *schema.Resource {
 
 func targetSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-		"type":           utils.Required(schema.TypeString),
-		"label":          utils.Required(schema.TypeString),
-		"integration_id": utils.Required(schema.TypeString),
-		"settings":       utils.SettingsMap(),
+		"type":     utils.Required(schema.TypeString),
+		"label":    utils.Required(schema.TypeString),
+		"settings": utils.SettingsMap(),
 	}
 }
 
 func createTarget(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	var diags diag.Diagnostics
 	c := meta.(*client.ApiClient)
-	target := client.SymTarget{
-		Label:         data.Get("label").(string),
-		IntegrationId: data.Get("integration_id").(string),
-		Type:          data.Get("type").(string),
-		Settings:      getSettings(data),
+	target := client.Target{
+		Type:     data.Get("type").(string),
+		Label:    data.Get("label").(string),
+		Settings: getSettings(data),
 	}
 
 	id, err := c.Target.Create(target)
 	if err != nil {
-		diags = append(diags, diag.Diagnostic{
-			Severity: diag.Error,
-			Summary:  "Unable to create Sym Target: " + err.Error(),
-		})
-	} else {
-		data.SetId(id)
+		return utils.DiagsFromError(err, "Unable to create Target")
 	}
-	return diags
+
+	data.SetId(id)
+	return nil
 }
 
 func readTarget(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 	c := meta.(*client.ApiClient)
 	id := data.Id()
+
 	target, err := c.Target.Read(id)
-
 	if err != nil {
-		diags = append(diags, diag.Diagnostic{
-			Severity: diag.Error,
-			Summary:  "Unable to read Sym Target: " + err.Error(),
-		})
-	} else {
-		err = data.Set("label", target.Label)
-		if err != nil {
-			diags = append(diags, diag.Diagnostic{
-				Severity: diag.Error,
-				Summary:  "Unable to read Sym Target label: " + err.Error(),
-			})
-		}
-
-		err = data.Set("integration_id", target.IntegrationId)
-		if err != nil {
-			diags = append(diags, diag.Diagnostic{
-				Severity: diag.Error,
-				Summary:  "Unable to read Sym Target integration_id: " + err.Error(),
-			})
-		}
-
-		err = data.Set("type", target.Type)
-		if err != nil {
-			diags = append(diags, diag.Diagnostic{
-				Severity: diag.Error,
-				Summary:  "Unable to read Sym Target type: " + err.Error(),
-			})
-		}
-
-		err = data.Set("settings", target.Settings)
-		if err != nil {
-			diags = append(diags, diag.Diagnostic{
-				Severity: diag.Error,
-				Summary:  "Unable to read Sym Target settings: " + err.Error(),
-			})
-		}
+		diags = append(diags, utils.DiagFromError(err, "Unable to read Target"))
+		return diags
 	}
+
+	diags = utils.DiagsCheckError(diags, data.Set("type", target.Type), "Unable to read Target type")
+	diags = utils.DiagsCheckError(diags, data.Set("label", target.Label), "Unable to read Target label")
+	diags = utils.DiagsCheckError(diags, data.Set("settings", target.Settings), "Unable to read Target settings")
 
 	return diags
 }
@@ -102,20 +65,14 @@ func readTarget(ctx context.Context, data *schema.ResourceData, meta interface{}
 func updateTarget(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 	c := meta.(*client.ApiClient)
-	target := client.SymTarget{
-		Id:            data.Id(),
-		Label:         data.Get("label").(string),
-		IntegrationId: data.Get("integration_id").(string),
-		Type:          data.Get("type").(string),
-		Settings:      getSettings(data),
-	}
 
-	_, err := c.Target.Update(target)
-	if err != nil {
-		diags = append(diags, diag.Diagnostic{
-			Severity: diag.Error,
-			Summary:  "Unable to update Sym Target: " + err.Error(),
-		})
+	target := client.Target{
+		Type:     data.Get("type").(string),
+		Label:    data.Get("label").(string),
+		Settings: getSettings(data),
+	}
+	if _, err := c.Target.Update(target); err != nil {
+		diags = append(diags, utils.DiagFromError(err, "Unable to update Target"))
 	}
 
 	return diags
@@ -126,12 +83,8 @@ func deleteTarget(ctx context.Context, data *schema.ResourceData, meta interface
 	c := meta.(*client.ApiClient)
 	id := data.Id()
 
-	_, err := c.Target.Delete(id)
-	if err != nil {
-		diags = append(diags, diag.Diagnostic{
-			Severity: diag.Error,
-			Summary:  "Unable to delete Sym Target: " + err.Error(),
-		})
+	if _, err := c.Target.Delete(id); err != nil {
+		diags = append(diags, utils.DiagFromError(err, "Unable to delete Target"))
 	}
 
 	return diags

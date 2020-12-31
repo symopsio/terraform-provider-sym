@@ -12,6 +12,9 @@ dist
 *.tfstate
 *.tfstate.*
 
+.terraform.lock.hcl
+tf.log
+
 # Crash log files
 crash.log
 

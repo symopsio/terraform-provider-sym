@@ -7,12 +7,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 )
 
-type ParamMap struct {
-	Params map[string]interface{}
+type HCLParamMap struct {
+	Params map[string]string
 	Diags  diag.Diagnostics
 }
 
-func (pm *ParamMap) checkRequiredKeys(keys []string) {
+func (pm *HCLParamMap) checkRequiredKeys(keys []string) {
 	for _, key := range keys {
 		if _, ok := pm.Params[key]; !ok {
 			pm.addDiag(key, fmt.Sprintf("Missing required key %s", key))
@@ -20,7 +20,7 @@ func (pm *ParamMap) checkRequiredKeys(keys []string) {
 	}
 }
 
-func (pm *ParamMap) requireKey(key string) *ParamMapKey {
+func (pm *HCLParamMap) requireKey(key string) *ParamMapKey {
 	if checked := pm.checkKey(key); checked != nil {
 		return checked
 	} else {
@@ -29,18 +29,18 @@ func (pm *ParamMap) requireKey(key string) *ParamMapKey {
 	}
 }
 
-func (pm *ParamMap) checkKey(key string) *ParamMapKey {
+func (pm *HCLParamMap) checkKey(key string) *ParamMapKey {
 	if _, ok := pm.Params[key]; ok {
 		return &ParamMapKey{Map: pm, Key: key}
 	}
 	return nil
 }
 
-func (pm *ParamMap) importDiags(diags diag.Diagnostics) {
+func (pm *HCLParamMap) importDiags(diags diag.Diagnostics) {
 	pm.Diags = append(pm.Diags, diags...)
 }
 
-func (pm *ParamMap) addDiagWithDetail(key string, summary string, detail string) {
+func (pm *HCLParamMap) addDiagWithDetail(key string, summary string, detail string) {
 	pm.Diags = append(pm.Diags, diag.Diagnostic{
 		Severity:      diag.Error,
 		Summary:       summary,
@@ -50,11 +50,11 @@ func (pm *ParamMap) addDiagWithDetail(key string, summary string, detail string)
 
 }
 
-func (pm *ParamMap) addDiag(key string, summary string) {
+func (pm *HCLParamMap) addDiag(key string, summary string) {
 	pm.addDiagWithDetail(key, summary, "")
 }
 
-func (pm *ParamMap) checkError(key string, summary string, err error) error {
+func (pm *HCLParamMap) checkError(key string, summary string, err error) error {
 	if err != nil {
 		pm.addDiagWithDetail(key, summary, err.Error())
 	}
