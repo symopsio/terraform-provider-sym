@@ -35,7 +35,7 @@ resource "sym_integration" "runtime_context" {
 
 resource "sym_secrets" "flow" {
   type = "aws_secrets_manager" # only supported value, will support vault, parameter store in future
-  # name = "secrets"
+  name = "secrets"
 
   settings = {
     context = sym_integration.runtime_context.id
@@ -55,8 +55,6 @@ resource "sym_runtime" "this" {
 resource "sym_integration" "slack" {
   type = "slack"
   name = "slack"
-
-  settings = {}
 }
 
 
