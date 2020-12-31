@@ -10,49 +10,37 @@ terraform {
   }
 }
 
+# sym_integration types:
+# v1: permission_context, slack
+# v2: pagerduty, okta
+
 # -- Setup (Integrator) --
 
 ## AWS
-
-resource "sym_integration" "aws" {
-  type = "aws"
-  name = "aws"
-  settings = {
-    role = "arn:aws:iam::123456789012:role/sym/ExampleRole"
-    region = "us-east-1"
-  }
-}
-
-resource "sym_integration" "sso_main" {
-  type = "aws_sso"
-  name = "sso"
-  settings = {
-    instance_arn = "arn:aws:::instance/ssoinst-abcdefghi12314135325"
-    aws = sym_integration.aws.id
-  }
-}
-
-## Secrets
-
-resource "sym_secrets" "flow" {
-  type = "aws_secrets_manager"
-  settings = {
-    aws = sym_integration.aws.id
-  }
-}
-
-## Runtime
 
 resource "sym_integration" "runtime_context" {
   type = "permission_context"
   name = "runtime"
 
   settings = {
-    cloud      = "aws"
-    region     = "us-east-1"
-    role_arn   = "arn:aws:iam::123456789012:role/sym/ExampleRole2"
+    cloud       = "aws" # only supported value, will include gcp, azure, private in future
+    external_id = "1478F2AD-6091-41E6-B3D2-766CA2F173CB" # optional
+    region      = "us-east-1"
+    role_arn    = "arn:aws:iam::123456789012:role/sym/RuntimeConnectorRole"
   }
 }
+
+
+## Secrets
+
+resource "sym_secrets" "flow" {
+  type = "aws_secrets_manager" # only supported value, will support vault, parameter store in future
+  settings = {
+    aws = sym_integration.aws.id
+  }
+}
+
+## Runtime
 
 resource "sym_runtime" "this" {
   name     = "runtime"
@@ -77,6 +65,11 @@ resource "sym_flow" "this" {
   template = "sym:approval:1.0"
   implementation = "impl.py"
 
+  settings = {
+    runtime_id = sym_runtime.this.id
+    slack_id = sym_integration.slack.id
+  }
+
   params = {
     strategy_id = sym_strategy.sso_main.id
 
@@ -95,24 +88,18 @@ resource "sym_flow" "this" {
         allowed_values = ["Low", "Medium", "High"]
       }])
   }
-
-  settings = {
-    runtime_id = sym_runtime.this.id
-    slack_id = sym_integration.slack.id
-  }
 }
 
-
 resource "sym_strategy" "sso_main" {
-  type = "aws_sso"
+  type = "aws_sso" # only supported value, will support okta for LD, klaviyo doesn't need one
   integration_id = sym_integration.sso_main.id
   targets = [ sym_target.prod_break_glass.id ]
 }
 
 resource "sym_target" "prod_break_glass" {
-  type = "aws_sso_permission_set"
+  type = "aws_sso_permission_set" # only supported value, will support a custom alternative for ASICS in v2
   label = "Prod Break Glass"
-  integration_id = sym_integration.aws.id
+  integration_id = sym_integration.sso_main.id
 
   settings = {
     permission_set_arn = "arn:aws:sso:::permissionSet/ins-abcdefghijklmnop/ps-111111111111"
