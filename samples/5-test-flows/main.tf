@@ -35,8 +35,10 @@ resource "sym_integration" "runtime_context" {
 
 resource "sym_secrets" "flow" {
   type = "aws_secrets_manager" # only supported value, will support vault, parameter store in future
+  # name = "secrets"
+
   settings = {
-    aws = sym_integration.aws.id
+    context = sym_integration.runtime_context.id
   }
 }
 
@@ -53,6 +55,8 @@ resource "sym_runtime" "this" {
 resource "sym_integration" "slack" {
   type = "slack"
   name = "slack"
+
+  settings = {}
 }
 
 
@@ -92,14 +96,14 @@ resource "sym_flow" "this" {
 
 resource "sym_strategy" "sso_main" {
   type = "aws_sso" # only supported value, will support okta for LD, klaviyo doesn't need one
-  integration_id = sym_integration.sso_main.id
+  integration_id = sym_integration.runtime_context.id
   targets = [ sym_target.prod_break_glass.id ]
 }
 
 resource "sym_target" "prod_break_glass" {
   type = "aws_sso_permission_set" # only supported value, will support an okta target for LD and a custom alternative for ASICS in v2
   label = "Prod Break Glass"
-  integration_id = sym_integration.sso_main.id
+  integration_id = sym_integration.runtime_context.id
 
   settings = {
     permission_set_arn = "arn:aws:sso:::permissionSet/ins-abcdefghijklmnop/ps-111111111111"

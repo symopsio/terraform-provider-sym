@@ -3,7 +3,7 @@ HOSTNAME=symops.io
 NAMESPACE=com
 NAME=sym
 BINARY=terraform-provider-${NAME}
-VERSION=0.1
+VERSION=0.0.1
 OS_ARCH=darwin_amd64
 PLUGIN_DIR=~/.terraform.d/plugins/terraform.${HOSTNAME}/symopsio/${NAME}/${VERSION}/${OS_ARCH}
 
