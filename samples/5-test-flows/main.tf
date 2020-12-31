@@ -97,7 +97,7 @@ resource "sym_strategy" "sso_main" {
 }
 
 resource "sym_target" "prod_break_glass" {
-  type = "aws_sso_permission_set" # only supported value, will support a custom alternative for ASICS in v2
+  type = "aws_sso_permission_set" # only supported value, will support an okta target for LD and a custom alternative for ASICS in v2
   label = "Prod Break Glass"
   integration_id = sym_integration.sso_main.id
 
