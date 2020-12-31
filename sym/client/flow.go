@@ -1,7 +1,6 @@
 package client
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 )
@@ -28,12 +27,12 @@ func (f FlowParam) String() string {
 }
 
 type SymFlow struct {
-	Id             string      `json:"id,omitempty"`
-	Name           string      `json:"name"`
-	Label          string      `json:"label"`
-	Template       string      `json:"template"`
-	Implementation string      `json:"implementation"`
-	Params         []FlowParam `json:"params"`
+	Id             string    `json:"id,omitempty"`
+	Name           string    `json:"name"`
+	Label          string    `json:"label"`
+	Template       string    `json:"template"`
+	Implementation string    `json:"implementation"`
+	Params         FlowParam `json:"params"`
 }
 
 func (s SymFlow) String() string {
@@ -41,8 +40,10 @@ func (s SymFlow) String() string {
 }
 
 type FlowClient interface {
-	Create(secret SymFlow) (string, error)
+	Create(flow SymFlow) (string, error)
 	Read(id string) (*SymFlow, error)
+	Update(flow SymFlow) (string, error)
+	Delete(id string) (string, error)
 }
 
 func NewFlowClient(httpClient SymHttpClient) FlowClient {
@@ -56,25 +57,55 @@ type flowClient struct {
 }
 
 func (c *flowClient) Create(flow SymFlow) (string, error) {
-	log.Printf("Creating flow: %v", flow)
-	result, err := c.HttpClient.Do("POST", "/flows/", &flow)
-	if err != nil {
-		return "", err
-	}
-	parsed := make(map[string]interface{})
-	err = json.Unmarshal([]byte(result), &parsed)
-	if err != nil {
+	log.Printf("Creating Sym Flow: %v", flow)
+	result := SymFlow{}
+
+	if _, err := c.HttpClient.Create("/flows/", &flow, &result); err != nil {
 		return "", err
 	}
 
-	return parsed["id"].(string), nil
+	if result.Id == "" {
+		return "", fmt.Errorf("response indicates Sym Flow was not created")
+	}
+
+	log.Printf("Created Sym Flow: %s", result.Id)
+	return result.Id, nil
 }
 
 func (c *flowClient) Read(id string) (*SymFlow, error) {
-	log.Printf("Getting flow: %s", id)
+	log.Printf("Getting Sym Flow: %s", id)
 	result := SymFlow{}
-	if err := c.HttpClient.Read(fmt.Sprintf("/flows/%s", id), &result); err != nil {
+
+	if err := c.HttpClient.Read(fmt.Sprintf("/flows/%s/", id), &result); err != nil {
 		return nil, err
 	}
+
+	log.Printf("Got Sym Flow: %s", result.Id)
 	return &result, nil
+}
+
+func (c *flowClient) Update(flow SymFlow) (string, error) {
+	log.Printf("Updating Sym Flow: %v", flow)
+	result := SymFlow{}
+
+	if _, err := c.HttpClient.Update(fmt.Sprintf("/flows/%s/", flow.Id), &flow, &result); err != nil {
+		return "", err
+	}
+
+	if result.Id == "" {
+		return "", fmt.Errorf("response indicates Sym Flow was not updated")
+	}
+
+	log.Printf("Updated Sym Flow: %s", result.Id)
+	return result.Id, nil
+}
+
+func (c *flowClient) Delete(id string) (string, error) {
+	log.Printf("Deleting Sym Flow: %s", id)
+
+	if err := c.HttpClient.Delete(fmt.Sprintf("/flows/%s/", id)); err != nil {
+		return "", err
+	}
+
+	return id, nil
 }

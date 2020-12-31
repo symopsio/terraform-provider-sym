@@ -5,6 +5,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/symopsio/terraform-provider-sym/sym/client"
+	"github.com/symopsio/terraform-provider-sym/sym/utils"
 )
 
 func Secret() *schema.Resource {
@@ -19,8 +20,8 @@ func Secret() *schema.Resource {
 
 func secretSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-		"type":     required(schema.TypeString),
-		"settings": settingsMap(),
+		"type":     utils.Required(schema.TypeString),
+		"settings": utils.SettingsMap(),
 	}
 }
 
@@ -45,13 +46,13 @@ func createSecret(ctx context.Context, data *schema.ResourceData, meta interface
 }
 
 func readSecret(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	return notYetImplemented
+	return utils.NotYetImplemented
 }
 
 func updateSecret(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	return notYetImplemented
+	return utils.NotYetImplemented
 }
 
 func deleteSecret(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	return notYetImplemented
+	return utils.NotYetImplemented
 }

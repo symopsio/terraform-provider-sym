@@ -12,7 +12,7 @@ import (
 
 func NewSymHttpClient(apiUrl string) SymHttpClient {
 	return &symHttpClient{
-		apiUrl: apiUrl,
+		apiUrl:       apiUrl,
 		configReader: NewConfigReader(),
 	}
 }
@@ -21,6 +21,8 @@ type SymHttpClient interface {
 	Do(method, path string, payload interface{}) (string, error)
 	Create(path string, payload interface{}, result interface{}) (string, error)
 	Read(path string, result interface{}) error
+	Update(path string, payload interface{}, result interface{}) (string, error)
+	Delete(path string) error
 }
 
 type symHttpClient struct {
@@ -52,7 +54,7 @@ func (c *symHttpClient) Do(method string, path string, payload interface{}) (str
 	if err != nil {
 		return "", err
 	}
-	req.Header.Set("Authorization", "Bearer " + jwt)
+	req.Header.Set("Authorization", "Bearer "+jwt)
 	req.Header.Set("Content-Type", "application/json")
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
@@ -87,4 +89,26 @@ func (c *symHttpClient) Read(path string, result interface{}) error {
 		return err
 	}
 	return json.Unmarshal([]byte(body), result)
+}
+
+func (c *symHttpClient) Update(path string, payload interface{}, result interface{}) (string, error) {
+	body, err := c.Do("PATCH", path, payload)
+	if err != nil {
+		return "", err
+	}
+
+	if err := json.Unmarshal([]byte(body), result); err != nil {
+		return "", err
+	}
+
+	log.Printf("got response: %v", result)
+	return body, nil
+}
+
+func (c *symHttpClient) Delete(path string) error {
+	if _, err := c.Do("DELETE", path, nil); err != nil {
+		return err
+	}
+
+	return nil
 }

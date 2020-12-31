@@ -2,11 +2,11 @@ package sym
 
 import (
 	"context"
-	"github.com/symopsio/terraform-provider-sym/sym/resources"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/symopsio/terraform-provider-sym/sym/client"
+	"github.com/symopsio/terraform-provider-sym/sym/data_sources"
+	"github.com/symopsio/terraform-provider-sym/sym/resources"
 )
 
 // Provider defines the schema this provider supports
@@ -23,11 +23,15 @@ func Provider() *schema.Provider {
 			},
 		},
 		ResourcesMap: map[string]*schema.Resource{
-			"sym_flow": resources.Flow(),
-			"sym_strategy": resources.Strategy(),
-			"sym_target": resources.Target(),
-			"sym_secrets": resources.Secret(),
+			"sym_flow":        resources.Flow(),
+			"sym_strategy":    resources.Strategy(),
+			"sym_target":      resources.Target(),
+			"sym_secrets":     resources.Secret(),
 			"sym_integration": resources.Integration(),
+		},
+		DataSourcesMap: map[string]*schema.Resource{
+			"sym_integration": data_sources.DataSourceIntegration(),
+			"sym_runtime":     data_sources.DataSourceRuntime(),
 		},
 		ConfigureContextFunc: providerConfigure,
 	}
