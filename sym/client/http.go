@@ -64,7 +64,7 @@ func (c *symHttpClient) Do(method string, path string, payload interface{}) (str
 	if err != nil {
 		return "", err
 	} else if resp.StatusCode >= 400 {
-		return "", fmt.Errorf("error response: %v\n%s", resp, string(body))
+		return "", fmt.Errorf("Error %d: %s", resp.StatusCode, string(body))
 	}
 	return string(body), nil
 }

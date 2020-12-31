@@ -14,7 +14,14 @@ type SymTarget struct {
 }
 
 func (s SymTarget) String() string {
-	return fmt.Sprintf("{id=%s, type=%s, label=%s, integration_id=%s, settings=%v", s.Id, s.Type, s.Label, s.IntegrationId, s.Settings)
+	return fmt.Sprintf(
+		"{id=%s, type=%s, label=%s, integration_id=%s, settings=%v",
+		s.Id,
+		s.Type,
+		s.Label,
+		s.IntegrationId,
+		s.Settings,
+	)
 }
 
 type TargetClient interface {
