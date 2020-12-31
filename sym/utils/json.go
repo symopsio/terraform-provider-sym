@@ -3,8 +3,9 @@ package utils
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"reflect"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func JsonBytesEqual(b1 []byte, b2 []byte) bool {

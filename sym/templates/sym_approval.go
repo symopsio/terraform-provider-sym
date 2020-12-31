@@ -2,10 +2,8 @@ package templates
 
 import (
 	"encoding/json"
-	"errors"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/symopsio/terraform-provider-sym/sym/client"
 	"github.com/symopsio/terraform-provider-sym/sym/utils"
 )
@@ -34,59 +32,60 @@ func (t *SymApprovalTemplate) ParamResource() *schema.Resource {
 
 // ValidateSymApprovalParam will return an error if the provided ParamMap does not
 // match the expected specification for the sym:approval template.
-func (t *SymApprovalTemplate) ValidateParamMap(params utils.ParamMap) error {
-	// Pull out the JSON from fields and parse it
-	var fields interface{}
-	origFields := params["fields"].(string)
-	if err := json.Unmarshal([]byte(origFields), &fields); err != nil {
-		return err
+func (t *SymApprovalTemplate) ValidateParamMap(params *ParamMap) {
+	// Extract various fields to put into a Resource, which will be validated.
+	mapToValidate := make(map[string]interface{})
+
+	if field := params.requireKey("fields_json"); field != nil {
+		var fields interface{}
+		field.checkError(
+			"Error decoding fields_json",
+			json.Unmarshal([]byte(field.StringValue()), &fields),
+		)
+		mapToValidate["fields"] = fields
 	}
 
-	// Create a new map to validate so the original remains untouched
-	mapToValidate := utils.ParamMap{"strategy_id": params["strategy_id"], "fields": fields}
-
-	// Turn the flow param data into a form schema.Resource understands, then
-	// call its validate method.
-	resourceConfig := terraform.NewResourceConfigRaw(mapToValidate)
-	validateDiags := t.ParamResource().Validate(resourceConfig)
-
-	if validateDiags.HasError() {
-		return errors.New(validateDiags[0].Summary)
+	if field := params.requireKey("strategy_id"); field != nil {
+		mapToValidate["strategy_id"] = field.Value()
 	}
 
-	return nil
+	if params.Diags.HasError() {
+		return // avoid duplicate errors from the Resource validator
+	}
+
+	// Run the actual Resource validation
+	params.importDiags(validateAgainstResource(t.ParamResource(), mapToValidate))
 }
 
-func (t *SymApprovalTemplate) ParamMapToFlowParam(params utils.ParamMap) (*client.FlowParam, error) {
-	flowParam := client.FlowParam{
-		StrategyId: params["strategy_id"].(string),
-	}
+func (t *SymApprovalTemplate) ParamMapToFlowParam(params *ParamMap) (*client.FlowParam, error) {
+	// We can skip checking for missing params, type mismatches, or JSON parsing failure
+	// in this function because we know ValidateParamMap has already been called.
 
-	// Decode the json encoded param fields in the flow.
+	flowParam := client.FlowParam{StrategyId: params.Params["strategy_id"].(string)}
+
 	var fields interface{}
-	if err := json.Unmarshal([]byte(params["fields"].(string)), &fields); err != nil {
-		return nil, err
-	}
+	json.Unmarshal([]byte(params.Params["fields_json"].(string)), &fields)
 
-	for _, field := range fields.([]interface{}) {
-		f := field.(utils.ParamMap)
+	for _, fieldInt := range fields.([]interface{}) {
+		field := fieldInt.(map[string]interface{})
+
 		paramField := client.ParamField{
-			Name: f["name"].(string),
-			Type: f["type"].(string),
+			Name: field["name"].(string),
+			Type: field["type"].(string),
 		}
 
-		if val, ok := f["label"]; ok {
+		if val, ok := field["label"]; ok {
 			paramField.Label = val.(string)
 		}
 
-		if val, ok := f["required"]; ok {
+		if val, ok := field["required"]; ok {
 			paramField.Required = val.(bool)
 		}
 
-		if val, ok := f["allowed_values"]; ok {
-			allowedValues := val.([]interface{})
-			for _, allowedValue := range allowedValues {
-				paramField.AllowedValues = append(paramField.AllowedValues, allowedValue.(string))
+		if val, ok := field["allowed_values"]; ok {
+			for _, allowedValueInt := range val.([]interface{}) {
+				allowedValue := allowedValueInt.(string)
+				paramField.AllowedValues = append(paramField.AllowedValues, allowedValue)
 			}
 		}
 
@@ -96,10 +95,14 @@ func (t *SymApprovalTemplate) ParamMapToFlowParam(params utils.ParamMap) (*clien
 	return &flowParam, nil
 }
 
-func (t *SymApprovalTemplate) FlowParamToParamMap(flowParam client.FlowParam) (*utils.ParamMap, error) {
+func (t *SymApprovalTemplate) FlowParamToParamMap(flowParam *client.FlowParam) (*ParamMap, error) {
 	fieldsJSON, err := json.Marshal(flowParam.Fields)
 	if err != nil {
 		return nil, err
 	}
-	return &utils.ParamMap{"strategy_id": flowParam.StrategyId, "fields": string(fieldsJSON)}, nil
+	params := map[string]interface{}{
+		"strategy_id": flowParam.StrategyId,
+		"fields":      string(fieldsJSON),
+	}
+	return &ParamMap{Params: params}, nil
 }

@@ -2,6 +2,7 @@ package resources
 
 import (
 	"context"
+
 	"github.com/symopsio/terraform-provider-sym/sym/utils"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"

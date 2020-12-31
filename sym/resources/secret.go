@@ -2,6 +2,7 @@ package resources
 
 import (
 	"context"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/symopsio/terraform-provider-sym/sym/client"
@@ -29,7 +30,7 @@ func createSecret(ctx context.Context, data *schema.ResourceData, meta interface
 	var diags diag.Diagnostics
 	c := meta.(*client.ApiClient)
 	secret := client.SymSecret{
-		Type: data.Get("type").(string),
+		Type:     data.Get("type").(string),
 		Settings: getSettings(data),
 	}
 
