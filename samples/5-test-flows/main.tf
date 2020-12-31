@@ -16,6 +16,7 @@ terraform {
 
 resource "sym_integration" "aws" {
   type = "aws"
+  name = "aws"
   settings = {
     role = "arn:aws:iam::123456789012:role/sym/ExampleRole"
     region = "us-east-1"
@@ -24,6 +25,7 @@ resource "sym_integration" "aws" {
 
 resource "sym_integration" "sso_main" {
   type = "aws_sso"
+  name = "sso"
   settings = {
     instance_arn = "arn:aws:::instance/ssoinst-abcdefghi12314135325"
     aws = sym_integration.aws.id
