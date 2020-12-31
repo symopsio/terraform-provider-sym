@@ -3,8 +3,6 @@ package resources
 import (
 	"context"
 	"encoding/base64"
-	"errors"
-	"fmt"
 	"io/ioutil"
 	"strings"
 
@@ -47,56 +45,33 @@ func getTemplateNameWithoutVersion(templateName string) string {
 	return splitTemplateName[0] + ":" + splitTemplateName[1]
 }
 
-// Validate a SymFlow's parameters based on a Template's specifications
-func validateTemplateFlowParam(templateName string, paramMap map[string]interface{}) error {
+func getTemplateFromTemplateID(templateID string) templates.Template {
+	templateName := getTemplateNameWithoutVersion(templateID)
 	switch templateName {
 	case "sym:approval":
-		return templates.ValidateSymApprovalParam(paramMap)
+		return &templates.SymApprovalTemplate{}
 	default:
-		// If we don't recognize the template, it may be user-defined
-		// in which case, we can't do any validation currently.
-		// Eventually, if we can get the expected schema for a user-defined
-		// template, we should do that and validate here as well.
-		return nil
+		return &templates.UnknownTemplate{Name: templateName}
 	}
 }
 
 // Build a SymFlow's FlowParam from ResourceData based on a Template's specifications
-func buildTemplateFlowParam(data *schema.ResourceData) (client.FlowParam, error) {
-	params := data.Get("params").(map[string]interface{})
-	templateName := getTemplateNameWithoutVersion(data.Get("template").(string))
+func buildFlowParamFromResourceData(data *schema.ResourceData) (*client.FlowParam, error) {
+	template := getTemplateFromTemplateID(data.Get("template").(string))
+	params := data.Get("params").(utils.ParamMap)
 
-	if err := validateTemplateFlowParam(templateName, params); err != nil {
-		return client.FlowParam{}, err
+	if err := template.ValidateParamMap(params); err != nil {
+		return nil, err
 	}
-
-	switch templateName {
-	case "sym:approval":
-		return templates.BuildSymApprovalParam(params)
-	default:
-		// TODO: FlowParam, ParamField structs should be refactored to be more
-		//  generic. They are currently specific to sym:approval. We can fill in
-		//  the future generic struct with whatever data the user may have provided.
-		errorMsg := fmt.Sprintf("unrecognized template name provided: %s", templateName)
-		return client.FlowParam{}, errors.New(errorMsg)
-	}
+	return template.ParamMapToFlowParam(params)
 }
 
-// templateParamToMap turns the internal FlowParam struct into a map that can be set
+// buildParamMapFromFlowParam turns the internal FlowParam struct into a map that can be set
 // on terraform's ResourceData so that the version from the API can be compared to the
 // version terraform pulls from the local files during diffs.
-func templateParamToMap(templateName string, flowParam client.FlowParam) (map[string]interface{}, error) {
-	switch templateName {
-	case "sym:approval":
-		return templates.SymApprovalParamToMap(flowParam)
-	default:
-		// TODO: FlowParam, ParamField structs should be refactored to be more
-		//  generic. They are currently specific to sym:approval. Once we have a generic
-		//  version of those structs, we should update this to parse out any and all
-		//  params provided by the API by default.
-		errorMsg := fmt.Sprintf("unrecognized template name provided: %s", templateName)
-		return make(map[string]interface{}), errors.New(errorMsg)
-	}
+func buildParamMapFromFlowParam(data *schema.ResourceData, flowParam client.FlowParam) (*utils.ParamMap, error) {
+	template := getTemplateFromTemplateID(data.Get("template").(string))
+	return template.FlowParamToParamMap(flowParam)
 }
 
 func createFlow(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -119,14 +94,14 @@ func createFlow(ctx context.Context, data *schema.ResourceData, meta interface{}
 		Implementation: base64.StdEncoding.EncodeToString(b),
 	}
 
-	flowParams, err := buildTemplateFlowParam(data)
+	flowParams, err := buildFlowParamFromResourceData(data)
 	if err != nil {
 		diags = append(diags, diag.Diagnostic{
 			Severity: diag.Error,
 			Summary:  "Error decoding Sym Flow params for creation: " + err.Error(),
 		})
 	}
-	flow.Params = flowParams
+	flow.Params = *flowParams
 
 	id, err := c.Flow.Create(flow)
 	if err != nil {
@@ -173,8 +148,7 @@ func readFlow(ctx context.Context, data *schema.ResourceData, meta interface{}) 
 			})
 		}
 
-		templateName := getTemplateNameWithoutVersion(data.Get("template").(string))
-		flowParamsMap, err := templateParamToMap(templateName, flow.Params)
+		flowParamsMap, err := buildParamMapFromFlowParam(data, flow.Params)
 		if err != nil {
 			diags = append(diags, diag.Diagnostic{
 				Severity: diag.Error,
@@ -215,14 +189,14 @@ func updateFlow(ctx context.Context, data *schema.ResourceData, meta interface{}
 		Implementation: base64.StdEncoding.EncodeToString(b),
 	}
 
-	flowParams, err := buildTemplateFlowParam(data)
+	flowParams, err := buildFlowParamFromResourceData(data)
 	if err != nil {
 		diags = append(diags, diag.Diagnostic{
 			Severity: diag.Error,
 			Summary:  "Error decoding Sym Flow params for creation: " + err.Error(),
 		})
 	}
-	flow.Params = flowParams
+	flow.Params = *flowParams
 
 	if _, err := c.Flow.Update(flow); err != nil {
 		diags = append(diags, diag.Diagnostic{

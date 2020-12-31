@@ -3,11 +3,14 @@ package templates
 import (
 	"encoding/json"
 	"errors"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/symopsio/terraform-provider-sym/sym/client"
 	"github.com/symopsio/terraform-provider-sym/sym/utils"
 )
+
+type SymApprovalTemplate struct{}
 
 func fieldResource() *schema.Resource {
 	return &schema.Resource{
@@ -20,8 +23,7 @@ func fieldResource() *schema.Resource {
 		},
 	}
 }
-
-func paramResource() *schema.Resource {
+func (t *SymApprovalTemplate) ParamResource() *schema.Resource {
 	return &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"strategy_id": utils.Required(schema.TypeString),
@@ -30,25 +32,23 @@ func paramResource() *schema.Resource {
 	}
 }
 
-// ValidateSymApprovalParam will return an error if the provided paramMap does not
+// ValidateSymApprovalParam will return an error if the provided ParamMap does not
 // match the expected specification for the sym:approval template.
-func ValidateSymApprovalParam(paramMap map[string]interface{}) error {
+func (t *SymApprovalTemplate) ValidateParamMap(params utils.ParamMap) error {
+	// Pull out the JSON from fields and parse it
 	var fields interface{}
-	origFields := paramMap["fields"].(string)
-
-	// Create a new map to validate so the original remains untouched
-	mapToValidate := map[string]interface{}{"strategy_id": paramMap["strategy_id"]}
-
+	origFields := params["fields"].(string)
 	if err := json.Unmarshal([]byte(origFields), &fields); err != nil {
 		return err
 	}
 
-	mapToValidate["fields"] = fields
+	// Create a new map to validate so the original remains untouched
+	mapToValidate := utils.ParamMap{"strategy_id": params["strategy_id"], "fields": fields}
 
 	// Turn the flow param data into a form schema.Resource understands, then
 	// call its validate method.
 	resourceConfig := terraform.NewResourceConfigRaw(mapToValidate)
-	validateDiags := paramResource().Validate(resourceConfig)
+	validateDiags := t.ParamResource().Validate(resourceConfig)
 
 	if validateDiags.HasError() {
 		return errors.New(validateDiags[0].Summary)
@@ -57,7 +57,7 @@ func ValidateSymApprovalParam(paramMap map[string]interface{}) error {
 	return nil
 }
 
-func BuildSymApprovalParam(params map[string]interface{}) (client.FlowParam, error) {
+func (t *SymApprovalTemplate) ParamMapToFlowParam(params utils.ParamMap) (*client.FlowParam, error) {
 	flowParam := client.FlowParam{
 		StrategyId: params["strategy_id"].(string),
 	}
@@ -65,11 +65,11 @@ func BuildSymApprovalParam(params map[string]interface{}) (client.FlowParam, err
 	// Decode the json encoded param fields in the flow.
 	var fields interface{}
 	if err := json.Unmarshal([]byte(params["fields"].(string)), &fields); err != nil {
-		return client.FlowParam{}, err
+		return nil, err
 	}
 
 	for _, field := range fields.([]interface{}) {
-		f := field.(map[string]interface{})
+		f := field.(utils.ParamMap)
 		paramField := client.ParamField{
 			Name: f["name"].(string),
 			Type: f["type"].(string),
@@ -93,19 +93,13 @@ func BuildSymApprovalParam(params map[string]interface{}) (client.FlowParam, err
 		flowParam.Fields = append(flowParam.Fields, paramField)
 	}
 
-	return flowParam, nil
+	return &flowParam, nil
 }
 
-func SymApprovalParamToMap(flowParam client.FlowParam) (map[string]interface{}, error) {
-	out := make(map[string]interface{})
-
-	fieldsJson, err := json.Marshal(flowParam.Fields)
+func (t *SymApprovalTemplate) FlowParamToParamMap(flowParam client.FlowParam) (*utils.ParamMap, error) {
+	fieldsJSON, err := json.Marshal(flowParam.Fields)
 	if err != nil {
-		return out, err
+		return nil, err
 	}
-
-	out["strategy_id"] = flowParam.StrategyId
-	out["fields"] = string(fieldsJson)
-
-	return out, err
+	return &utils.ParamMap{"strategy_id": flowParam.StrategyId, "fields": string(fieldsJSON)}, nil
 }
