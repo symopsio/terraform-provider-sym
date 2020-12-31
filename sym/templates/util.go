@@ -18,6 +18,9 @@ func validateAgainstResource(resource *schema.Resource, params map[string]interf
 	return diags
 }
 
+// The AttributePaths that come from validating a Resource use GetAttrSteps,
+// since Resources are blocks. However, in our case, we're actuall validating
+// a map, so we need to translate each GetAttrStep to an IndexStep.
 func translateResourceDiags(diags diag.Diagnostics) {
 	for i, d := range diags {
 		diags[i].AttributePath = translateAttrToIndexPaths(d.AttributePath)

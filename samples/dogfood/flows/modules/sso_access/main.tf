@@ -8,6 +8,10 @@ terraform {
   }
 }
 
+provider "sym" {
+  org = "asics"
+}
+
 data "sym_runtime" "this" {
   name = var.environment
 }

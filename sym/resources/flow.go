@@ -175,7 +175,7 @@ func deleteFlow(ctx context.Context, data *schema.ResourceData, meta interface{}
 	id := data.Id()
 
 	if _, err := c.Flow.Delete(id); err != nil {
-		diags = append(diags, utils.DiagFromError(err, "Unable to update Flow"))
+		diags = append(diags, utils.DiagFromError(err, "Unable to delete Flow"))
 	}
 
 	return diags
