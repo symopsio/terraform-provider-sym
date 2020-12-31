@@ -10,6 +10,10 @@ terraform {
   }
 }
 
+provider "sym" {
+  org = "asics"
+}
+
 # sym_integration types:
 # v1: permission_context, slack
 # v2: pagerduty, okta

@@ -30,7 +30,7 @@ resource "sym_flow" "this" {
     strategy_id = "sym_strategy.sso_main.id"
 
     # This is called `fields` in the API
-    fields_json2 = jsonencode([
+    fields_json = jsonencode([
       {
         name = "reason"
         type = "string"
