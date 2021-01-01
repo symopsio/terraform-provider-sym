@@ -41,6 +41,14 @@ var (
 		}
 	}
 
+	OptionalList = func(resource *schema.Resource) *schema.Schema {
+		return &schema.Schema{
+			Type:     schema.TypeList,
+			Optional: true,
+			Elem:     resource,
+		}
+	}
+
 	RequiredList = func(resource *schema.Resource) *schema.Schema {
 		return &schema.Schema{
 			Type:     schema.TypeList,

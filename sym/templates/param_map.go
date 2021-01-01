@@ -40,6 +40,15 @@ func (pm *HCLParamMap) importDiags(diags diag.Diagnostics) {
 	pm.Diags = append(pm.Diags, diags...)
 }
 
+func (pm *HCLParamMap) addWarning(key string, summary string, detail string, docs string) {
+	pm.Diags = append(pm.Diags, diag.Diagnostic{
+		Severity:      diag.Warning,
+		Summary:       summary,
+		Detail:        fmt.Sprint("%s\nFor more details, see %s", detail, docs),
+		AttributePath: cty.GetAttrPath("params").IndexString(key),
+	})
+}
+
 func (pm *HCLParamMap) addDiagWithDetail(key string, summary string, detail string) {
 	pm.Diags = append(pm.Diags, diag.Diagnostic{
 		Severity:      diag.Error,
@@ -47,7 +56,6 @@ func (pm *HCLParamMap) addDiagWithDetail(key string, summary string, detail stri
 		Detail:        detail,
 		AttributePath: cty.GetAttrPath("params").IndexString(key),
 	})
-
 }
 
 func (pm *HCLParamMap) addDiag(key string, summary string) {
