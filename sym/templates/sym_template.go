@@ -4,16 +4,16 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/symopsio/terraform-provider-sym/sym/client"
 )
 
 type Template interface {
 	ParamResource() *schema.Resource
-	// TF -> API:
-	HCLParamsToAPIResource(params *HCLParamMap) *terraform.ResourceConfig
 	// API -> TF:
-	APIParamsToHCLParams(flowParam client.APIParams) (*HCLParamMap, error)
+	APIToTerraform(flowParam client.APIParams) (*HCLParamMap, error)
+	// TF -> API:
+	// (Internal. use HCLParamMap.ToAPIParams() for external.)
+	terraformToAPI(params *HCLParamMap) client.APIParams
 }
 
 type UnknownTemplate struct {
@@ -26,7 +26,7 @@ func (t *UnknownTemplate) ParamResource() *schema.Resource {
 	}
 }
 
-func (t *UnknownTemplate) HCLParamsToAPIResource(params *HCLParamMap) *terraform.ResourceConfig {
+func (t *UnknownTemplate) terraformToAPI(params *HCLParamMap) client.APIParams {
 	// If we don't recognize the template, it may be user-defined
 	// in which case, we can't do any validation currently.
 	// Eventually, if we can get the expected schema for a user-defined
@@ -34,14 +34,14 @@ func (t *UnknownTemplate) HCLParamsToAPIResource(params *HCLParamMap) *terraform
 
 	// TODO: Look up the Template spec from a user template, and use it to convert HCL
 	// strings to the proper API types. For now, just pass everything through as strings.
-	raw := make(map[string]interface{})
+	raw := make(client.APIParams)
 	for k, v := range params.Params {
 		raw[k] = v
 	}
-	return terraform.NewResourceConfigRaw(raw)
+	return raw
 }
 
-func (t *UnknownTemplate) APIParamsToHCLParams(apiParams client.APIParams) (*HCLParamMap, error) {
+func (t *UnknownTemplate) APIToTerraform(apiParams client.APIParams) (*HCLParamMap, error) {
 	// TODO: Look up the Template spec from a user template, and use it to convert
 	// API types to their HCL string representations.
 	// For now, just stringify everything.

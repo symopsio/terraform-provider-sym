@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/symopsio/terraform-provider-sym/sym/client"
 	"github.com/symopsio/terraform-provider-sym/sym/utils"
 )
@@ -31,11 +30,10 @@ func (t *SymApprovalTemplate) ParamResource() *schema.Resource {
 	}
 }
 
-// HCLParamsToAPIResource will add error diags if the provided HCLParamMap does not
+// terraformToAPI will add error diags if the provided HCLParamMap does not
 // match the expected specification for the sym:approval template.
-func (t *SymApprovalTemplate) HCLParamsToAPIResource(params *HCLParamMap) *terraform.ResourceConfig {
-	// Extract various fields to put into a Resource, which will be validated.
-	raw := make(map[string]interface{})
+func (t *SymApprovalTemplate) terraformToAPI(params *HCLParamMap) client.APIParams {
+	raw := make(client.APIParams)
 
 	if field := params.checkKey("fields_json"); field != nil {
 		var fields interface{}
@@ -64,13 +62,10 @@ func (t *SymApprovalTemplate) HCLParamsToAPIResource(params *HCLParamMap) *terra
 		)
 	}
 
-	// Run the actual Resource validation
-	resourceConfig := terraform.NewResourceConfigRaw(raw)
-	params.validateAgainstResource(t, resourceConfig)
-	return resourceConfig
+	return raw
 }
 
-func (t *SymApprovalTemplate) APIParamsToHCLParams(apiParams client.APIParams) (*HCLParamMap, error) {
+func (t *SymApprovalTemplate) APIToTerraform(apiParams client.APIParams) (*HCLParamMap, error) {
 	fieldsJSON, err := json.Marshal(apiParams["fields"].([]client.ParamField))
 	if err != nil {
 		return nil, err

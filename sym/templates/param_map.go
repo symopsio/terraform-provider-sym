@@ -18,15 +18,20 @@ type HCLParamMap struct {
 }
 
 func (pm *HCLParamMap) ToAPIParams(t Template) (client.APIParams, error) {
-	configReader := schema.ConfigFieldReader{
-		Config: t.HCLParamsToAPIResource(pm),
-		Schema: t.ParamResource().Schema,
-	}
+	resource := t.ParamResource()
+	config := terraform.NewResourceConfigRaw(t.terraformToAPI(pm))
+	pm.validateAgainstResource(resource, config)
+
 	if pm.Diags.HasError() {
 		return nil, errors.New("validation errors occured")
 	}
 
+	configReader := schema.ConfigFieldReader{
+		Config: config,
+		Schema: resource.Schema,
+	}
 	apiParams := make(client.APIParams)
+
 	for k := range configReader.Config.Config {
 		if r, err := configReader.ReadField([]string{k}); err == nil {
 			if r.Exists {
@@ -40,8 +45,8 @@ func (pm *HCLParamMap) ToAPIParams(t Template) (client.APIParams, error) {
 	return apiParams, nil
 }
 
-func (pm *HCLParamMap) validateAgainstResource(t Template, resourceConfig *terraform.ResourceConfig) {
-	diags := t.ParamResource().Validate(resourceConfig)
+func (pm *HCLParamMap) validateAgainstResource(r *schema.Resource, c *terraform.ResourceConfig) {
+	diags := r.Validate(c)
 
 	translateResourceDiags(diags)
 	utils.PrefixDiagPaths(diags, cty.GetAttrPath("params"))
@@ -77,7 +82,7 @@ func (pm *HCLParamMap) addWarning(key string, summary string, detail string, doc
 	pm.Diags = append(pm.Diags, diag.Diagnostic{
 		Severity:      diag.Warning,
 		Summary:       summary,
-		Detail:        fmt.Sprint("%s\nFor more details, see %s", detail, docs),
+		Detail:        fmt.Sprintf("%s\nFor more details, see %s", detail, docs),
 		AttributePath: cty.GetAttrPath("params").IndexString(key),
 	})
 }

@@ -76,7 +76,7 @@ func buildAPIParamsFromResourceData(data *schema.ResourceData) (client.APIParams
 // version terraform pulls from the local files during diffs.
 func buildHCLParamsfromAPIParams(data *schema.ResourceData, flowParam client.APIParams) (*templates.HCLParamMap, error) {
 	template := getTemplateFromTemplateID(data.Get("template").(string))
-	return template.APIParamsToHCLParams(flowParam)
+	return template.APIToTerraform(flowParam)
 }
 
 func createFlow(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
