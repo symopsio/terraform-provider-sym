@@ -9,11 +9,12 @@ import (
 
 type Template interface {
 	ParamResource() *schema.Resource
-	ValidateParamMap(params *HCLParamMap)
-	// TF -> API:
-	HCLParamsToAPIParams(params *HCLParamMap) (*client.APIParams, error)
 	// API -> TF:
-	APIParamsToHCLParams(flowParam client.APIParams) (*HCLParamMap, error)
+	APIToTerraform(flowParam client.APIParams) (*HCLParamMap, error)
+	APIToTerraformKeyMap() map[string]string
+	// TF -> API:
+	// (Internal. use HCLParamMap.ToAPIParams() for external.)
+	terraformToAPI(params *HCLParamMap) client.APIParams
 }
 
 type UnknownTemplate struct {
@@ -26,25 +27,22 @@ func (t *UnknownTemplate) ParamResource() *schema.Resource {
 	}
 }
 
-func (t *UnknownTemplate) ValidateParamMap(params *HCLParamMap) {
+func (t *UnknownTemplate) terraformToAPI(params *HCLParamMap) client.APIParams {
 	// If we don't recognize the template, it may be user-defined
 	// in which case, we can't do any validation currently.
 	// Eventually, if we can get the expected schema for a user-defined
 	// template, we should do that and validate here as well.
-}
 
-func (t *UnknownTemplate) HCLParamsToAPIParams(params *HCLParamMap) (*client.APIParams, error) {
-	// TODO: Look up the Template spec from a user template, and use it to convert
-	// HCL strings to the proper API types.
-	// For now, just pass everything through as strings.
-	apiParams := make(client.APIParams)
+	// TODO: Look up the Template spec from a user template, and use it to convert HCL
+	// strings to the proper API types. For now, just pass everything through as strings.
+	raw := make(client.APIParams)
 	for k, v := range params.Params {
-		apiParams[k] = v
+		raw[k] = v
 	}
-	return &apiParams, nil
+	return raw
 }
 
-func (t *UnknownTemplate) APIParamsToHCLParams(apiParams client.APIParams) (*HCLParamMap, error) {
+func (t *UnknownTemplate) APIToTerraform(apiParams client.APIParams) (*HCLParamMap, error) {
 	// TODO: Look up the Template spec from a user template, and use it to convert
 	// API types to their HCL string representations.
 	// For now, just stringify everything.
@@ -53,4 +51,8 @@ func (t *UnknownTemplate) APIParamsToHCLParams(apiParams client.APIParams) (*HCL
 		params[k] = fmt.Sprintf("%v", v)
 	}
 	return &HCLParamMap{Params: params}, nil
+}
+
+func (t *UnknownTemplate) APIToTerraformKeyMap() map[string]string {
+	return make(map[string]string)
 }

@@ -56,17 +56,16 @@ func getTemplateFromTemplateID(templateID string) templates.Template {
 }
 
 // Build a Flow's FlowParam from ResourceData based on a Template's specifications
-func buildAPIParamsFromResourceData(data *schema.ResourceData) (*client.APIParams, diag.Diagnostics) {
+func buildAPIParamsFromResourceData(data *schema.ResourceData) (client.APIParams, diag.Diagnostics) {
 	template := getTemplateFromTemplateID(data.Get("template").(string))
 	params := &templates.HCLParamMap{Params: getSettingsMap(data, "params")}
 
-	template.ValidateParamMap(params)
-	if params.Diags.HasError() {
-		return nil, params.Diags
-	}
-
-	if apiParams, err := template.HCLParamsToAPIParams(params); err != nil {
-		return nil, utils.DiagsFromError(err, "Failed to create Flow")
+	if apiParams, err := params.ToAPIParams(template); err != nil {
+		if params.Diags.HasError() {
+			return nil, params.Diags
+		} else {
+			return nil, utils.DiagsFromError(err, "Failed to create Flow")
+		}
 	} else {
 		return apiParams, nil
 	}
@@ -77,7 +76,7 @@ func buildAPIParamsFromResourceData(data *schema.ResourceData) (*client.APIParam
 // version terraform pulls from the local files during diffs.
 func buildHCLParamsfromAPIParams(data *schema.ResourceData, flowParam client.APIParams) (*templates.HCLParamMap, error) {
 	template := getTemplateFromTemplateID(data.Get("template").(string))
-	return template.APIParamsToHCLParams(flowParam)
+	return template.APIToTerraform(flowParam)
 }
 
 func createFlow(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -101,7 +100,7 @@ func createFlow(ctx context.Context, data *schema.ResourceData, meta interface{}
 	if flowParams, d := buildAPIParamsFromResourceData(data); d.HasError() {
 		diags = append(diags, d...)
 	} else {
-		flow.Params = *flowParams
+		flow.Params = flowParams
 	}
 
 	if diags.HasError() {
@@ -162,7 +161,7 @@ func updateFlow(ctx context.Context, data *schema.ResourceData, meta interface{}
 	if flowParams, d := buildAPIParamsFromResourceData(data); d.HasError() {
 		diags = append(diags, d...)
 	} else {
-		flow.Params = *flowParams
+		flow.Params = flowParams
 	}
 
 	if _, err := c.Flow.Update(flow); err != nil {

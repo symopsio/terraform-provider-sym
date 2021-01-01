@@ -29,3 +29,33 @@ func PrefixDiagPaths(diags diag.Diagnostics, prefix cty.Path) {
 		diags[i].AttributePath = append(prefix, d.AttributePath...)
 	}
 }
+
+func TranslateDiagPaths(diags diag.Diagnostics, keyMap map[string]string) {
+	for i, d := range diags {
+		if val, ok := d.AttributePath[0].(cty.IndexStep); ok {
+			key := val.Key
+
+			if val.Key.Type() == cty.String {
+				if newKey, ok := keyMap[val.Key.AsString()]; ok {
+					key = cty.StringVal(newKey)
+				}
+			}
+
+			diags[i].AttributePath[0] = cty.IndexStep{Key: key}
+		}
+	}
+}
+
+func translateAttrToIndexPaths(path cty.Path) cty.Path {
+	newPath := make(cty.Path, 0, len(path))
+
+	for _, item := range path {
+		if val, ok := item.(cty.GetAttrStep); ok {
+			newPath = append(newPath, cty.IndexStep{Key: cty.StringVal(val.Name)})
+		} else {
+			newPath = append(newPath, item)
+		}
+	}
+
+	return newPath
+}

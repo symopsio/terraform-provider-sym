@@ -1,15 +1,58 @@
 package templates
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/symopsio/terraform-provider-sym/sym/client"
+	"github.com/symopsio/terraform-provider-sym/sym/utils"
 )
 
 type HCLParamMap struct {
 	Params map[string]string
 	Diags  diag.Diagnostics
+}
+
+func (pm *HCLParamMap) ToAPIParams(t Template) (client.APIParams, error) {
+	resource := t.ParamResource()
+	config := terraform.NewResourceConfigRaw(t.terraformToAPI(pm))
+	pm.validateAgainstResource(t, config)
+
+	if pm.Diags.HasError() {
+		return nil, errors.New("validation errors occured")
+	}
+
+	configReader := schema.ConfigFieldReader{
+		Config: config,
+		Schema: resource.Schema,
+	}
+	apiParams := make(client.APIParams)
+
+	for k := range configReader.Config.Config {
+		if r, err := configReader.ReadField([]string{k}); err == nil {
+			if r.Exists {
+				apiParams[k] = r.Value
+			}
+		} else {
+			return nil, fmt.Errorf("Error parsing %s: %s", k, err.Error())
+		}
+	}
+
+	return apiParams, nil
+}
+
+func (pm *HCLParamMap) validateAgainstResource(t Template, c *terraform.ResourceConfig) {
+	diags := t.ParamResource().Validate(c)
+
+	translateResourceDiags(diags)
+	utils.TranslateDiagPaths(diags, t.APIToTerraformKeyMap())
+	utils.PrefixDiagPaths(diags, cty.GetAttrPath("params"))
+
+	pm.Diags = append(pm.Diags, diags...)
 }
 
 func (pm *HCLParamMap) checkRequiredKeys(keys []string) {
@@ -36,8 +79,13 @@ func (pm *HCLParamMap) checkKey(key string) *ParamMapKey {
 	return nil
 }
 
-func (pm *HCLParamMap) importDiags(diags diag.Diagnostics) {
-	pm.Diags = append(pm.Diags, diags...)
+func (pm *HCLParamMap) addWarning(key string, summary string, detail string, docs string) {
+	pm.Diags = append(pm.Diags, diag.Diagnostic{
+		Severity:      diag.Warning,
+		Summary:       summary,
+		Detail:        fmt.Sprintf("%s\nFor more details, see %s", detail, docs),
+		AttributePath: cty.GetAttrPath("params").IndexString(key),
+	})
 }
 
 func (pm *HCLParamMap) addDiagWithDetail(key string, summary string, detail string) {
@@ -47,7 +95,6 @@ func (pm *HCLParamMap) addDiagWithDetail(key string, summary string, detail stri
 		Detail:        detail,
 		AttributePath: cty.GetAttrPath("params").IndexString(key),
 	})
-
 }
 
 func (pm *HCLParamMap) addDiag(key string, summary string) {
