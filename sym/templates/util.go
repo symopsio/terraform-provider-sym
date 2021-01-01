@@ -3,20 +3,7 @@ package templates
 import (
 	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"github.com/symopsio/terraform-provider-sym/sym/utils"
 )
-
-func validateAgainstResource(resource *schema.Resource, params map[string]interface{}) diag.Diagnostics {
-	resourceConfig := terraform.NewResourceConfigRaw(params)
-	diags := resource.Validate(resourceConfig)
-
-	translateResourceDiags(diags)
-	utils.PrefixDiagPaths(diags, cty.GetAttrPath("params"))
-
-	return diags
-}
 
 // The AttributePaths that come from validating a Resource use GetAttrSteps,
 // since Resources are blocks. However, in our case, we're actuall validating

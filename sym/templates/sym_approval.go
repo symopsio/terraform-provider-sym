@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/symopsio/terraform-provider-sym/sym/client"
 	"github.com/symopsio/terraform-provider-sym/sym/utils"
 )
@@ -15,7 +16,7 @@ func fieldResource() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"name":           utils.Required(schema.TypeString),
 			"type":           utils.Required(schema.TypeString),
-			"required":       utils.Required(schema.TypeBool),
+			"required":       utils.OptionalWithDefault(schema.TypeBool, true),
 			"label":          utils.Optional(schema.TypeString),
 			"allowed_values": utils.StringList(false),
 		},
@@ -30,11 +31,11 @@ func (t *SymApprovalTemplate) ParamResource() *schema.Resource {
 	}
 }
 
-// ValidateSymApprovalParam will return an error if the provided ParamMap does not
+// HCLParamsToAPIResource will add error diags if the provided HCLParamMap does not
 // match the expected specification for the sym:approval template.
-func (t *SymApprovalTemplate) ValidateParamMap(params *HCLParamMap) {
+func (t *SymApprovalTemplate) HCLParamsToAPIResource(params *HCLParamMap) *terraform.ResourceConfig {
 	// Extract various fields to put into a Resource, which will be validated.
-	mapToValidate := make(map[string]interface{})
+	raw := make(map[string]interface{})
 
 	if field := params.checkKey("fields_json"); field != nil {
 		var fields interface{}
@@ -42,7 +43,7 @@ func (t *SymApprovalTemplate) ValidateParamMap(params *HCLParamMap) {
 			"Error decoding fields_json",
 			json.Unmarshal([]byte(field.Value()), &fields),
 		)
-		mapToValidate["fields"] = fields
+		raw["fields"] = fields
 	} else {
 		params.addWarning(
 			"fields_json",
@@ -53,7 +54,7 @@ func (t *SymApprovalTemplate) ValidateParamMap(params *HCLParamMap) {
 	}
 
 	if field := params.checkKey("strategy_id"); field != nil {
-		mapToValidate["strategy_id"] = field.Value()
+		raw["strategy_id"] = field.Value()
 	} else {
 		params.addWarning(
 			"strategy_id",
@@ -64,53 +65,9 @@ func (t *SymApprovalTemplate) ValidateParamMap(params *HCLParamMap) {
 	}
 
 	// Run the actual Resource validation
-	params.importDiags(validateAgainstResource(t.ParamResource(), mapToValidate))
-}
-
-func (t *SymApprovalTemplate) HCLParamsToAPIParams(params *HCLParamMap) (*client.APIParams, error) {
-	// We can skip checking for type mismatches or JSON parsing failures
-	// in this function because we know ValidateParamMap has already been called.
-
-	apiParams := client.APIParams{}
-
-	if field := params.checkKey("fields_json"); field != nil {
-		var fields interface{}
-		json.Unmarshal([]byte(params.Params["fields_json"]), &fields)
-
-		paramFields := make([]client.ParamField, 0)
-		for _, fieldInt := range fields.([]interface{}) {
-			field := fieldInt.(map[string]interface{})
-
-			paramField := client.ParamField{
-				Name: field["name"].(string),
-				Type: field["type"].(string),
-			}
-
-			if val, ok := field["label"]; ok {
-				paramField.Label = val.(string)
-			}
-
-			if val, ok := field["required"]; ok {
-				paramField.Required = val.(bool)
-			}
-
-			if val, ok := field["allowed_values"]; ok {
-				for _, allowedValueInt := range val.([]interface{}) {
-					allowedValue := allowedValueInt.(string)
-					paramField.AllowedValues = append(paramField.AllowedValues, allowedValue)
-				}
-			}
-
-			paramFields = append(paramFields, paramField)
-		}
-		apiParams["fields"] = paramFields
-	}
-
-	if field := params.checkKey("strategy_id"); field != nil {
-		apiParams["strategy_id"] = field.Value()
-	}
-
-	return &apiParams, nil
+	resourceConfig := terraform.NewResourceConfigRaw(raw)
+	params.validateAgainstResource(t, resourceConfig)
+	return resourceConfig
 }
 
 func (t *SymApprovalTemplate) APIParamsToHCLParams(apiParams client.APIParams) (*HCLParamMap, error) {

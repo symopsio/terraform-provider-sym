@@ -20,6 +20,14 @@ var (
 		}
 	}
 
+	OptionalWithDefault = func(valueType schema.ValueType, default_ interface{}) *schema.Schema {
+		return &schema.Schema{
+			Type:     valueType,
+			Optional: true,
+			Default:  default_,
+		}
+	}
+
 	SettingsMap = func() *schema.Schema {
 		return &schema.Schema{
 			Type: schema.TypeMap,
