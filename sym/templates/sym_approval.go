@@ -76,3 +76,7 @@ func (t *SymApprovalTemplate) APIToTerraform(apiParams client.APIParams) (*HCLPa
 	}
 	return &HCLParamMap{Params: params}, nil
 }
+
+func (t *SymApprovalTemplate) APIToTerraformKeyMap() map[string]string {
+	return map[string]string{"fields": "fields_json"}
+}

@@ -11,6 +11,7 @@ type Template interface {
 	ParamResource() *schema.Resource
 	// API -> TF:
 	APIToTerraform(flowParam client.APIParams) (*HCLParamMap, error)
+	APIToTerraformKeyMap() map[string]string
 	// TF -> API:
 	// (Internal. use HCLParamMap.ToAPIParams() for external.)
 	terraformToAPI(params *HCLParamMap) client.APIParams
@@ -50,4 +51,8 @@ func (t *UnknownTemplate) APIToTerraform(apiParams client.APIParams) (*HCLParamM
 		params[k] = fmt.Sprintf("%v", v)
 	}
 	return &HCLParamMap{Params: params}, nil
+}
+
+func (t *UnknownTemplate) APIToTerraformKeyMap() map[string]string {
+	return make(map[string]string)
 }

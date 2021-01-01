@@ -20,7 +20,7 @@ type HCLParamMap struct {
 func (pm *HCLParamMap) ToAPIParams(t Template) (client.APIParams, error) {
 	resource := t.ParamResource()
 	config := terraform.NewResourceConfigRaw(t.terraformToAPI(pm))
-	pm.validateAgainstResource(resource, config)
+	pm.validateAgainstResource(t, config)
 
 	if pm.Diags.HasError() {
 		return nil, errors.New("validation errors occured")
@@ -38,17 +38,18 @@ func (pm *HCLParamMap) ToAPIParams(t Template) (client.APIParams, error) {
 				apiParams[k] = r.Value
 			}
 		} else {
-			return nil, err
+			return nil, fmt.Errorf("Error parsing %s: %s", k, err.Error())
 		}
 	}
 
 	return apiParams, nil
 }
 
-func (pm *HCLParamMap) validateAgainstResource(r *schema.Resource, c *terraform.ResourceConfig) {
-	diags := r.Validate(c)
+func (pm *HCLParamMap) validateAgainstResource(t Template, c *terraform.ResourceConfig) {
+	diags := t.ParamResource().Validate(c)
 
 	translateResourceDiags(diags)
+	utils.TranslateDiagPaths(diags, t.APIToTerraformKeyMap())
 	utils.PrefixDiagPaths(diags, cty.GetAttrPath("params"))
 
 	pm.Diags = append(pm.Diags, diags...)
