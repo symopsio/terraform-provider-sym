@@ -19,6 +19,7 @@ func (s Integration) String() string {
 type IntegrationClient interface {
 	Create(integration Integration) (string, error)
 	Read(id string) (*Integration, error)
+	ReadName(name string) (*Integration, error)
 	Update(integration Integration) (string, error)
 	Delete(id string) (string, error)
 }
@@ -58,6 +59,18 @@ func (i *integrationClient) Read(id string) (*Integration, error) {
 	}
 
 	log.Printf("Got Sym Integration: %s", result.Id)
+	return &result, nil
+}
+
+func (i *integrationClient) ReadName(name string) (*Integration, error) {
+	log.Printf("Getting Sym Integration by name: %s", name)
+	result := Integration{}
+
+	if err := i.HttpClient.Read(fmt.Sprintf("/integrations/search/%s/", name), &result); err != nil {
+		return nil, err
+	}
+
+	log.Printf("Got Sym Integration by name: %s (%s)", name, result.Id)
 	return &result, nil
 }
 
