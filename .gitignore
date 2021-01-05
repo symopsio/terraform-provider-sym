@@ -6,10 +6,14 @@ dist
 # Local .terraform directories
 **/.terraform/*
 .idea
+.vscode
 
 # .tfstate files
 *.tfstate
 *.tfstate.*
+
+.terraform.lock.hcl
+tf.log
 
 # Crash log files
 crash.log

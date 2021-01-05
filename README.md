@@ -12,11 +12,18 @@ for more details.
 ## Dev setup
 
 * Install terraform 0.14 
-* Run `make build` to create the binary locally
-
-This binary can be used by placing it into the cache in the correct location and running `terraform init`.
+* Run `make local` to create the binary locally
 
 ### Debugging
+
+Then, run the following command to initialize the workspace and apply the sample configuration. Note: you must have Terraform 14 installed (not 13, the default now).
+
+```shell
+cd samples
+terraform init && terraform apply
+```
+
+Running `terraform apply` in the samples folder will create a local `terraform.tfstate` file. You can safely remove this file if you are testing and want to redo something.
 
 To debug problems, first turn on trace logging, for example: `TF_LOG=trace terraform init`. 
 

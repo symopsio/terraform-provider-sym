@@ -2,6 +2,9 @@ package resources
 
 import (
 	"context"
+
+	"github.com/symopsio/terraform-provider-sym/sym/utils"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/symopsio/terraform-provider-sym/sym/client"
@@ -19,34 +22,24 @@ func Integration() *schema.Resource {
 
 func integrationSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-		"type":     required(schema.TypeString),
-		"settings": settingsMap(),
+		"type":     utils.Required(schema.TypeString),
+		"settings": utils.SettingsMap(),
+		"name":     utils.Required(schema.TypeString),
 	}
-}
-
-func getSettings(data *schema.ResourceData) client.Settings {
-	rawSettings := data.Get("settings").(map[string]interface{})
-	settings := make(map[string]string)
-	for k, v := range rawSettings {
-		settings[k] = v.(string)
-	}
-	return settings
 }
 
 func createIntegration(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 	c := meta.(*client.ApiClient)
-	integration := client.SymIntegration{
-		Type: data.Get("type").(string),
+	integration := client.Integration{
+		Type:     data.Get("type").(string),
 		Settings: getSettings(data),
+		Name:     data.Get("name").(string),
 	}
 
 	id, err := c.Integration.Create(integration)
 	if err != nil {
-		diags = append(diags, diag.Diagnostic{
-			Severity: diag.Error,
-			Summary:  "Unable to create sym integration: " + err.Error(),
-		})
+		diags = utils.DiagsCheckError(diags, err, "Unable to create Integration")
 	} else {
 		data.SetId(id)
 	}
@@ -54,13 +47,47 @@ func createIntegration(ctx context.Context, data *schema.ResourceData, meta inte
 }
 
 func readIntegration(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	return notYetImplemented
+	var diags diag.Diagnostics
+	c := meta.(*client.ApiClient)
+	id := data.Id()
+
+	integration, err := c.Integration.Read(id)
+	if err != nil {
+		diags = append(diags, utils.DiagFromError(err, "Unable to read Integration"))
+		return diags
+	}
+
+	diags = utils.DiagsCheckError(diags, data.Set("type", integration.Type), "Unable to read Integration type")
+	diags = utils.DiagsCheckError(diags, data.Set("name", integration.Name), "Unable to read Integration name")
+	diags = utils.DiagsCheckError(diags, data.Set("settings", integration.Settings), "Unable to read Integration settings")
+
+	return diags
 }
 
 func updateIntegration(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	return notYetImplemented
+	var diags diag.Diagnostics
+	c := meta.(*client.ApiClient)
+
+	integration := client.Integration{
+		Type:     data.Get("type").(string),
+		Name:     data.Get("name").(string),
+		Settings: getSettings(data),
+	}
+	if _, err := c.Integration.Update(integration); err != nil {
+		diags = append(diags, utils.DiagFromError(err, "Unable to update Integration"))
+	}
+
+	return diags
 }
 
 func deleteIntegration(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	return notYetImplemented
+	var diags diag.Diagnostics
+	c := meta.(*client.ApiClient)
+	id := data.Id()
+
+	if _, err := c.Integration.Delete(id); err != nil {
+		diags = append(diags, utils.DiagFromError(err, "Unable to delete Integration"))
+	}
+
+	return diags
 }

@@ -1,10 +1,10 @@
 package client
 
 import (
-	"github.com/ghodss/yaml"
 	"io/ioutil"
-	"log"
 	"os"
+
+	"github.com/ghodss/yaml"
 )
 
 type ConfigReader interface {
@@ -35,7 +35,6 @@ func (c *configReader) readConfig() (*Config, error) {
 	if err != nil {
 		return nil, err
 	}
-	log.Printf("Output: %s", string(b))
 	config := Config{}
 	err = yaml.Unmarshal(b, &config)
 	if err != nil {
