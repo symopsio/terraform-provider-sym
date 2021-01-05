@@ -1,29 +1,45 @@
 package data_sources
 
 import (
-	"log"
-
+	"context"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/symopsio/terraform-provider-sym/sym/client"
+	"github.com/symopsio/terraform-provider-sym/sym/utils"
 )
 
 func DataSourceRuntime() *schema.Resource {
 	return &schema.Resource{
-		Read:   dataSourceRuntimeRead,
-		Schema: runtimeSchema(),
+		ReadContext: dataSourceRuntimeRead,
+		Schema:      runtimeSchema(),
 	}
 }
 
+// runtimeSchema is defined specifically for the data source (vs. using the
+// already defined version from the resource) because the context_id should not
+// be required to retrieve data, only name.
 func runtimeSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-		"name": {
-			Type:     schema.TypeString,
-			Required: true,
-		},
+		"name":       utils.Required(schema.TypeString),
+		"context_id": utils.Optional(schema.TypeString),
 	}
 }
 
-func dataSourceRuntimeRead(data *schema.ResourceData, meta interface{}) error {
-	// TODO: need an API endpoint to retrieve this information
-	log.Printf("dataSourceRuntimeRead id %v", data.Id())
-	return nil
+func dataSourceRuntimeRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	var diags diag.Diagnostics
+	c := meta.(*client.ApiClient)
+	name := data.Get("name").(string)
+
+	runtime, err := c.Runtime.Find(name)
+	if err != nil {
+		diags = append(diags, utils.DiagFromError(err, "Unable to read Runtime"))
+		return diags
+	}
+
+	diags = utils.DiagsCheckError(diags, data.Set("name", runtime.Name), "Unable to read Runtime name")
+	diags = utils.DiagsCheckError(diags, data.Set("context_id", runtime.ContextId), "Unable to read Runtime context_id")
+
+	data.SetId(runtime.Id)
+
+	return diags
 }
