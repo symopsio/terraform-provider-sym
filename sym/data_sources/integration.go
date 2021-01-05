@@ -21,7 +21,7 @@ func dataSourceIntegrationRead(ctx context.Context, data *schema.ResourceData, m
 	c := meta.(*client.ApiClient)
 	name := data.Get("name").(string)
 
-	integration, err := c.Integration.ReadName(name)
+	integration, err := c.Integration.Find(name)
 	if err != nil {
 		diags = append(diags, utils.DiagFromError(err, "Unable to read Integration"))
 		return diags
