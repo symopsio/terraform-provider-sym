@@ -19,7 +19,7 @@ func (s Integration) String() string {
 type IntegrationClient interface {
 	Create(integration Integration) (string, error)
 	Read(id string) (*Integration, error)
-	ReadName(name string) (*Integration, error)
+	Find(name string) (*Integration, error)
 	Update(integration Integration) (string, error)
 	Delete(id string) (string, error)
 }
@@ -62,7 +62,7 @@ func (i *integrationClient) Read(id string) (*Integration, error) {
 	return &result, nil
 }
 
-func (i *integrationClient) ReadName(name string) (*Integration, error) {
+func (i *integrationClient) Find(name string) (*Integration, error) {
 	log.Printf("Getting Sym Integration by name: %s", name)
 	result := Integration{}
 
