@@ -59,14 +59,18 @@ func (c *runtimeClient) Read(id string) (*Runtime, error) {
 
 func (c *runtimeClient) Find(name string) (*Runtime, error) {
 	log.Printf("Getting Runtime by name: %s", name)
-	result := Runtime{}
+	var result []Runtime
 
-	if err := c.HttpClient.Read(fmt.Sprintf("/runtimes/search/%s/", name), &result); err != nil {
+	if err := c.HttpClient.Read(fmt.Sprintf("/runtimes/search/?name=%s", name), &result); err != nil {
 		return nil, err
 	}
 
-	log.Printf("Got Runtime by name: %s (%s)", name, result.Id)
-	return &result, nil
+	if len(result) != 1 {
+		return nil, fmt.Errorf("one Runtime with the name %s was expected, but %v were found", name, len(result))
+	}
+
+	log.Printf("Got Runtime by name: %s (%s)", name, result[0].Id)
+	return &result[0], nil
 }
 
 func (c *runtimeClient) Update(runtime Runtime) (string, error) {
