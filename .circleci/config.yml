@@ -1,39 +1,42 @@
 version: 2.1
 
+orbs:
+  aws-cli: circleci/aws-cli@1.3.0
+
 commands:
   restore_pkg_cache:
     steps:
       - restore_cache:
           keys:
             - &cache_name v1-pkg-cache
-
 jobs:
   build:
     docker:
       - image: circleci/golang:1.14
-
     steps:
       - checkout
-
       - restore_pkg_cache
-
       - run: GOPRIVATE="github.com/symopsio" make
-
       - save_cache:
           key: *cache_name
           paths:
             - "/go/pkg"
-
   release:
     docker:
       - image: circleci/golang:1.14
-
     steps:
       - checkout
-
       - restore_pkg_cache
-
+      - run:
+          name: import GPG key
+          command: echo -e "$GPG_KEY" | gpg --import
+      - aws-cli/setup
       - run: curl -sL https://git.io/goreleaser | bash
+      - run:
+          name: sync to s3
+          command: |
+            aws s3 sync dist s3://sym-releases/terraform-provider-sym/$CIRCLE_TAG --acl public-read
+
 
 workflows:
   version: 2

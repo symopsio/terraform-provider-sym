@@ -14,6 +14,7 @@ type Runtime struct {
 type RuntimeClient interface {
 	Create(runtime Runtime) (string, error)
 	Read(id string) (*Runtime, error)
+	Find(name string) (*Runtime, error)
 	Update(runtime Runtime) (string, error)
 	Delete(id string) (string, error)
 }
@@ -53,6 +54,18 @@ func (c *runtimeClient) Read(id string) (*Runtime, error) {
 	}
 
 	log.Printf("Got Runtime: %s", result.Id)
+	return &result, nil
+}
+
+func (c *runtimeClient) Find(name string) (*Runtime, error) {
+	log.Printf("Getting Runtime by name: %s", name)
+	result := Runtime{}
+
+	if err := c.HttpClient.Read(fmt.Sprintf("/runtimes/search/%s/", name), &result); err != nil {
+		return nil, err
+	}
+
+	log.Printf("Got Runtime by name: %s (%s)", name, result.Id)
 	return &result, nil
 }
 
