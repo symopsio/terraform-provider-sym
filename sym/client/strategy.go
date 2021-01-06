@@ -21,6 +21,7 @@ type Strategy struct {
 	Type          string   `json:"type"`
 	IntegrationId string   `json:"integration_id"`
 	Targets       []string `json:"targets"`
+	Settings Settings 		`json:"settings"`
 }
 
 func (s Strategy) String() string {
