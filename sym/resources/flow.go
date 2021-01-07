@@ -25,11 +25,15 @@ func Flow() *schema.Resource {
 
 func flowSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-		"name":           utils.Required(schema.TypeString),
-		"label":          utils.Required(schema.TypeString),
-		"template":       utils.Required(schema.TypeString),
-		"implementation": utils.Required(schema.TypeString),
-		"environment":    utils.SettingsMap(),
+		"name":     utils.Required(schema.TypeString),
+		"label":    utils.Required(schema.TypeString),
+		"template": utils.Required(schema.TypeString),
+		"implementation": {
+			Type:             schema.TypeString,
+			Required:         true,
+			DiffSuppressFunc: utils.SuppressEquivalentFileContentDiffs,
+		},
+		"environment": utils.SettingsMap(),
 		"params": {
 			Type:             schema.TypeMap,
 			Required:         true,
@@ -130,11 +134,13 @@ func readFlow(ctx context.Context, data *schema.ResourceData, meta interface{}) 
 	diags = utils.DiagsCheckError(diags, data.Set("label", flow.Label), "Unable to read Flow label")
 	diags = utils.DiagsCheckError(diags, data.Set("template", flow.Template), "Unable to read Flow template")
 	diags = utils.DiagsCheckError(diags, data.Set("environment", flow.Environment), "Unable to read Flow environment")
+	diags = utils.DiagsCheckError(diags, data.Set("implementation", flow.Implementation), "Unable to read Flow implementation")
 
 	flowParamsMap, err := buildHCLParamsfromAPIParams(data, flow.Params)
 	if flowParamsMap != nil {
-		err = data.Set("params", flowParamsMap)
+		err = data.Set("params", flowParamsMap.Params)
 	}
+
 	diags = utils.DiagsCheckError(diags, err, "Unable to read Flow params")
 
 	return diags
@@ -145,6 +151,7 @@ func updateFlow(ctx context.Context, data *schema.ResourceData, meta interface{}
 	c := meta.(*client.ApiClient)
 
 	flow := client.Flow{
+		Id:          data.Id(),
 		Name:        data.Get("name").(string),
 		Label:       data.Get("label").(string),
 		Template:    data.Get("template").(string),

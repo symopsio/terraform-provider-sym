@@ -67,6 +67,7 @@ func updateSecret(ctx context.Context, data *schema.ResourceData, meta interface
 	c := meta.(*client.ApiClient)
 
 	secret := client.Secret{
+		Id:       data.Id(),
 		Type:     data.Get("type").(string),
 		Name:     data.Get("name").(string),
 		Settings: getSettings(data),

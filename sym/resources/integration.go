@@ -12,7 +12,7 @@ import (
 
 func Integration() *schema.Resource {
 	return &schema.Resource{
-		Schema:        integrationSchema(),
+		Schema:        IntegrationSchema(),
 		CreateContext: createIntegration,
 		ReadContext:   readIntegration,
 		UpdateContext: updateIntegration,
@@ -20,7 +20,7 @@ func Integration() *schema.Resource {
 	}
 }
 
-func integrationSchema() map[string]*schema.Schema {
+func IntegrationSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"type":     utils.Required(schema.TypeString),
 		"settings": utils.SettingsMap(),
@@ -69,6 +69,7 @@ func updateIntegration(ctx context.Context, data *schema.ResourceData, meta inte
 	c := meta.(*client.ApiClient)
 
 	integration := client.Integration{
+		Id:       data.Id(),
 		Type:     data.Get("type").(string),
 		Name:     data.Get("name").(string),
 		Settings: getSettings(data),

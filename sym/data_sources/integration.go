@@ -1,35 +1,37 @@
 package data_sources
 
 import (
-	"log"
-
+	"context"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/symopsio/terraform-provider-sym/sym/client"
+	"github.com/symopsio/terraform-provider-sym/sym/resources"
+	"github.com/symopsio/terraform-provider-sym/sym/utils"
 )
 
 func DataSourceIntegration() *schema.Resource {
 	return &schema.Resource{
-		Read:   dataSourceIntegrationRead,
-		Schema: integrationSchema(),
+		ReadContext: dataSourceIntegrationRead,
+		Schema:      resources.IntegrationSchema(),
 	}
 }
 
-func required(valueType schema.ValueType) *schema.Schema {
-	return &schema.Schema{
-		Type:     valueType,
-		Required: true,
-	}
-}
+func dataSourceIntegrationRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	var diags diag.Diagnostics
+	c := meta.(*client.ApiClient)
+	name := data.Get("name").(string)
 
-func integrationSchema() map[string]*schema.Schema {
-	return map[string]*schema.Schema{
-		"type": required(schema.TypeString),
-		"name": required(schema.TypeString),
+	integration, err := c.Integration.Find(name)
+	if err != nil {
+		diags = append(diags, utils.DiagFromError(err, "Unable to read Integration"))
+		return diags
 	}
-}
 
-func dataSourceIntegrationRead(data *schema.ResourceData, meta interface{}) error {
-	// TODO: need an API endpoint to retrieve this information (?) or
-	//  figure out how we grab this from our normal integrations/uuid endpoint
-	log.Printf("DataSourceIntegrationRead id %v", data.Id())
-	return nil
+	diags = utils.DiagsCheckError(diags, data.Set("type", integration.Type), "Unable to read Integration type")
+	diags = utils.DiagsCheckError(diags, data.Set("name", integration.Name), "Unable to read Integration name")
+	diags = utils.DiagsCheckError(diags, data.Set("settings", integration.Settings), "Unable to read Integration settings")
+
+	data.SetId(integration.Id)
+
+	return diags
 }
