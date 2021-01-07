@@ -2,7 +2,6 @@ package templates
 
 import (
 	"encoding/json"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/symopsio/terraform-provider-sym/sym/client"
 	"github.com/symopsio/terraform-provider-sym/sym/utils"
@@ -66,7 +65,13 @@ func (t *SymApprovalTemplate) terraformToAPI(params *HCLParamMap) client.APIPara
 }
 
 func (t *SymApprovalTemplate) APIToTerraform(apiParams client.APIParams) (*HCLParamMap, error) {
-	fieldsJSON, err := json.Marshal(apiParams["fields"].([]client.ParamField))
+	var paramFields []client.ParamField
+
+	for _, fieldInterface := range apiParams["fields"].([]interface{}) {
+		paramFields = append(paramFields, *client.ParamFieldFromMap(fieldInterface.(map[string]interface{})))
+	}
+
+	fieldsJSON, err := json.Marshal(paramFields)
 	if err != nil {
 		return nil, err
 	}

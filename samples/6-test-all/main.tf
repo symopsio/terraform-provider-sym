@@ -100,6 +100,8 @@ resource "sym_strategy" "sso_main" {
   type = "aws_sso" # only supported value, will support okta for LD, klaviyo doesn't need one
   integration_id = sym_integration.runtime_context.id
   targets = [ sym_target.prod_break_glass.id ]
+
+  settings = {}
 }
 
 resource "sym_target" "prod_break_glass" {

@@ -24,6 +24,28 @@ func (p ParamField) String() string {
 	)
 }
 
+func ParamFieldFromMap(inputMap map[string]interface{}) *ParamField {
+	paramField := ParamField{
+		Name: inputMap["name"].(string),
+		Type: inputMap["type"].(string),
+		Required: inputMap["required"].(bool),
+	}
+
+	if _, ok := inputMap["label"]; ok {
+		paramField.Label = inputMap["label"].(string)
+	}
+
+	if _, ok := inputMap["allowed_values"]; ok {
+		var allowedValues []string
+		for _, allowedValueInterface := range inputMap["allowed_values"].([]interface{}) {
+			allowedValues = append(allowedValues, allowedValueInterface.(string))
+		}
+		paramField.AllowedValues = allowedValues
+	}
+
+	return &paramField
+}
+
 type Flow struct {
 	Id             string    `json:"id,omitempty"`
 	Name           string    `json:"name"`
