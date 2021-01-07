@@ -75,7 +75,7 @@ func (c *strategyClient) Update(strategy Strategy) (string, error) {
 	log.Printf("Updating Sym Strategy: %v", strategy)
 	result := Strategy{}
 
-	if _, err := c.HttpClient.Update(fmt.Sprintf("/stragtegies/%s/", strategy.Id), &strategy, &result); err != nil {
+	if _, err := c.HttpClient.Update(fmt.Sprintf("/strategies/%s/", strategy.Id), &strategy, &result); err != nil {
 		return "", err
 	}
 
