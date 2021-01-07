@@ -159,10 +159,19 @@ func updateFlow(ctx context.Context, data *schema.ResourceData, meta interface{}
 	}
 
 	implementation := data.Get("implementation").(string)
-	if b, err := ioutil.ReadFile(implementation); err != nil {
-		diags = append(diags, utils.DiagFromError(err, "Unable to read implementation file"))
+
+	// We'll have a base64 encoded string here already if we got content from the API
+	// that matches what's in our local impl.py file (caused by SuppressEquivalentFileContentDiffs)
+	// This check is to say if we can decode it, assume that's what happened, and don't re-encode.
+	if _, err := base64.StdEncoding.DecodeString(implementation); err == nil {
+		flow.Implementation = implementation
 	} else {
-		flow.Implementation = base64.StdEncoding.EncodeToString(b)
+		// Normal case where the diff has not been suppressed, read our local file and send it.
+		if b, err := ioutil.ReadFile(implementation); err != nil {
+			diags = append(diags, utils.DiagFromError(err, "Unable to read implementation file"))
+		} else {
+			flow.Implementation = base64.StdEncoding.EncodeToString(b)
+		}
 	}
 
 	if flowParams, d := buildAPIParamsFromResourceData(data); d.HasError() {
