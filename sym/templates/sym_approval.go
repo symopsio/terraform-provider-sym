@@ -24,8 +24,8 @@ func fieldResource() *schema.Resource {
 func (t *SymApprovalTemplate) ParamResource() *schema.Resource {
 	return &schema.Resource{
 		Schema: map[string]*schema.Schema{
-			"strategy_id": utils.Optional(schema.TypeString),
-			"fields":      utils.OptionalList(fieldResource()),
+			"strategy_id":  utils.Optional(schema.TypeString),
+			"param_fields": utils.OptionalList(fieldResource()),
 		},
 	}
 }
@@ -78,5 +78,5 @@ func (t *SymApprovalTemplate) APIToTerraform(apiParams client.APIParams) (*HCLPa
 }
 
 func (t *SymApprovalTemplate) APIToTerraformKeyMap() map[string]string {
-	return map[string]string{"fields": "fields_json"}
+	return map[string]string{"param_fields": "fields_json"}
 }
