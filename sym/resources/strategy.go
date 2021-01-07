@@ -20,12 +20,11 @@ func Strategy() *schema.Resource {
 	}
 }
 
-
 func strategySchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"type":           utils.Required(schema.TypeString),
 		"integration_id": utils.Required(schema.TypeString),
-		"settings": utils.SettingsMap(),
+		"settings":       utils.SettingsMap(),
 		"targets":        utils.StringList(true),
 	}
 }
@@ -36,7 +35,7 @@ func createStrategy(ctx context.Context, data *schema.ResourceData, meta interfa
 
 	strategy := client.Strategy{
 		Type:          data.Get("type").(string),
-		Settings: getSettings(data),
+		Settings:      getSettings(data),
 		IntegrationId: data.Get("integration_id").(string),
 	}
 	targets := data.Get("targets").([]interface{})
@@ -69,7 +68,6 @@ func readStrategy(ctx context.Context, data *schema.ResourceData, meta interface
 	diags = utils.DiagsCheckError(diags, data.Set("targets", strategy.Targets), "Unable to read Strategy targets")
 	diags = utils.DiagsCheckError(diags, data.Set("settings", strategy.Settings), "Unable to read Strategy settings")
 
-
 	return diags
 }
 
@@ -78,9 +76,10 @@ func updateStrategy(ctx context.Context, data *schema.ResourceData, meta interfa
 	c := meta.(*client.ApiClient)
 
 	strategy := client.Strategy{
+		Id:            data.Id(),
 		Type:          data.Get("type").(string),
 		IntegrationId: data.Get("integration_id").(string),
-		Settings: getSettings(data),
+		Settings:      getSettings(data),
 	}
 	targets := data.Get("targets").([]interface{})
 	for i := range targets {

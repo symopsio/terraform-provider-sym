@@ -69,6 +69,7 @@ func updateIntegration(ctx context.Context, data *schema.ResourceData, meta inte
 	c := meta.(*client.ApiClient)
 
 	integration := client.Integration{
+		Id:       data.Id(),
 		Type:     data.Get("type").(string),
 		Name:     data.Get("name").(string),
 		Settings: getSettings(data),

@@ -67,6 +67,7 @@ func updateTarget(ctx context.Context, data *schema.ResourceData, meta interface
 	c := meta.(*client.ApiClient)
 
 	target := client.Target{
+		Id:       data.Id(),
 		Type:     data.Get("type").(string),
 		Label:    data.Get("label").(string),
 		Settings: getSettings(data),

@@ -65,6 +65,7 @@ func updateRuntime(ctx context.Context, data *schema.ResourceData, meta interfac
 	c := meta.(*client.ApiClient)
 
 	runtime := client.Runtime{
+		Id:        data.Id(),
 		Name:      data.Get("name").(string),
 		ContextId: data.Get("context_id").(string),
 	}

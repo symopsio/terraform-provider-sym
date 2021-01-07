@@ -145,6 +145,7 @@ func updateFlow(ctx context.Context, data *schema.ResourceData, meta interface{}
 	c := meta.(*client.ApiClient)
 
 	flow := client.Flow{
+		Id:          data.Id(),
 		Name:        data.Get("name").(string),
 		Label:       data.Get("label").(string),
 		Template:    data.Get("template").(string),
