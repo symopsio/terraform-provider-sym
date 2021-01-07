@@ -4,7 +4,7 @@ terraform {
   required_version = ">= 0.14"
   required_providers {
     sym = {
-      source = "terraform.symops.io/symopsio/sym"
+      source  = "terraform.symops.io/symopsio/sym"
       version = "0.0.1"
     }
   }
@@ -27,7 +27,7 @@ resource "sym_integration" "runtime_context" {
   name = "runtime"
 
   settings = {
-    cloud       = "aws" # only supported value, will include gcp, azure, private in future
+    cloud       = "aws"                                  # only supported value, will include gcp, azure, private in future
     external_id = "1478F2AD-6091-41E6-B3D2-766CA2F173CB" # optional
     region      = "us-east-1"
     role_arn    = "arn:aws:iam::123456789012:role/sym/RuntimeConnectorRole"
@@ -49,8 +49,8 @@ resource "sym_secrets" "flow" {
 ## Runtime
 
 resource "sym_runtime" "this" {
-  name     = "runtime"
-  context_id  = sym_integration.runtime_context.id
+  name       = "runtime"
+  context_id = sym_integration.runtime_context.id
 }
 
 
@@ -65,51 +65,50 @@ resource "sym_integration" "slack" {
 # -- Flow (Implementer) --
 
 resource "sym_flow" "this" {
-  name = "sso_access"
+  name  = "sso_access"
   label = "SSO Access"
 
-  template = "sym:approval:1.0"
+  template       = "sym:approval:1.0"
   implementation = "impl.py"
 
   environment = {
     runtime_id = sym_runtime.this.id
-    slack_id = sym_integration.slack.id
+    slack_id   = sym_integration.slack.id
   }
 
   params = {
     strategy_id = sym_strategy.sso_main.id
 
     # This is called `fields` in the API
-    fields_json = jsonencode([
+    prompt_fields_json = jsonencode([
       {
-        name = "reason"
-        type = "string"
+        name     = "reason"
+        type     = "string"
         required = true
-        label = "Reason"
+        label    = "Reason"
       },
       {
-        name = "urgency"
-        type = "string"
-        required = true
+        name           = "urgency"
+        type           = "string"
+        required       = true
         allowed_values = ["Low", "Medium", "High"]
-      }])
+    }])
   }
 }
 
 resource "sym_strategy" "sso_main" {
-  type = "aws_sso" # only supported value, will support okta for LD, klaviyo doesn't need one
+  type           = "aws_sso" # only supported value, will support okta for LD, klaviyo doesn't need one
   integration_id = sym_integration.runtime_context.id
-  targets = [ sym_target.prod_break_glass.id ]
-
-  settings = {}
+  targets        = [sym_target.prod_break_glass.id]
+  settings       = {}
 }
 
 resource "sym_target" "prod_break_glass" {
-  type = "aws_sso_permission_set" # only supported value, will support an okta target for LD and a custom alternative for ASICS in v2
+  type  = "aws_sso_permission_set" # only supported value, will support an okta target for LD and a custom alternative for ASICS in v2
   label = "Prod Break Glass"
 
   settings = {
     permission_set_arn = "arn:aws:sso:::permissionSet/ins-abcdefghijklmnop/ps-111111111111"
-    account_id = "012345678910"
+    account_id         = "012345678910"
   }
 }

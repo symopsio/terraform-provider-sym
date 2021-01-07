@@ -23,8 +23,8 @@ func fieldResource() *schema.Resource {
 func (t *SymApprovalTemplate) ParamResource() *schema.Resource {
 	return &schema.Resource{
 		Schema: map[string]*schema.Schema{
-			"strategy_id": utils.Optional(schema.TypeString),
-			"fields":      utils.OptionalList(fieldResource()),
+			"strategy_id":   utils.Optional(schema.TypeString),
+			"prompt_fields": utils.OptionalList(fieldResource()),
 		},
 	}
 }
@@ -34,16 +34,16 @@ func (t *SymApprovalTemplate) ParamResource() *schema.Resource {
 func (t *SymApprovalTemplate) terraformToAPI(params *HCLParamMap) client.APIParams {
 	raw := make(client.APIParams)
 
-	if field := params.checkKey("fields_json"); field != nil {
+	if field := params.checkKey("prompt_fields_json"); field != nil {
 		var fields interface{}
 		field.checkError(
-			"Error decoding fields_json",
+			"Error decoding prompt_fields_json",
 			json.Unmarshal([]byte(field.Value()), &fields),
 		)
-		raw["fields"] = fields
+		raw["prompt_fields"] = fields
 	} else {
 		params.addWarning(
-			"fields_json",
+			"prompt_fields_json",
 			"No additional fields supplied",
 			"You can customize the request modal presented to users by specifying additional fields.",
 			"https://docs.symops.com/docs/sym-approval",
@@ -67,7 +67,7 @@ func (t *SymApprovalTemplate) terraformToAPI(params *HCLParamMap) client.APIPara
 func (t *SymApprovalTemplate) APIToTerraform(apiParams client.APIParams) (*HCLParamMap, error) {
 	var paramFields []client.ParamField
 
-	for _, fieldInterface := range apiParams["fields"].([]interface{}) {
+	for _, fieldInterface := range apiParams["prompt_fields"].([]interface{}) {
 		paramFields = append(paramFields, *client.ParamFieldFromMap(fieldInterface.(map[string]interface{})))
 	}
 
@@ -76,12 +76,12 @@ func (t *SymApprovalTemplate) APIToTerraform(apiParams client.APIParams) (*HCLPa
 		return nil, err
 	}
 	params := map[string]string{
-		"strategy_id": apiParams["strategy_id"].(string),
-		"fields_json": string(fieldsJSON),
+		"strategy_id":        apiParams["strategy_id"].(string),
+		"prompt_fields_json": string(fieldsJSON),
 	}
 	return &HCLParamMap{Params: params}, nil
 }
 
 func (t *SymApprovalTemplate) APIToTerraformKeyMap() map[string]string {
-	return map[string]string{"fields": "fields_json"}
+	return map[string]string{"prompt_fields": "prompt_fields_json"}
 }
