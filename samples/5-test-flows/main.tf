@@ -4,7 +4,7 @@ terraform {
   required_version = ">= 0.14"
   required_providers {
     sym = {
-      source = "terraform.symops.io/symopsio/sym"
+      source  = "terraform.symops.io/symopsio/sym"
       version = "0.0.1"
     }
   }
@@ -15,33 +15,33 @@ provider "sym" {
 }
 
 resource "sym_flow" "this" {
-  name = "sso_access"
+  name  = "sso_access"
   label = "SSO Access"
 
-  template = "sym:approval:1.0"
+  template       = "sym:approval:1.0"
   implementation = "impl.py"
 
   environment = {
     runtime_id = "sym_runtime.this.id"
-    slack_id = "sym_integration.slack.id"
+    slack_id   = "sym_integration.slack.id"
   }
 
   params = {
-    strategy_id = "sym_strategy.sso_main.id"
+    strategy_id = "1f7bbad8-12a9-4ed0-bd63-6cf74edc0dcc"
 
     # This is called `fields` in the API
-    fields_json = jsonencode([
+    prompt_fields_json = jsonencode([
       {
-        name = "reason"
-        type = "string"
+        name     = "reason"
+        type     = "string"
         required = true
-        label = "Reason"
+        label    = "Reason"
       },
       {
-        name = "urgency"
-        type = "string"
-        required = true
+        name           = "urgency"
+        type           = "string"
+        required       = true
         allowed_values = ["Low", "Medium", "High"]
-      }])
+    }])
   }
 }

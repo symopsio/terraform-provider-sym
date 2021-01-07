@@ -2,7 +2,7 @@ terraform {
   required_version = ">= 0.14"
   required_providers {
     sym = {
-      source = "terraform.symops.io/symopsio/sym"
+      source  = "terraform.symops.io/symopsio/sym"
       version = "0.0.1"
     }
   }
@@ -29,10 +29,10 @@ data "sym_integration" "slack" {
 # An approval flow uses a handler and params to fill in the missing pieces of a
 # template
 resource "sym_flow" "this" {
-  name = "sso_access_${var.environment}"
+  name  = "sso_access_${var.environment}"
   label = "SSO Access (${title(var.environment)})"
 
-  template = "sym:approval:1.0"
+  template       = "sym:approval:1.0"
   implementation = "impl.py"
 
   params = {
@@ -49,24 +49,24 @@ resource "sym_flow" "this" {
     // To generalize this, we've defined params as a map of string/string key/value pairs.
     // so to get fields to comply with this structure, the value must be a string, so we
     // end up json encoding the value.
-    fields_json = jsonencode([
+    prompt_fields_json = jsonencode([
       {
-        name = "reason"
-        type = "string"
+        name     = "reason"
+        type     = "string"
         required = true
-        label = "Reason"
+        label    = "Reason"
       },
       {
-        name = "urgency"
-        type = "string"
-        required = true
+        name           = "urgency"
+        type           = "string"
+        required       = true
         allowed_values = ["Low", "Medium", "High"]
-      }])
+    }])
   }
 
   settings = {
     runtime_id = data.sym_runtime.this.id
-    slack_id = data.sym_integration.slack.id
+    slack_id   = data.sym_integration.slack.id
   }
 }
 
@@ -76,21 +76,21 @@ resource "sym_strategy" "this" {
   type = "aws_sso"
 
   integration_id = data.sym_integration.sso.id
-  targets = [for target in sym_target.targets : target.id]
+  targets        = [for target in sym_target.targets : target.id]
 }
 
 # A target is a thing that we are managing access to
 resource "sym_target" "targets" {
   for_each = var.permission_sets
 
-  type = "aws_sso_permission_set"
+  type           = "aws_sso_permission_set"
   integration_id = data.sym_integration.sso.id
 
   label = each.key
 
   settings = {
-    instance_arn = var.instance_arn
+    instance_arn       = var.instance_arn
     permission_set_arn = each.value["arn"]
-    account_id = each.value["account_id"]
+    account_id         = each.value["account_id"]
   }
 }
