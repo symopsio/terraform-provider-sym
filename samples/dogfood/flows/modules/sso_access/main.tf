@@ -12,10 +12,6 @@ data "sym_integration" "slack" {
   name = var.environment
 }
 
-locals {
-  implementation_file_path = var.implementation_file_path != "" ? var.implementation_file_path : "${path.module}/impl.py"
-}
-
 # An approval flow uses a handler and params to fill in the missing pieces of a
 # template
 resource "sym_flow" "this" {
@@ -26,7 +22,7 @@ resource "sym_flow" "this" {
 
   # path.module is required here to make sure the file path points
   # to the file in this module vs. the calling location (root module path)
-  implementation = local.implementation_file_path
+  implementation = "${path.module}/impl.py"
 
   environment = {
     runtime_id = data.sym_runtime.this.id
