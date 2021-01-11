@@ -19,8 +19,9 @@ resource "sym_flow" "this" {
   label = "SSO Access (${title(var.environment)})"
 
   template       = "sym:approval:1.0"
-  # implementation = abspath("${path.module}/impl.py")
-  # implementation = "impl.py"
+
+  # path.module is required here to make sure the file path points
+  # to the file in this module vs. the calling location (root module path)
   implementation = "${path.module}/impl.py"
 
   environment = {
