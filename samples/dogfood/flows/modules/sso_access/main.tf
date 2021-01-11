@@ -19,7 +19,9 @@ resource "sym_flow" "this" {
   label = "SSO Access (${title(var.environment)})"
 
   template       = "sym:approval:1.0"
-  implementation = "impl.py"
+  # implementation = abspath("${path.module}/impl.py")
+  # implementation = "impl.py"
+  implementation = "${path.module}/impl.py"
 
   environment = {
     runtime_id = data.sym_runtime.this.id

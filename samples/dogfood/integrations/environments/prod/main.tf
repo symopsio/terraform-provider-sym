@@ -3,7 +3,7 @@ provider "aws" {
 }
 
 provider "sym" {
-  org = "symops"
+  org = "sym"
 }
 
 locals {
