@@ -1,5 +1,5 @@
 TEST?=$$(go list ./... | grep -v 'vendor')
-HOSTNAME=symops.io
+HOSTNAME=symops.com
 NAMESPACE=com
 NAME=sym
 BINARY=terraform-provider-${NAME}

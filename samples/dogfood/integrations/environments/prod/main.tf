@@ -7,7 +7,7 @@ provider "sym" {
 }
 
 locals {
-  environment = "sandbox"
+  environment = "prod"
 }
 
 # Creates an AWS IAM Role that a Sym runtime can use for execution
@@ -26,8 +26,6 @@ module "runtime_connector" {
   # set this if they are hosting the Sym platform AND the Sym runtime. We
   # currently are just planning on letting them host the runtime.
   sym_account_ids = [
-    "838419636750", #dev
-    "859391937334", #test
     "803477428605", #prod
     "455753951875"  #staging
   ]
