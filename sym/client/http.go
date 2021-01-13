@@ -3,12 +3,12 @@ package client
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"strings"
 
+	"github.com/google/uuid"
 	"github.com/symopsio/terraform-provider-sym/sym/utils"
 )
 
@@ -59,27 +59,29 @@ func (c *symHttpClient) Do(method string, path string, payload interface{}) (str
 		return "", err
 	}
 
+	requestID := uuid.New().String()
 	req.Header.Set("Authorization", "Bearer "+jwt)
 	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("X-Sym-Request-ID", requestID)
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		log.Printf("%s to %s errored: %v", method, path, err)
-		return "", utils.ErrAPIUnexpected
+		// no status code if there was an error at this point
+		return "", utils.ErrAPIConnect(path, requestID)
 	}
 
 	if resp.StatusCode == 404 {
-		return "", utils.ErrAPINotFound
+		return "", utils.ErrAPINotFound(path, requestID)
 	} else if resp.StatusCode == 401 {
 		return "", utils.ErrConfigFileNoJWT
 	} else if resp.StatusCode >= 500 {
-		return "", utils.ErrAPIInternal
+		return "", utils.ErrAPIUnexpected(path, requestID, resp.StatusCode)
 	}
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return "", err
 	} else if resp.StatusCode >= 400 {
-		return "", utils.GenerateError(fmt.Sprintf("Error %d: %s", resp.StatusCode, string(body)), utils.DocsHome)
+		return "", utils.ErrAPIUnexpected(path, requestID, resp.StatusCode)
 	}
 
 	return string(body), nil
