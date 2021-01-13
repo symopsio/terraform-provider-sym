@@ -8,6 +8,8 @@ import (
 	"log"
 	"net/http"
 	"strings"
+
+	"github.com/symopsio/terraform-provider-sym/sym/utils"
 )
 
 func NewSymHttpClient(apiUrl string) SymHttpClient {
@@ -44,28 +46,42 @@ func (c *symHttpClient) Do(method string, path string, payload interface{}) (str
 	if err != nil {
 		return "", err
 	}
+
 	url := c.getUrl(path)
 	b, err := json.Marshal(payload)
 	if err != nil {
 		return "", err
 	}
+
 	log.Printf("submitting request: %s %s %s", method, path, string(b))
 	req, err := http.NewRequest(method, url, bytes.NewReader(b))
 	if err != nil {
 		return "", err
 	}
+
 	req.Header.Set("Authorization", "Bearer "+jwt)
 	req.Header.Set("Content-Type", "application/json")
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return "", err
+		log.Printf("%s to %s errored: %v", method, path, err)
+		return "", utils.ErrAPIUnexpected
 	}
+
+	if resp.StatusCode == 404 {
+		return "", utils.ErrAPINotFound
+	} else if resp.StatusCode == 401 {
+		return "", utils.ErrConfigFileNoJWT
+	} else if resp.StatusCode >= 500 {
+		return "", utils.ErrAPIInternal
+	}
+
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return "", err
 	} else if resp.StatusCode >= 400 {
-		return "", fmt.Errorf("Error %d: %s", resp.StatusCode, string(body))
+		return "", utils.GenerateError(fmt.Sprintf("Error %d: %s", resp.StatusCode, string(body)), utils.DocsHome)
 	}
+
 	return string(body), nil
 }
 
