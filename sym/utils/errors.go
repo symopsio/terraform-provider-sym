@@ -12,7 +12,7 @@ func GenerateError(detail string, docs string) error {
 // Static URLs for specific Sym documentation pages.
 const (
 	DocsHome           = "https://docs.symops.com/"
-	DocsSupport        = "https://docs.symops.com/" // TODO: update this URL
+	DocsSupport        = "https://docs.symops.com/docs/support"
 	DocsSymflowInstall = "https://docs.symops.com/docs/install-sym-flow"
 	DocsSymflowLogin   = "https://docs.symops.com/docs/login-sym-flow"
 )
