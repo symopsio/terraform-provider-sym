@@ -28,7 +28,7 @@ func New() *ApiClient {
 func getApiUrl() string {
 	apiUrl := os.Getenv("SYM_API_URL")
 	if apiUrl == "" {
-		apiUrl = "http://localhost:8000/api/v1"
+		apiUrl = "https://api.symops.com/api/v1"
 	}
 	return apiUrl
 }
