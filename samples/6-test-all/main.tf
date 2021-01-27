@@ -88,7 +88,7 @@ resource "sym_flow" "this" {
       },
       {
         name           = "urgency"
-        type           = "string"
+        type           = "list"
         required       = true
         allowed_values = ["Low", "Medium", "High"]
     }])
