@@ -15,15 +15,15 @@ provider "sym" {
 
 # The AWS integration depends on a role that provides access to the various
 # things this flow needs to do in AWS.
-resource "sym_integration" "aws" {
-  type = "aws"
-  name = "aws-flow-test"
+resource "sym_integration" "aws_context" {
+  type = "permission_context"
+  name = "aws-flow-context-test"
 
   settings = {
-    # Sym can assume this role to RW things in customer account
-    # The role is created by a TF module independent of this config (for now)
-    role_arn = "arn:aws:iam::123456789012:role/sym/SymExecutionRole"
-    region = "us-east-1"
+    cloud       = "aws"                                  # only supported value, will include gcp, azure, private in future
+    external_id = "1478F2AD-6091-41E6-B3D2-766CA2F173CB" # optional
+    region      = "us-east-1"
+    role_arn    = "arn:aws:iam::123456789012:role/sym/RuntimeConnectorRole"
   }
 }
 
@@ -33,7 +33,7 @@ resource "sym_integration" "sso_main" {
 
   settings = {
     instance_arn = "arn:aws:::instance/ssoinst-abcdefghi12314135325"
-    aws = sym_integration.aws.id
+    aws = sym_integration.aws_context.id
   }
 }
 
