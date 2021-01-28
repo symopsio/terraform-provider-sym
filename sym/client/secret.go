@@ -8,7 +8,7 @@ import (
 type Secret struct {
 	Id       string   `json:"id,omitempty"`
 	Type     string   `json:"type"`
-	Name     string   `json:"name"`
+	Name     string   `json:"slug"`
 	Settings Settings `json:"settings"`
 }
 

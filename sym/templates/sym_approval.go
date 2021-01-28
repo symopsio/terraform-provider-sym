@@ -2,6 +2,7 @@ package templates
 
 import (
 	"encoding/json"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/symopsio/terraform-provider-sym/sym/client"
 	"github.com/symopsio/terraform-provider-sym/sym/utils"

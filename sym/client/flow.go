@@ -26,8 +26,8 @@ func (p ParamField) String() string {
 
 func ParamFieldFromMap(inputMap map[string]interface{}) *ParamField {
 	paramField := ParamField{
-		Name: inputMap["name"].(string),
-		Type: inputMap["type"].(string),
+		Name:     inputMap["name"].(string),
+		Type:     inputMap["type"].(string),
 		Required: inputMap["required"].(bool),
 	}
 
@@ -48,7 +48,7 @@ func ParamFieldFromMap(inputMap map[string]interface{}) *ParamField {
 
 type Flow struct {
 	Id             string    `json:"id,omitempty"`
-	Name           string    `json:"name"`
+	Name           string    `json:"slug"`
 	Label          string    `json:"label"`
 	Template       string    `json:"template"`
 	Implementation string    `json:"implementation"`

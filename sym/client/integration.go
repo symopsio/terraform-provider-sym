@@ -9,7 +9,7 @@ type Integration struct {
 	Id       string   `json:"id,omitempty"`
 	Type     string   `json:"type"`
 	Settings Settings `json:"settings"`
-	Name     string   `json:"name"`
+	Name     string   `json:"slug"`
 }
 
 func (s Integration) String() string {
@@ -66,7 +66,7 @@ func (i *integrationClient) Find(name string) (*Integration, error) {
 	log.Printf("Getting Sym Integration by name: %s", name)
 	var result []Integration
 
-	if err := i.HttpClient.Read(fmt.Sprintf("/integrations/search/?name=%s", name), &result); err != nil {
+	if err := i.HttpClient.Read(fmt.Sprintf("/integrations/search/?slug=%s", name), &result); err != nil {
 		return nil, err
 	}
 

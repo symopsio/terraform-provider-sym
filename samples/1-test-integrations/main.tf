@@ -1,8 +1,7 @@
 terraform {
-  required_version = ">= 0.14"
   required_providers {
     sym = {
-      source = "terraform.symops.io/symopsio/sym"
+      source = "terraform.symops.com/symopsio/sym"
       version = "0.0.1"
     }
   }
@@ -40,7 +39,7 @@ resource "sym_integration" "aws" {
   settings = {
     # Sym can assume this role to RW things in customer account
     # The role is created by a TF module independent of this config (for now)
-    role = "arn:aws:iam::123456789012:role/sym/SymExecutionRole"
+    role_arn = "arn:aws:iam::123456789012:role/sym/SymExecutionRole"
     region = "us-east-1"
   }
 }

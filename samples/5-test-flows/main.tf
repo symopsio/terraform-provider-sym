@@ -1,10 +1,9 @@
 # -- Deps --
 
 terraform {
-  required_version = ">= 0.14"
   required_providers {
     sym = {
-      source  = "terraform.symops.io/symopsio/sym"
+      source  = "terraform.symops.com/symopsio/sym"
       version = "0.0.1"
     }
   }
@@ -13,6 +12,28 @@ terraform {
 provider "sym" {
   org = "healthy-health"
 }
+
+# The AWS integration depends on a role that provides access to the various
+# things this flow needs to do in AWS.
+resource "sym_integration" "aws_context" {
+  type = "permission_context"
+  name = "aws-flow-context-test"
+
+  settings = {
+    cloud       = "aws"                                  # only supported value, will include gcp, azure, private in future
+    external_id = "1478F2AD-6091-41E6-B3D2-766CA2F173CB" # optional
+    region      = "us-east-1"
+    role_arn    = "arn:aws:iam::123456789012:role/sym/RuntimeConnectorRole"
+  }
+}
+
+
+resource "sym_strategy" "sso_main" {
+  type = "aws_sso"
+  integration_id = sym_integration.aws_context.id
+  targets = []
+}
+
 
 resource "sym_flow" "this" {
   name  = "sso_access"
@@ -27,7 +48,7 @@ resource "sym_flow" "this" {
   }
 
   params = {
-    strategy_id = "1f7bbad8-12a9-4ed0-bd63-6cf74edc0dcc"
+    strategy_id = sym_strategy.sso_main.id
 
     # This is called `fields` in the API
     prompt_fields_json = jsonencode([
