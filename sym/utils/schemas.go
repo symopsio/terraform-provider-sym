@@ -34,8 +34,9 @@ var (
 			Elem: &schema.Schema{
 				Type: schema.TypeString,
 			},
-			Optional: true,
-			Default:  map[string]string{},
+			Optional:         true,
+			Default:          map[string]string{},
+			DiffSuppressFunc: SuppressNullSettingsDiffs,
 		}
 	}
 
