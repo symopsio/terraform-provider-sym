@@ -27,19 +27,10 @@ resource "sym_integration" "aws_context" {
   }
 }
 
-resource "sym_integration" "sso_main" {
-  type = "aws_sso"
-  name = "sso-main-flow-test"
-
-  settings = {
-    instance_arn = "arn:aws:::instance/ssoinst-abcdefghi12314135325"
-    aws = sym_integration.aws_context.id
-  }
-}
 
 resource "sym_strategy" "sso_main" {
   type = "aws_sso"
-  integration_id = sym_integration.sso_main.id
+  integration_id = sym_integration.aws_context.id
   targets = []
 }
 
