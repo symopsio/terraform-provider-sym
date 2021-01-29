@@ -4,9 +4,12 @@ import (
 	"bytes"
 	"encoding/base64"
 	"encoding/json"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"io/ioutil"
 	"log"
+	"strconv"
+	"strings"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 // SuppressEquivalentJsonDiffs is a DiffSuppressFunc that can be passed into
@@ -31,6 +34,60 @@ func SuppressEquivalentJsonDiffs(k string, old string, new string, d *schema.Res
 	}
 
 	return JsonBytesEqual(ob.Bytes(), nb.Bytes())
+}
+
+// SuppressNullSettingsDiffs is a DiffSuppressFunc that can be passed into
+// a schema to account for differences in settings maps received from the API
+// and stored in the Terraform state.
+//
+// e.g. if a Terraform object's settings are empty:
+// 	settings {}
+//
+// the API may still send the full dictionary of possible settings will null values
+// 	{"account_id": null, ...}
+//
+// where effectively those values are the same, but Terraform's diff will not
+// know that.
+//
+// SuppressNullSettingsDiffs will be called on each item in the settings
+// map individually as well as on the settings map as a whole.
+func SuppressNullSettingsDiffs(k string, old string, new string, d *schema.ResourceData) bool {
+	isTopLevel := strings.HasSuffix(k, ".%")
+
+	if isTopLevel {
+		// If we're at the top level of the settings map, all incoming values are null,
+		// and there are no values locally, suppress that difference.
+		// This is because if all values are null on both sides, suppressing each individual
+		// item is not sufficient to suppress the update.
+		settingsName := strings.TrimSuffix(k, ".%")
+		settings := d.Get(settingsName).(map[string]interface{})
+		allSettingsNull := true
+
+		for _, v := range settings {
+			if v.(string) != "" {
+				allSettingsNull = false
+				break
+			}
+		}
+
+		i, err := strconv.Atoi(new)
+		if err != nil {
+			log.Printf("Error getting new settings value count from %v for value %v", new, k)
+			return false
+		}
+
+		if i == 0 && allSettingsNull {
+			return true
+		}
+	} else if !isTopLevel && old == "" && new == "" {
+		// If we're not at the top level of the settings map, and both the existing
+		// and the incoming data values are all null, suppress that difference.
+		// This is sufficient if not all values in the settings map are null on both
+		// sides.
+		return true
+	}
+
+	return false
 }
 
 // SuppressEquivalentFileContentDiffs is a DiffSuppressFunc that can be passed into
