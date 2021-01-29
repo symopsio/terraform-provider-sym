@@ -61,7 +61,7 @@ func (c *runtimeClient) Find(name string) (*Runtime, error) {
 	log.Printf("Getting Runtime by name: %s", name)
 	var result []Runtime
 
-	if err := c.HttpClient.Read(fmt.Sprintf("/runtimes/search/?name=%s", name), &result); err != nil {
+	if err := c.HttpClient.Read(fmt.Sprintf("/runtimes/search/?slug=%s", name), &result); err != nil {
 		return nil, err
 	}
 
