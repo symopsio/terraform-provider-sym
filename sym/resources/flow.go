@@ -43,16 +43,16 @@ func flowSchema() map[string]*schema.Schema {
 }
 
 // Remove the version from our template type for handling
-// e.g. sym:approval:1.0 becomes just sym:approval
+// e.g. sym:template:approval:1.0 becomes just sym:template:approval
 func getTemplateNameWithoutVersion(templateName string) string {
 	splitTemplateName := strings.Split(templateName, ":")
-	return splitTemplateName[0] + ":" + splitTemplateName[1]
+	return splitTemplateName[0] + ":" + splitTemplateName[1] + ":" + splitTemplateName[2]
 }
 
 func getTemplateFromTemplateID(templateID string) templates.Template {
 	templateName := getTemplateNameWithoutVersion(templateID)
 	switch templateName {
-	case "sym:approval":
+	case "sym:template:approval":
 		return &templates.SymApprovalTemplate{}
 	default:
 		return &templates.UnknownTemplate{Name: templateName}

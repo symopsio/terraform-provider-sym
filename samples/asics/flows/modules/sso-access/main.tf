@@ -18,7 +18,7 @@ resource "sym_flow" "this" {
   name  = "sso_access_${var.environment}"
   label = "SSO Access (${title(var.environment)})"
 
-  template = "sym:approval:1.0"
+  template = "sym:template:approval:1.0"
 
   implementation = "${path.module}/impl.py"
 
