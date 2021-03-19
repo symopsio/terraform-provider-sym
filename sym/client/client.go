@@ -10,6 +10,7 @@ type ApiClient struct {
 	Strategy    StrategyClient
 	Flow        FlowClient
 	Runtime     RuntimeClient
+	Environment EnvironmentClient
 }
 
 // New creates a new symflow client
