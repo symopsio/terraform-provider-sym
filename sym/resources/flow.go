@@ -1,3 +1,6 @@
+// Each resource must implement a Resource interface provided by Hashicorp.
+//
+// This file contains the implementation of the Flow Resource
 package resources
 
 import (
@@ -13,6 +16,9 @@ import (
 	"github.com/symopsio/terraform-provider-sym/sym/utils"
 )
 
+// Flow Resource ////////////////////////////////
+
+// Return an implementation of the Resource interface
 func Flow() *schema.Resource {
 	return &schema.Resource{
 		Schema:        flowSchema(),
@@ -23,6 +29,7 @@ func Flow() *schema.Resource {
 	}
 }
 
+// Map the resource's fields to types
 func flowSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"name":     utils.Required(schema.TypeString),
@@ -34,6 +41,7 @@ func flowSchema() map[string]*schema.Schema {
 			DiffSuppressFunc: utils.SuppressEquivalentFileContentDiffs,
 		},
 		"environment": utils.SettingsMap(),
+		"vars":        utils.SettingsMap(),
 		"params": {
 			Type:             schema.TypeMap,
 			Required:         true,
@@ -42,6 +50,8 @@ func flowSchema() map[string]*schema.Schema {
 	}
 }
 
+// Template Helper Functions ////////////////////
+
 // Remove the version from our template type for handling
 // e.g. sym:template:approval:1.0 becomes just sym:template:approval
 func getTemplateNameWithoutVersion(templateName string) string {
@@ -49,6 +59,7 @@ func getTemplateNameWithoutVersion(templateName string) string {
 	return splitTemplateName[0] + ":" + splitTemplateName[1] + ":" + splitTemplateName[2]
 }
 
+// Given a template ID string, return the appropriate template
 func getTemplateFromTemplateID(templateID string) templates.Template {
 	templateName := getTemplateNameWithoutVersion(templateID)
 	switch templateName {
@@ -59,7 +70,11 @@ func getTemplateFromTemplateID(templateID string) templates.Template {
 	}
 }
 
+// API Helper Functions /////////////////////////
+
 // Build a Flow's FlowParam from ResourceData based on a Template's specifications
+//
+// Terraform -> API
 func buildAPIParamsFromResourceData(data *schema.ResourceData) (client.APIParams, diag.Diagnostics) {
 	template := getTemplateFromTemplateID(data.Get("template").(string))
 	params := &templates.HCLParamMap{Params: getSettingsMap(data, "params")}
@@ -78,10 +93,14 @@ func buildAPIParamsFromResourceData(data *schema.ResourceData) (client.APIParams
 // buildHCLParamsfromAPIParams turns the internal FlowParam struct into a map that can be set
 // on terraform's ResourceData so that the version from the API can be compared to the
 // version terraform pulls from the local files during diffs.
+//
+// API -> Terraform
 func buildHCLParamsfromAPIParams(data *schema.ResourceData, flowParam client.APIParams) (*templates.HCLParamMap, error) {
 	template := getTemplateFromTemplateID(data.Get("template").(string))
 	return template.APIToTerraform(flowParam)
 }
+
+// CRUD operations //////////////////////////////
 
 func createFlow(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
@@ -92,6 +111,7 @@ func createFlow(ctx context.Context, data *schema.ResourceData, meta interface{}
 		Label:       data.Get("label").(string),
 		Template:    data.Get("template").(string),
 		Environment: getSettingsMap(data, "environment"),
+		Vars:        getSettingsMap(data, "vars"),
 	}
 
 	implementation := data.Get("implementation").(string)
@@ -134,6 +154,7 @@ func readFlow(ctx context.Context, data *schema.ResourceData, meta interface{}) 
 	diags = utils.DiagsCheckError(diags, data.Set("label", flow.Label), "Unable to read Flow label")
 	diags = utils.DiagsCheckError(diags, data.Set("template", flow.Template), "Unable to read Flow template")
 	diags = utils.DiagsCheckError(diags, data.Set("environment", flow.Environment), "Unable to read Flow environment")
+	diags = utils.DiagsCheckError(diags, data.Set("vars", flow.Environment), "Unable to read Flow vars")
 	diags = utils.DiagsCheckError(diags, data.Set("implementation", flow.Implementation), "Unable to read Flow implementation")
 
 	flowParamsMap, err := buildHCLParamsfromAPIParams(data, flow.Params)
@@ -156,6 +177,7 @@ func updateFlow(ctx context.Context, data *schema.ResourceData, meta interface{}
 		Label:       data.Get("label").(string),
 		Template:    data.Get("template").(string),
 		Environment: getSettingsMap(data, "environment"),
+		Vars:        getSettingsMap(data, "vars"),
 	}
 
 	implementation := data.Get("implementation").(string)

@@ -5,6 +5,8 @@ import (
 	"log"
 )
 
+// Types ////////////////////////////////////////
+
 type ParamField struct {
 	Name          string   `json:"name"`
 	Type          string   `json:"type"`
@@ -12,6 +14,19 @@ type ParamField struct {
 	Label         string   `json:"label,omitempty"`
 	AllowedValues []string `json:"allowed_values,omitempty"`
 }
+
+type Flow struct {
+	Id             string    `json:"id,omitempty"`
+	Name           string    `json:"slug"`
+	Label          string    `json:"label"`
+	Template       string    `json:"template"`
+	Implementation string    `json:"implementation"`
+	Environment    Settings  `json:"environment"`
+	Vars           Settings  `json:"vars"`
+	Params         APIParams `json:"params"`
+}
+
+// Helper Functions for Types ///////////////////
 
 func (p ParamField) String() string {
 	return fmt.Sprintf(
@@ -24,6 +39,7 @@ func (p ParamField) String() string {
 	)
 }
 
+// Given an input map, construct a ParamField
 func ParamFieldFromMap(inputMap map[string]interface{}) *ParamField {
 	paramField := ParamField{
 		Name:     inputMap["name"].(string),
@@ -46,16 +62,7 @@ func ParamFieldFromMap(inputMap map[string]interface{}) *ParamField {
 	return &paramField
 }
 
-type Flow struct {
-	Id             string    `json:"id,omitempty"`
-	Name           string    `json:"slug"`
-	Label          string    `json:"label"`
-	Template       string    `json:"template"`
-	Implementation string    `json:"implementation"`
-	Environment    Settings  `json:"environment"`
-	Params         APIParams `json:"params"`
-}
-
+// Pretty-print a Flow
 func (s Flow) String() string {
 	return fmt.Sprintf(
 		"{id=%s, name=%s, label=%s, template=%s, implementation=%s, params=%v}",
@@ -67,6 +74,8 @@ func (s Flow) String() string {
 		s.Params,
 	)
 }
+
+// Client ///////////////////////////////////////
 
 type FlowClient interface {
 	Create(flow Flow) (string, error)
@@ -84,6 +93,8 @@ func NewFlowClient(httpClient SymHttpClient) FlowClient {
 type flowClient struct {
 	HttpClient SymHttpClient
 }
+
+// Client CRUD operations ///////////////////////
 
 func (c *flowClient) Create(flow Flow) (string, error) {
 	log.Printf("Creating Sym Flow: %v", flow)
