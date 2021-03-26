@@ -62,7 +62,17 @@ func ParamFieldFromMap(inputMap map[string]interface{}) *ParamField {
 	return &paramField
 }
 
-// Pretty-print a Flow
+type Flow struct {
+	Id             string    `json:"id,omitempty"`
+	Name           string    `json:"slug"`
+	Label          string    `json:"label"`
+	Template       string    `json:"template"`
+	Implementation string    `json:"implementation"`
+	Environment    Settings  `json:"environment"`
+	EnvironmentId  string    `json:"environment_id"`
+	Params         APIParams `json:"params"`
+}
+
 func (s Flow) String() string {
 	return fmt.Sprintf(
 		"{id=%s, name=%s, label=%s, template=%s, implementation=%s, params=%v}",

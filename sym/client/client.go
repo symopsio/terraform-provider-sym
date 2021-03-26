@@ -23,6 +23,7 @@ func New() *ApiClient {
 		Strategy:    NewStrategyClient(httpClient),
 		Flow:        NewFlowClient(httpClient),
 		Runtime:     NewRuntimeClient(httpClient),
+		Environment: NewEnvironmentClient(httpClient),
 	}
 }
 

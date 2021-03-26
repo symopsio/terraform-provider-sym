@@ -40,8 +40,12 @@ func flowSchema() map[string]*schema.Schema {
 			Required:         true,
 			DiffSuppressFunc: utils.SuppressEquivalentFileContentDiffs,
 		},
-		"environment": utils.SettingsMap(),
-		"vars":        utils.SettingsMap(),
+		"vars": utils.SettingsMap(),
+		"environment": utils.Deprecated(
+			utils.SettingsMap(),
+			"Deprecated. Please use environment_id with a sym_environment resource.",
+		),
+		"environment_id": utils.Required(schema.TypeString),
 		"params": {
 			Type:             schema.TypeMap,
 			Required:         true,
@@ -107,11 +111,12 @@ func createFlow(ctx context.Context, data *schema.ResourceData, meta interface{}
 	c := meta.(*client.ApiClient)
 
 	flow := client.Flow{
-		Name:        data.Get("name").(string),
-		Label:       data.Get("label").(string),
-		Template:    data.Get("template").(string),
-		Environment: getSettingsMap(data, "environment"),
-		Vars:        getSettingsMap(data, "vars"),
+		Name:          data.Get("name").(string),
+		Label:         data.Get("label").(string),
+		Template:      data.Get("template").(string),
+		Environment:   getSettingsMap(data, "environment"),
+		EnvironmentId: data.Get("environment_id").(string),
+		Vars:          getSettingsMap(data, "vars"),
 	}
 
 	implementation := data.Get("implementation").(string)
@@ -153,6 +158,7 @@ func readFlow(ctx context.Context, data *schema.ResourceData, meta interface{}) 
 	diags = utils.DiagsCheckError(diags, data.Set("name", flow.Name), "Unable to read Flow name")
 	diags = utils.DiagsCheckError(diags, data.Set("label", flow.Label), "Unable to read Flow label")
 	diags = utils.DiagsCheckError(diags, data.Set("template", flow.Template), "Unable to read Flow template")
+	diags = utils.DiagsCheckError(diags, data.Set("environment_id", flow.EnvironmentId), "Unable to read Flow environment_id")
 	diags = utils.DiagsCheckError(diags, data.Set("environment", flow.Environment), "Unable to read Flow environment")
 	diags = utils.DiagsCheckError(diags, data.Set("vars", flow.Environment), "Unable to read Flow vars")
 	diags = utils.DiagsCheckError(diags, data.Set("implementation", flow.Implementation), "Unable to read Flow implementation")
@@ -172,12 +178,13 @@ func updateFlow(ctx context.Context, data *schema.ResourceData, meta interface{}
 	c := meta.(*client.ApiClient)
 
 	flow := client.Flow{
-		Id:          data.Id(),
-		Name:        data.Get("name").(string),
-		Label:       data.Get("label").(string),
-		Template:    data.Get("template").(string),
-		Environment: getSettingsMap(data, "environment"),
-		Vars:        getSettingsMap(data, "vars"),
+		Id:            data.Id(),
+		Name:          data.Get("name").(string),
+		Label:         data.Get("label").(string),
+		Template:      data.Get("template").(string),
+		Environment:   getSettingsMap(data, "environment"),
+		EnvironmentId: data.Get("environment_id").(string),
+		Vars:          getSettingsMap(data, "vars"),
 	}
 
 	implementation := data.Get("implementation").(string)

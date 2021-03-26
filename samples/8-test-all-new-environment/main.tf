@@ -63,6 +63,13 @@ resource "sym_integration" "slack" {
 
 # -- Flow (Implementer) --
 
+resource "sym_environment" "this" {
+  name = "sandbox"
+  sym_entities = {
+    runtime_id = sym_runtime.this.id
+  }
+}
+
 resource "sym_flow" "this" {
   name  = "sso_access"
   label = "SSO Access"
@@ -70,10 +77,7 @@ resource "sym_flow" "this" {
   template       = "sym:template:approval:1.0.0"
   implementation = "impl.py"
 
-  environment = {
-    runtime_id = sym_runtime.this.id
-    slack_id   = sym_integration.slack.id
-  }
+  environment_id = sym_environment.this.id
 
   params = {
     strategy_id = sym_strategy.sso_main.id
