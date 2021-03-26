@@ -22,6 +22,7 @@ type Flow struct {
 	Template       string    `json:"template"`
 	Implementation string    `json:"implementation"`
 	Environment    Settings  `json:"environment"`
+	EnvironmentId  string    `json:"environment_id"`
 	Vars           Settings  `json:"vars"`
 	Params         APIParams `json:"params"`
 }
@@ -60,17 +61,6 @@ func ParamFieldFromMap(inputMap map[string]interface{}) *ParamField {
 	}
 
 	return &paramField
-}
-
-type Flow struct {
-	Id             string    `json:"id,omitempty"`
-	Name           string    `json:"slug"`
-	Label          string    `json:"label"`
-	Template       string    `json:"template"`
-	Implementation string    `json:"implementation"`
-	Environment    Settings  `json:"environment"`
-	EnvironmentId  string    `json:"environment_id"`
-	Params         APIParams `json:"params"`
 }
 
 func (s Flow) String() string {
