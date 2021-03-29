@@ -45,7 +45,7 @@ func (c *environmentClient) Create(environment Environment) (string, error) {
 	}
 
 	if result.Id == "" {
-		return "", fmt.Errorf("response indicates Sym Environment was not created")
+		return "", fmt.Errorf("An error happened during the Environment creation. Please contact Sym support.")
 	}
 
 	log.Printf("Created Sym Environment: %s", result.Id)

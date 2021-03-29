@@ -43,7 +43,7 @@ func flowSchema() map[string]*schema.Schema {
 		"vars": utils.SettingsMap(),
 		"environment": utils.Deprecated(
 			utils.SettingsMap(),
-			"Deprecated. Please use environment_id with a sym_environment resource.",
+			"The environment field is deprecated. Please use environment_id with a sym_environment resource.",
 		),
 		"environment_id": utils.Required(schema.TypeString),
 		"params": {
