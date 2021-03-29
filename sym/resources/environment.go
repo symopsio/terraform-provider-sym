@@ -25,7 +25,7 @@ func Environment() *schema.Resource {
 func environmentSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"name":         utils.Required(schema.TypeString),
-		"sym_entities": utils.SettingsMap(),
+		"integrations": utils.SettingsMap(),
 	}
 }
 
@@ -37,8 +37,8 @@ func createEnvironment(ctx context.Context, data *schema.ResourceData, meta inte
 	c := meta.(*client.ApiClient)
 
 	environment := client.Environment{
-		Name:        data.Get("name").(string),
-		SymEntities: getSettingsMap(data, "sym_entities"),
+		Name:         data.Get("name").(string),
+		Integrations: getSettingsMap(data, "integrations"),
 	}
 
 	if id, err := c.Environment.Create(environment); err != nil {
@@ -63,7 +63,7 @@ func readEnvironment(ctx context.Context, data *schema.ResourceData, meta interf
 	}
 
 	diags = utils.DiagsCheckError(diags, data.Set("name", environment.Name), "Unable to read Environment name")
-	diags = utils.DiagsCheckError(diags, data.Set("sym_entities", environment.SymEntities), "Unable to read Environment sym_entites")
+	diags = utils.DiagsCheckError(diags, data.Set("integrations", environment.Integrations), "Unable to read Environment sym_entites")
 
 	return diags
 }
@@ -74,9 +74,9 @@ func updateEnvironment(ctx context.Context, data *schema.ResourceData, meta inte
 	c := meta.(*client.ApiClient)
 
 	environment := client.Environment{
-		Id:          data.Id(),
-		Name:        data.Get("name").(string),
-		SymEntities: getSettingsMap(data, "sym_entities"),
+		Id:           data.Id(),
+		Name:         data.Get("name").(string),
+		Integrations: getSettingsMap(data, "integrations"),
 	}
 
 	if _, err := c.Environment.Update(environment); err != nil {

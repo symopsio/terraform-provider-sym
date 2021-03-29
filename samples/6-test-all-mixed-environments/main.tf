@@ -65,7 +65,7 @@ resource "sym_integration" "slack" {
 
 resource "sym_environment" "this" {
   name = "sandbox"
-  sym_entities = {
+  integrations = {
     runtime_id = sym_runtime.this.id
     slack_id   = sym_integration.slack.id
   }

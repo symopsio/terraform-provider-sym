@@ -6,9 +6,9 @@ import (
 )
 
 type Environment struct {
-	Id          string            `json:"id,omitempty"`
-	Name        string            `json:"slug"`
-	SymEntities map[string]string `json:"sym_entities"`
+	Id           string            `json:"id,omitempty"`
+	Name         string            `json:"slug"`
+	Integrations map[string]string `json:"integrations"`
 }
 
 func (s Environment) String() string {
