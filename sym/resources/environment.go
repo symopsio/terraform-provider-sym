@@ -41,10 +41,6 @@ func createEnvironment(ctx context.Context, data *schema.ResourceData, meta inte
 		SymEntities: getSettingsMap(data, "sym_entities"),
 	}
 
-	if diags.HasError() {
-		return diags
-	}
-
 	if id, err := c.Environment.Create(environment); err != nil {
 		diags = append(diags, utils.DiagFromError(err, "Unable to create Environment"))
 	} else {
