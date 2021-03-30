@@ -10,6 +10,7 @@ type ApiClient struct {
 	Strategy    StrategyClient
 	Flow        FlowClient
 	Runtime     RuntimeClient
+	Environment EnvironmentClient
 }
 
 // New creates a new symflow client
@@ -22,6 +23,7 @@ func New() *ApiClient {
 		Strategy:    NewStrategyClient(httpClient),
 		Flow:        NewFlowClient(httpClient),
 		Runtime:     NewRuntimeClient(httpClient),
+		Environment: NewEnvironmentClient(httpClient),
 	}
 }
 

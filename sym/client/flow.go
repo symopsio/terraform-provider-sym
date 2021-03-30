@@ -22,6 +22,7 @@ type Flow struct {
 	Template       string    `json:"template"`
 	Implementation string    `json:"implementation"`
 	Environment    Settings  `json:"environment"`
+	EnvironmentId  string    `json:"environment_id"`
 	Vars           Settings  `json:"vars"`
 	Params         APIParams `json:"params"`
 }
@@ -62,7 +63,6 @@ func ParamFieldFromMap(inputMap map[string]interface{}) *ParamField {
 	return &paramField
 }
 
-// Pretty-print a Flow
 func (s Flow) String() string {
 	return fmt.Sprintf(
 		"{id=%s, name=%s, label=%s, template=%s, implementation=%s, params=%v}",

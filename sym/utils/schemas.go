@@ -28,6 +28,11 @@ var (
 		}
 	}
 
+	Deprecated = func(schema *schema.Schema, message string) *schema.Schema {
+		schema.Deprecated = message
+		return schema
+	}
+
 	SettingsMap = func() *schema.Schema {
 		return &schema.Schema{
 			Type: schema.TypeMap,
