@@ -76,7 +76,7 @@ func (c *environmentClient) Update(environment Environment) (string, error) {
 	}
 
 	if result.Id == "" {
-		return "", fmt.Errorf("response indicates Sym Environment was not updated")
+		return "", utils.GenerateError("An error happened during the Environment update. Please contact Sym support.", utils.DocsSupport)
 	}
 
 	log.Printf("Updated Sym Environment: %s", result.Id)
