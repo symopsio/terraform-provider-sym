@@ -3,11 +3,14 @@ package client
 import (
 	"fmt"
 	"log"
+
+	"github.com/symopsio/terraform-provider-sym/sym/utils"
 )
 
 type Environment struct {
 	Id           string            `json:"id,omitempty"`
 	Name         string            `json:"slug"`
+	RuntimeId    string            `json:"runtime_id"`
 	Integrations map[string]string `json:"integrations"`
 }
 
@@ -45,7 +48,7 @@ func (c *environmentClient) Create(environment Environment) (string, error) {
 	}
 
 	if result.Id == "" {
-		return "", fmt.Errorf("An error happened during the Environment creation. Please contact Sym support.")
+		return "", utils.GenerateError("An error happened during the Environment creation. Please contact Sym support.", utils.DocsSupport)
 	}
 
 	log.Printf("Created Sym Environment: %s", result.Id)
