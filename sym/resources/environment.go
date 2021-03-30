@@ -65,7 +65,7 @@ func readEnvironment(ctx context.Context, data *schema.ResourceData, meta interf
 	}
 
 	diags = utils.DiagsCheckError(diags, data.Set("name", environment.Name), "Unable to read Environment name")
-	diags = utils.DiagsCheckError(diags, data.Set("runtime_id", environment.Name), "Unable to read RuntimeId")
+	diags = utils.DiagsCheckError(diags, data.Set("runtime_id", environment.RuntimeId), "Unable to read RuntimeId")
 	diags = utils.DiagsCheckError(diags, data.Set("integrations", environment.Integrations), "Unable to read Environment integrations")
 
 	return diags
