@@ -14,7 +14,7 @@ import (
 
 func Environment() *schema.Resource {
 	return &schema.Resource{
-		Schema:        environmentSchema(),
+		Schema:        EnvironmentSchema(),
 		CreateContext: createEnvironment,
 		ReadContext:   readEnvironment,
 		UpdateContext: updateEnvironment,
@@ -22,7 +22,7 @@ func Environment() *schema.Resource {
 	}
 }
 
-func environmentSchema() map[string]*schema.Schema {
+func EnvironmentSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"name":         utils.Required(schema.TypeString),
 		"runtime_id":   utils.Required(schema.TypeString),
