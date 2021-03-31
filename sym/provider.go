@@ -35,6 +35,7 @@ func Provider() *schema.Provider {
 		DataSourcesMap: map[string]*schema.Resource{
 			"sym_integration": data_sources.DataSourceIntegration(),
 			"sym_runtime":     data_sources.DataSourceRuntime(),
+			"sym_environment": data_sources.DataSourceEnvironment(),
 		},
 		ConfigureContextFunc: providerConfigure,
 	}
