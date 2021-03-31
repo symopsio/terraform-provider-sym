@@ -11,13 +11,8 @@ provider "sym" {
   org = "asics"
 }
 
-variable "runtime_id" {
-    type = string
-}
-
 data "sym_environment" "foo" {
     name = "sandbox"
-    runtime_id = var.runtime_id
 }
 
 output "runtime_id" {

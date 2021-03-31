@@ -5,14 +5,26 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/symopsio/terraform-provider-sym/sym/client"
-	"github.com/symopsio/terraform-provider-sym/sym/resources"
 	"github.com/symopsio/terraform-provider-sym/sym/utils"
 )
+
+// Similar to the EnvironmentSchema in resources/environment.go
+// The difference is that runtime_id is not required here.
+func EnvironmentDataSourceSchema() map[string]*schema.Schema {
+	return map[string]*schema.Schema{
+		"name": utils.Required(schema.TypeString),
+		"runtime_id": {
+			Type:     schema.TypeString,
+			Optional: true,
+		},
+		"integrations": utils.SettingsMap(),
+	}
+}
 
 func DataSourceEnvironment() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: dataSourceEnvironmentRead,
-		Schema:      resources.EnvironmentSchema(),
+		Schema:      EnvironmentDataSourceSchema(),
 	}
 }
 
