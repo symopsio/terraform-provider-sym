@@ -29,7 +29,7 @@ func dataSourceEnvironmentRead(ctx context.Context, data *schema.ResourceData, m
 
 	diags = utils.DiagsCheckError(diags, data.Set("name", environment.Name), "Unable to read Environment name")
 	diags = utils.DiagsCheckError(diags, data.Set("runtime_id", environment.RuntimeId), "Unable to read Environment runtime_id")
-	diags = utils.DiagsCheckError(diags, data.Set("settings", environment.Integrations), "Unable to read Environment integrations")
+	diags = utils.DiagsCheckError(diags, data.Set("integrations", environment.Integrations), "Unable to read Environment integrations")
 
 	data.SetId(environment.Id)
 
