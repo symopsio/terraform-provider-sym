@@ -160,7 +160,7 @@ func readFlow(ctx context.Context, data *schema.ResourceData, meta interface{}) 
 	diags = utils.DiagsCheckError(diags, data.Set("template", flow.Template), "Unable to read Flow template")
 	diags = utils.DiagsCheckError(diags, data.Set("environment_id", flow.EnvironmentId), "Unable to read Flow environment_id")
 	diags = utils.DiagsCheckError(diags, data.Set("environment", flow.Environment), "Unable to read Flow environment")
-	diags = utils.DiagsCheckError(diags, data.Set("vars", flow.Environment), "Unable to read Flow vars")
+	diags = utils.DiagsCheckError(diags, data.Set("vars", flow.Vars), "Unable to read Flow vars")
 	diags = utils.DiagsCheckError(diags, data.Set("implementation", flow.Implementation), "Unable to read Flow implementation")
 
 	flowParamsMap, err := buildHCLParamsfromAPIParams(data, flow.Params)
