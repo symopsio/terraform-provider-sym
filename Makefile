@@ -31,4 +31,12 @@ test:
 testacc:
 	TF_ACC=1 go test $(TEST) -v $(TESTARGS) -timeout 120m
 
+# example:	 make tf-test-8
+tf-test-%:
+	cd samples/$** \
+		&& pwd \
+		&& terraform init -upgrade \
+		&& terraform apply -auto-approve \
+		&& terraform destroy -auto-approve
+
 .PHONY: install clean build local test testacc
