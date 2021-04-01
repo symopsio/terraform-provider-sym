@@ -88,7 +88,7 @@ func (c *environmentClient) Find(name string) (*Environment, error) {
 	}
 
 	if len(result) != 1 {
-		msg := fmt.Sprintf("One Environment with the name %s was expected, but %w were found", name, len(result))
+		msg := fmt.Sprintf("One Environment with the name %s was expected, but %v were found", name, len(result))
 		return nil, utils.GenerateError(msg, utils.DocsSupport)
 	}
 
