@@ -81,6 +81,10 @@ resource "sym_flow" "this" {
 
   environment_id = sym_environment.this.id
 
+  vars = {
+    something = "abc123"
+  }
+
   params = {
     strategy_id = sym_strategy.sso_main.id
 
