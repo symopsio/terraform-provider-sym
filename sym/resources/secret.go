@@ -19,10 +19,9 @@ func Secret() *schema.Resource {
 	}
 }
 
-
 func secretSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-		"path":		 utils.Required(schema.TypeString),
+		"path":      utils.Required(schema.TypeString),
 		"source_id": utils.Required(schema.TypeString),
 	}
 }
@@ -31,7 +30,7 @@ func createSecret(ctx context.Context, data *schema.ResourceData, meta interface
 	c := meta.(*client.ApiClient)
 	secret := client.Secret{
 		Path:     data.Get("path").(string),
-		SourceId:     data.Get("source_id").(string),
+		SourceId: data.Get("source_id").(string),
 	}
 
 	id, err := c.Secret.Create(secret)

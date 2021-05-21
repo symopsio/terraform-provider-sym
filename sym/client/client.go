@@ -5,7 +5,7 @@ import "os"
 // ApiClient interact with the Sym API
 type ApiClient struct {
 	Integration IntegrationClient
-	Secret		SecretClient
+	Secret      SecretClient
 	Secrets     SecretsClient
 	Target      TargetClient
 	Strategy    StrategyClient
@@ -19,7 +19,7 @@ func New() *ApiClient {
 	httpClient := NewSymHttpClient(getApiUrl())
 	return &ApiClient{
 		Integration: NewIntegrationClient(httpClient),
-		Secret:		 NewSecretClient(httpClient),
+		Secret:      NewSecretClient(httpClient),
 		Secrets:     NewSecretsClient(httpClient),
 		Target:      NewTargetClient(httpClient),
 		Strategy:    NewStrategyClient(httpClient),

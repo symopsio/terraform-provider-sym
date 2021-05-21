@@ -19,7 +19,6 @@ func Secrets() *schema.Resource {
 	}
 }
 
-
 func secretsSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"type":     utils.Required(schema.TypeString),
