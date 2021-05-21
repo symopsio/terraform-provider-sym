@@ -27,6 +27,7 @@ func Provider() *schema.Provider {
 			"sym_flow":        resources.Flow(),
 			"sym_strategy":    resources.Strategy(),
 			"sym_target":      resources.Target(),
+			"sym_secret":      resources.Secret(),
 			"sym_secrets":     resources.Secrets(),
 			"sym_integration": resources.Integration(),
 			"sym_runtime":     resources.Runtime(),
