@@ -11,6 +11,7 @@ provider "sym" {
   org = "asics"
 }
 
+
 # The AWS integration depends on a role that provides access to the various
 # things this flow needs to do in AWS.
 resource "sym_integration" "runtime_context" {
@@ -35,7 +36,7 @@ resource "sym_integration" "runtime_context" {
 
 resource "sym_secrets" "aws_test" {
   type = "aws_secrets_manager"
-  name = "very secret"
+  name = "very-secret"
   settings = {
     context_id = "context-id-123"
   }

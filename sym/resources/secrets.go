@@ -11,7 +11,7 @@ import (
 
 func Secrets() *schema.Resource {
 	return &schema.Resource{
-		Schema:        secretsSchema(),
+		Schema:        SecretsSchema(),
 		CreateContext: createSecrets,
 		ReadContext:   readSecrets,
 		UpdateContext: updateSecrets,
@@ -19,7 +19,7 @@ func Secrets() *schema.Resource {
 	}
 }
 
-func secretsSchema() map[string]*schema.Schema {
+func SecretsSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"type":     utils.Required(schema.TypeString),
 		"name":     utils.Required(schema.TypeString),

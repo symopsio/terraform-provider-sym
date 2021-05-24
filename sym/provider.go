@@ -37,6 +37,7 @@ func Provider() *schema.Provider {
 			"sym_integration": data_sources.DataSourceIntegration(),
 			"sym_runtime":     data_sources.DataSourceRuntime(),
 			"sym_environment": data_sources.DataSourceEnvironment(),
+			"sym_secrets":     data_sources.DataSourceSecrets(),
 		},
 		ConfigureContextFunc: providerConfigure,
 	}
