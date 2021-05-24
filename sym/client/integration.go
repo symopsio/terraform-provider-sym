@@ -19,7 +19,7 @@ func (s Integration) String() string {
 type IntegrationClient interface {
 	Create(integration Integration) (string, error)
 	Read(id string) (*Integration, error)
-	Find(name string) (*Integration, error)
+	Find(name string, integrationType string) (*Integration, error)
 	Update(integration Integration) (string, error)
 	Delete(id string) (string, error)
 }
@@ -62,16 +62,16 @@ func (i *integrationClient) Read(id string) (*Integration, error) {
 	return &result, nil
 }
 
-func (i *integrationClient) Find(name string) (*Integration, error) {
+func (i *integrationClient) Find(name string, integrationType string) (*Integration, error) {
 	log.Printf("Getting Sym Integration by name: %s", name)
 	var result []Integration
 
-	if err := i.HttpClient.Read(fmt.Sprintf("/integrations/search/?slug=%s", name), &result); err != nil {
+	if err := i.HttpClient.Read(fmt.Sprintf("/integrations/search/?slug=%s&type=%s", name, integrationType), &result); err != nil {
 		return nil, err
 	}
 
 	if len(result) != 1 {
-		return nil, fmt.Errorf("one Integration with the name %s was expected, but %v were found", name, len(result))
+		return nil, fmt.Errorf("one Integration of type %s with the name %s was expected, but %v were found", integrationType, name, len(result))
 	}
 
 	log.Printf("Got Sym Integration by name: %s (%s)", name, result[0].Id)
