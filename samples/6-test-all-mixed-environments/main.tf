@@ -45,6 +45,19 @@ resource "sym_secrets" "flow" {
   }
 }
 
+
+resource "sym_secret" "username" {
+  path = "/sym/tf-tests/username"
+  source_id = sym_secrets.flow.id
+}
+
+
+resource "sym_secret" "password" {
+  path = "/sym/tf-tests/password"
+  source_id = sym_secrets.flow.id
+}
+
+
 ## Runtime
 
 resource "sym_runtime" "this" {

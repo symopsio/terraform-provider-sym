@@ -21,18 +21,16 @@ func Secret() *schema.Resource {
 
 func secretSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-		"type":     utils.Required(schema.TypeString),
-		"name":     utils.Required(schema.TypeString),
-		"settings": utils.SettingsMap(),
+		"path":      utils.Required(schema.TypeString),
+		"source_id": utils.Required(schema.TypeString),
 	}
 }
 
 func createSecret(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	c := meta.(*client.ApiClient)
 	secret := client.Secret{
-		Type:     data.Get("type").(string),
-		Name:     data.Get("name").(string),
-		Settings: getSettings(data),
+		Path:     data.Get("path").(string),
+		SourceId: data.Get("source_id").(string),
 	}
 
 	id, err := c.Secret.Create(secret)
@@ -55,9 +53,8 @@ func readSecret(ctx context.Context, data *schema.ResourceData, meta interface{}
 		return diags
 	}
 
-	diags = utils.DiagsCheckError(diags, data.Set("type", secret.Type), "Unable to read Secret type")
-	diags = utils.DiagsCheckError(diags, data.Set("name", secret.Name), "Unable to read Secret name")
-	diags = utils.DiagsCheckError(diags, data.Set("settings", secret.Settings), "Unable to read Secret settings")
+	diags = utils.DiagsCheckError(diags, data.Set("path", secret.Path), "Unable to read Secret path")
+	diags = utils.DiagsCheckError(diags, data.Set("source_id", secret.SourceId), "Unable to read Secret source_id")
 
 	return diags
 }
@@ -68,9 +65,8 @@ func updateSecret(ctx context.Context, data *schema.ResourceData, meta interface
 
 	secret := client.Secret{
 		Id:       data.Id(),
-		Type:     data.Get("type").(string),
-		Name:     data.Get("name").(string),
-		Settings: getSettings(data),
+		Path:     data.Get("path").(string),
+		SourceId: data.Get("source_id").(string),
 	}
 	if _, err := c.Secret.Update(secret); err != nil {
 		diags = append(diags, utils.DiagFromError(err, "Unable to update Secret"))

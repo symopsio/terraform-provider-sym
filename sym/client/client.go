@@ -6,6 +6,7 @@ import "os"
 type ApiClient struct {
 	Integration IntegrationClient
 	Secret      SecretClient
+	Secrets     SecretsClient
 	Target      TargetClient
 	Strategy    StrategyClient
 	Flow        FlowClient
@@ -19,6 +20,7 @@ func New() *ApiClient {
 	return &ApiClient{
 		Integration: NewIntegrationClient(httpClient),
 		Secret:      NewSecretClient(httpClient),
+		Secrets:     NewSecretsClient(httpClient),
 		Target:      NewTargetClient(httpClient),
 		Strategy:    NewStrategyClient(httpClient),
 		Flow:        NewFlowClient(httpClient),

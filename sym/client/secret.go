@@ -7,9 +7,8 @@ import (
 
 type Secret struct {
 	Id       string   `json:"id,omitempty"`
-	Type     string   `json:"type"`
-	Name     string   `json:"slug"`
-	Settings Settings `json:"settings"`
+	Path	 string   `json:"path"`
+	SourceId string	  `json:"source_id"`
 }
 
 type SecretClient interface {
@@ -33,7 +32,7 @@ func (c *secretClient) Create(secret Secret) (string, error) {
 	log.Printf("Creating Secret: %v", secret)
 	result := Secret{}
 
-	if _, err := c.HttpClient.Create("/secrets/", &secret, &result); err != nil {
+	if _, err := c.HttpClient.Create("/secret/", &secret, &result); err != nil {
 		return "", err
 	}
 
@@ -49,7 +48,7 @@ func (c *secretClient) Read(id string) (*Secret, error) {
 	log.Printf("Getting Secret: %s", id)
 	result := Secret{}
 
-	if err := c.HttpClient.Read(fmt.Sprintf("/secrets/%s/", id), &result); err != nil {
+	if err := c.HttpClient.Read(fmt.Sprintf("/secret/%s/", id), &result); err != nil {
 		return nil, err
 	}
 
@@ -61,7 +60,7 @@ func (c *secretClient) Update(secret Secret) (string, error) {
 	log.Printf("Updating Secret: %v", secret)
 	result := Secret{}
 
-	if _, err := c.HttpClient.Update(fmt.Sprintf("/secrets/%s/", secret.Id), &secret, &result); err != nil {
+	if _, err := c.HttpClient.Update(fmt.Sprintf("/secret/%s/", secret.Id), &secret, &result); err != nil {
 		return "", err
 	}
 
@@ -76,7 +75,7 @@ func (c *secretClient) Update(secret Secret) (string, error) {
 func (c *secretClient) Delete(id string) (string, error) {
 	log.Printf("Deleting Secret: %s", id)
 
-	if err := c.HttpClient.Delete(fmt.Sprintf("/secrets/%s/", id)); err != nil {
+	if err := c.HttpClient.Delete(fmt.Sprintf("/secret/%s/", id)); err != nil {
 		return "", err
 	}
 
