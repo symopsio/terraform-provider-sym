@@ -17,6 +17,7 @@ type SecretsClient interface {
 	Read(id string) (*Secrets, error)
 	Update(secrets Secrets) (string, error)
 	Delete(id string) (string, error)
+	Find(name string, secretsType string) (*Secrets, error)
 }
 
 func NewSecretsClient(httpClient SymHttpClient) SecretsClient {
@@ -81,4 +82,20 @@ func (c *secretsClient) Delete(id string) (string, error) {
 	}
 
 	return id, nil
+}
+
+func (i *secretsClient) Find(name string, secretsType string) (*Secrets, error) {
+	log.Printf("Getting Sym Secrets by name: %s and type: %s", name, secretsType)
+	var result []Secrets
+
+	if err := i.HttpClient.Read(fmt.Sprintf("/secrets/search/?slug=%s&type=%s", name, secretsType), &result); err != nil {
+		return nil, err
+	}
+
+	if len(result) != 1 {
+		return nil, fmt.Errorf("one Secrets of type %s with the name %s was expected, but %v were found", secretsType, name, len(result))
+	}
+
+	log.Printf("Got Sym Secrets by name: %s and type: %s (%s)", name, secretsType, result[0].Id)
+	return &result[0], nil
 }
