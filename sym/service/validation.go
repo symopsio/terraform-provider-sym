@@ -37,6 +37,7 @@ func (s *validationService) IsLoggedInToOrg(org string) (bool, error) {
 	}
 
 	symflowOrg, err := s.symflowService.GetConfigValue("org")
+	symflowOrg = strings.TrimSpace(symflowOrg)
 	if err != nil {
 		msg := "You do not have an org configured via symflow."
 		hint := "Please run `symflow login`"
