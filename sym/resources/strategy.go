@@ -23,9 +23,9 @@ func Strategy() *schema.Resource {
 func strategySchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"type":           utils.Required(schema.TypeString),
-		"integration_id": utils.Required(schema.TypeString),
+		"integration_id": utils.Optional(schema.TypeString),
 		"settings":       utils.SettingsMap(),
-		"targets":        utils.StringList(true),
+		"targets":        utils.StringList(false),
 	}
 }
 

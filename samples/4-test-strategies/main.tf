@@ -18,6 +18,11 @@ resource "sym_strategy" "sso_main" {
   targets = [ sym_target.prod_break_glass.id ]
 }
 
+# The only required field for a strategy is type
+resource "sym_strategy" "test_minimal" {
+  type = "aws_sso"
+}
+
 # A target is a thing that we are managing access to
 resource "sym_target" "prod_break_glass" {
   type = "aws_sso_permission_set"
@@ -32,24 +37,14 @@ resource "sym_target" "prod_break_glass" {
 
 # The AWS integration depends on a role that provides access to the various
 # things this flow needs to do in AWS.
-resource "sym_integration" "aws" {
-  type = "aws"
-  name = "aws-strategies-test"
-
-  settings = {
-    # Sym can assume this role to RW things in customer account
-    # The role is created by a TF module independent of this config (for now)
-    role_arn = "arn:aws:iam::123456789012:role/sym/SymExecutionRole"
-    region = "us-east-1"
-  }
-}
-
 resource "sym_integration" "sso_main" {
-  type = "aws_sso"
+  type = "permission_context"
   name = "sso-main-strategies-test"
 
   settings = {
-    instance_arn = "arn:aws:::instance/ssoinst-abcdefghi12314135325"
-    aws = sym_integration.aws.id
+    cloud = "aws"
+    role_arn = "arn:aws:::instance/ssoinst-abcdefghi12314135325"
+    external_id = "1478F2AD-6091-41E6-B3D2-766CA2F173CB"
+    region = "us-east-1"
   }
 }
