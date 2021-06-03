@@ -56,8 +56,10 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}
 	}
 
 	if !isLoggedIn {
-		msg := fmt.Sprint(err)
-		diags = append(diags, utils.DiagFromError(err, msg))
+		diags = append(diags, diag.Diagnostic{
+			Severity: diag.Error,
+			Summary:  "You are not logged in to symflow. Please run `symflow login`.",
+		})
 		return nil, diags
 	}
 
