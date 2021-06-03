@@ -2,7 +2,6 @@ package sym
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -48,18 +47,9 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}
 	terraformOrg := d.Get("org").(string)
 
 	validationService := service.NewValidationService()
-	isLoggedIn, err := validationService.IsLoggedInToOrg(terraformOrg)
+	err := validationService.EnsureLoggedInToOrg(terraformOrg)
 	if err != nil {
-		msg := fmt.Sprint(err)
-		diags = append(diags, utils.DiagFromError(err, msg))
-		return nil, diags
-	}
-
-	if !isLoggedIn {
-		diags = append(diags, diag.Diagnostic{
-			Severity: diag.Error,
-			Summary:  "You are not logged in to symflow. Please run `symflow login`.",
-		})
+		diags = append(diags, utils.DiagFromError(err, "Validation failed"))
 		return nil, diags
 	}
 

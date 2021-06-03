@@ -14,8 +14,7 @@ func TestGetVersion(t *testing.T) {
 }
 
 func TestGetValidConfigValue(t *testing.T) {
-	// TODO: change this to just "symflow" when the new release is live
-	exe := "/home/rory/sym/misc/cli/symflow/.venv/bin/symflow"
+	exe := "symflow"
 	svc := NewSymflowService(exe)
 	_, err := svc.GetConfigValue("org")
 

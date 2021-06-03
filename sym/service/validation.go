@@ -1,58 +1,47 @@
 package service
 
 import (
-	"errors"
-	"fmt"
 	"strings"
+
+	"github.com/symopsio/terraform-provider-sym/sym/utils"
 )
 
-// Exposes Symflow CLI functionality
-type SymflowService interface {
-	GetVersion() (string, error)
-	GetConfigValue(key string) (string, error)
+// Exposes validation functionality
+type ValidationService interface {
+	IsLoggedInToOrg(org string) (bool, error)
 }
 
-func NewSymflowService(executable string) symflowService {
-	return symflowService{executable: executable}
-}
-
+// Implementation of the ValidationService interface
 type validationService struct {
-	symflowService symflowService
+	symflowService SymflowService
 }
 
+// Constructor for validationService
 func NewValidationService() validationService {
-	// TODO: Un-comment this when we merge the symflow PR
-	// exe := "symflow"
-	exe := "/home/rory/sym/misc/cli/symflow/.venv/bin/symflow"
+	exe := "symflow"
 	return validationService{symflowService: NewSymflowService(exe)}
 }
 
+/////////////////
+//// Methods ////
+/////////////////
+
 // Check whether the user is logged into the given org
-func (s *validationService) IsLoggedInToOrg(org string) (bool, error) {
+func (s *validationService) EnsureLoggedInToOrg(org string) error {
 	_, err := s.symflowService.GetVersion()
 	if err != nil {
-		msg := "Symflow is not installed."
-		hint := "Please check our documentation at https://docs.symops.com/"
-		return false, errors.New(fmt.Sprintf("%s %s", msg, hint))
+		return utils.ErrSymflowNotInstalled
 	}
 
 	symflowOrg, err := s.symflowService.GetConfigValue("org")
 	symflowOrg = strings.TrimSpace(symflowOrg)
 	if err != nil {
-		msg := "You do not have an org configured via symflow."
-		hint := "Please run `symflow login`"
-		return false, errors.New(fmt.Sprintf("%s %s", msg, hint))
+		return utils.ErrSymflowNoOrgConfigured
 	}
 
 	if org != symflowOrg {
-		msg := fmt.Sprintf(
-			"You are logged in to Symflow using the %s org, but the Sym provider is configured with the %s org.",
-			strings.TrimSpace(symflowOrg),
-			org,
-		)
-		hint := "Please ensure that you are deploying to the org that you are logged in to."
-		return false, errors.New(fmt.Sprintf("%s %s", msg, hint))
+		return utils.ErrSymflowWrongOrg(symflowOrg, org)
 	}
 
-	return true, nil
+	return nil
 }

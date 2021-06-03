@@ -20,7 +20,18 @@ const (
 var (
 	ErrConfigFileDoesNotExist = GenerateError("No Sym configuration file was found. Have you installed the Symflow CLI?", DocsSymflowInstall)
 	ErrConfigFileNoJWT        = GenerateError("Your Sym access token is missing or invalid. Have you run `symflow login`?", DocsSymflowLogin)
+	ErrSymflowNotInstalled    = GenerateError("Symflow is not installed, please install it and login.", DocsSymflowInstall)
+	ErrSymflowNoOrgConfigured = GenerateError("You do not have an org configured via symflow, please run `symflow login`", DocsSymflowLogin)
 )
+
+var ErrSymflowWrongOrg = func(symflowOrg string, providerOrg string) error {
+	errorMessage := fmt.Sprintf(
+		"You are logged in to Symflow using the %s org, but the Sym provider is configured with the %s org. Please ensure that you are logged in to the correct org via Symflow.",
+		symflowOrg,
+		providerOrg,
+	)
+	return GenerateError(errorMessage, DocsSymflowLogin)
+}
 
 var ErrAPINotFound = func(endpoint string, requestId string) error {
 	errorMessage := fmt.Sprintf("The Sym API URL you tried to use could not be found. Please reach out to Sym Support.\nURL: %s\nStatus Code: 404\nRequest ID: %s", endpoint, requestId)
