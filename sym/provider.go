@@ -50,10 +50,12 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}
 	terraformOrg := d.Get("org").(string)
 
 	validationService := service.NewValidationService()
-	err := validationService.EnsureLoggedInToOrg(terraformOrg)
-	if err != nil {
-		diags = append(diags, utils.DiagFromError(err, "Validation failed"))
-		return nil, diags
+	if validationService.ShouldValidate() {
+		err := validationService.EnsureLoggedInToOrg(terraformOrg)
+		if err != nil {
+			diags = append(diags, utils.DiagFromError(err, "Validation failed"))
+			return nil, diags
+		}
 	}
 
 	c := client.New()
