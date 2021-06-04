@@ -1,6 +1,7 @@
 package service
 
 import (
+	"os"
 	"strings"
 
 	"github.com/symopsio/terraform-provider-sym/sym/utils"
@@ -44,4 +45,15 @@ func (s *validationService) EnsureLoggedInToOrg(org string) error {
 	}
 
 	return nil
+}
+
+// Check if validation is disabled via an environment variable
+func (s *validationService) ShouldValidate() bool {
+	skip_validation, exists := os.LookupEnv("SYM_TF_SKIP_VALIDATION")
+
+	if !exists {
+		return true
+	}
+
+	return strings.TrimSpace(skip_validation) != "1"
 }
