@@ -8,6 +8,8 @@ import (
 	"github.com/symopsio/terraform-provider-sym/sym/client"
 	"github.com/symopsio/terraform-provider-sym/sym/data_sources"
 	"github.com/symopsio/terraform-provider-sym/sym/resources"
+	"github.com/symopsio/terraform-provider-sym/sym/service"
+	"github.com/symopsio/terraform-provider-sym/sym/utils"
 )
 
 // Provider defines the schema this provider supports
@@ -45,6 +47,15 @@ func Provider() *schema.Provider {
 
 func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
 	var diags diag.Diagnostics
+	terraformOrg := d.Get("org").(string)
+
+	validationService := service.NewValidationService()
+	err := validationService.EnsureLoggedInToOrg(terraformOrg)
+	if err != nil {
+		diags = append(diags, utils.DiagFromError(err, "Validation failed"))
+		return nil, diags
+	}
+
 	c := client.New()
 	return c, diags
 }
