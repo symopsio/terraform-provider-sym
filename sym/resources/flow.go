@@ -39,6 +39,9 @@ func flowSchema() map[string]*schema.Schema {
 			Type:             schema.TypeString,
 			Required:         true,
 			DiffSuppressFunc: utils.SuppressEquivalentFileContentDiffs,
+			StateFunc: func(val interface{}) string {
+				return utils.ParseImpl(val.(string))
+			},
 		},
 		"vars": utils.SettingsMap(),
 		"environment": utils.Deprecated(
@@ -161,7 +164,8 @@ func readFlow(ctx context.Context, data *schema.ResourceData, meta interface{}) 
 	diags = utils.DiagsCheckError(diags, data.Set("environment_id", flow.EnvironmentId), "Unable to read Flow environment_id")
 	diags = utils.DiagsCheckError(diags, data.Set("environment", flow.Environment), "Unable to read Flow environment")
 	diags = utils.DiagsCheckError(diags, data.Set("vars", flow.Vars), "Unable to read Flow vars")
-	diags = utils.DiagsCheckError(diags, data.Set("implementation", flow.Implementation), "Unable to read Flow implementation")
+	// Base64 -> Text
+	diags = utils.DiagsCheckError(diags, data.Set("implementation", utils.ParseRemoteImpl(flow.Implementation)), "Unable to read Flow implementation")
 
 	flowParamsMap, err := buildHCLParamsfromAPIParams(data, flow.Params)
 	if flowParamsMap != nil {
@@ -189,9 +193,14 @@ func updateFlow(ctx context.Context, data *schema.ResourceData, meta interface{}
 
 	implementation := data.Get("implementation").(string)
 
-	// We'll have a base64 encoded string here already if we got content from the API
-	// that matches what's in our local impl.py file (caused by SuppressEquivalentFileContentDiffs)
-	// This check is to say if we can decode it, assume that's what happened, and don't re-encode.
+	// If the diff was suppressed, we'll have a text string here already, as it was decoded by the StateFunc.
+	// Therefore, check if this is a filename or not. If it's not, assume it is the decoded impl.
+	if b, err := ioutil.ReadFile(implementation); err != nil {
+		flow.Implementation = base64.StdEncoding.EncodeToString([]byte(implementation))
+	} else {
+		flow.Implementation = base64.StdEncoding.EncodeToString(b)
+	}
+
 	if _, err := base64.StdEncoding.DecodeString(implementation); err == nil {
 		flow.Implementation = implementation
 	} else {

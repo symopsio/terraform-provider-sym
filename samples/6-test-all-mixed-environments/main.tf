@@ -10,7 +10,7 @@ terraform {
 }
 
 provider "sym" {
-  org = "asics"
+  org = "sym"
 }
 
 # sym_integration types:
