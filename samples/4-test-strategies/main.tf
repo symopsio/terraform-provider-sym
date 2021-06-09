@@ -18,11 +18,6 @@ resource "sym_strategy" "sso_main" {
   targets = [ sym_target.prod_break_glass.id ]
 }
 
-# The only required field for a strategy is type
-resource "sym_strategy" "test_minimal" {
-  type = "aws_sso"
-}
-
 # A target is a thing that we are managing access to
 resource "sym_target" "prod_break_glass" {
   type = "aws_sso_permission_set"
