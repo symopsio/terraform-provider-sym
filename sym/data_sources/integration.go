@@ -31,6 +31,7 @@ func dataSourceIntegrationRead(ctx context.Context, data *schema.ResourceData, m
 	diags = utils.DiagsCheckError(diags, data.Set("type", integration.Type), "Unable to read Integration type")
 	diags = utils.DiagsCheckError(diags, data.Set("name", integration.Name), "Unable to read Integration name")
 	diags = utils.DiagsCheckError(diags, data.Set("settings", integration.Settings), "Unable to read Integration settings")
+	diags = utils.DiagsCheckError(diags, data.Set("external_id", integration.ExternalId), "Unable to read Integration external_id")
 
 	data.SetId(integration.Id)
 
