@@ -26,7 +26,7 @@ output "data_slack_workspace_id" {
   value = data.sym_integration.data_slack.external_id
 }
 
-output "data_runtime_external_id" {
-  description = "External ID of the Runtime context"
+output "data_runtime_account_id" {
+  description = "AWS account number for the Runtime"
   value = data.sym_integration.data_runtime.external_id
 }
