@@ -6,10 +6,11 @@ import (
 )
 
 type Integration struct {
-	Id       string   `json:"id,omitempty"`
-	Type     string   `json:"type"`
-	Settings Settings `json:"settings"`
-	Name     string   `json:"slug"`
+	Id         string   `json:"id,omitempty"`
+	Type       string   `json:"type"`
+	Settings   Settings `json:"settings"`
+	Name       string   `json:"slug"`
+	ExternalId string   `json:"external_id"`
 }
 
 func (s Integration) String() string {

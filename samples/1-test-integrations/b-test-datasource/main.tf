@@ -21,12 +21,12 @@ data "sym_integration" "data_runtime" {
   name = "tf-test"
 }
 
-output "data_slack_id" {
-  description = "ID of the slack integration"
-  value = data.sym_integration.data_slack
+output "data_slack_workspace_id" {
+  description = "Workspace ID of the Slack Integration"
+  value = data.sym_integration.data_slack.external_id
 }
 
-output "data_runtime_id" {
-  description = "ID of the runtime context"
-  value = data.sym_integration.data_runtime
+output "data_runtime_account_id" {
+  description = "AWS account number for the Runtime"
+  value = data.sym_integration.data_runtime.external_id
 }

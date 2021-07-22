@@ -22,9 +22,10 @@ func Integration() *schema.Resource {
 
 func IntegrationSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-		"type":     utils.Required(schema.TypeString),
-		"settings": utils.SettingsMap(),
-		"name":     utils.Required(schema.TypeString),
+		"type":        utils.Required(schema.TypeString),
+		"settings":    utils.SettingsMap(),
+		"name":        utils.Required(schema.TypeString),
+		"external_id": utils.Required(schema.TypeString),
 	}
 }
 
@@ -32,9 +33,10 @@ func createIntegration(ctx context.Context, data *schema.ResourceData, meta inte
 	var diags diag.Diagnostics
 	c := meta.(*client.ApiClient)
 	integration := client.Integration{
-		Type:     data.Get("type").(string),
-		Settings: getSettings(data),
-		Name:     data.Get("name").(string),
+		Type:       data.Get("type").(string),
+		Settings:   getSettings(data),
+		Name:       data.Get("name").(string),
+		ExternalId: data.Get("external_id").(string),
 	}
 
 	id, err := c.Integration.Create(integration)
@@ -60,6 +62,7 @@ func readIntegration(ctx context.Context, data *schema.ResourceData, meta interf
 	diags = utils.DiagsCheckError(diags, data.Set("type", integration.Type), "Unable to read Integration type")
 	diags = utils.DiagsCheckError(diags, data.Set("name", integration.Name), "Unable to read Integration name")
 	diags = utils.DiagsCheckError(diags, data.Set("settings", integration.Settings), "Unable to read Integration settings")
+	diags = utils.DiagsCheckError(diags, data.Set("external_id", integration.ExternalId), "Unable to read Integration external_id")
 
 	return diags
 }
@@ -69,10 +72,11 @@ func updateIntegration(ctx context.Context, data *schema.ResourceData, meta inte
 	c := meta.(*client.ApiClient)
 
 	integration := client.Integration{
-		Id:       data.Id(),
-		Type:     data.Get("type").(string),
-		Name:     data.Get("name").(string),
-		Settings: getSettings(data),
+		Id:         data.Id(),
+		Type:       data.Get("type").(string),
+		Name:       data.Get("name").(string),
+		Settings:   getSettings(data),
+		ExternalId: data.Get("external_id").(string),
 	}
 	if _, err := c.Integration.Update(integration); err != nil {
 		diags = append(diags, utils.DiagFromError(err, "Unable to update Integration"))
