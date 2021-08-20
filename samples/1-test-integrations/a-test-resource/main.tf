@@ -20,13 +20,13 @@ resource "sym_integration" "slack" {
 
 resource "sym_integration" "runtime_context" {
   type = "permission_context"
-  name = "tf-test"
+  name = "tf-test-context"
   external_id = "123456789012"
 
   settings = {
     cloud       = "aws"                                  # only supported value, will include gcp, azure, private in future
     external_id = "1478F2AD-6091-41E6-B3D2-766CA2F173CB"  # optional
     region      = "us-east-1"
-    role_arn    = "arn:aws:iam::123456789012:role/sym/RuntimeConnectorRole"
+    role_id    = "arn:aws:iam::123456789012:role/sym/RuntimeConnectorRole"
   }
 }

@@ -5,14 +5,29 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/symopsio/terraform-provider-sym/sym/client"
-	"github.com/symopsio/terraform-provider-sym/sym/resources"
 	"github.com/symopsio/terraform-provider-sym/sym/utils"
 )
+
+// Similar to the IntegrationSchema in resources/integration.go
+// The difference is that external_id is not required here.
+func IntegrationSchema() map[string]*schema.Schema {
+	return map[string]*schema.Schema{
+		"type":        utils.Required(schema.TypeString),
+		"settings":    utils.SettingsMap(),
+		"name":        utils.Required(schema.TypeString),
+		"external_id": utils.Optional(schema.TypeString),
+		"label": {
+			Type:             schema.TypeString,
+			Optional:         true,
+			DiffSuppressFunc: utils.SuppressAutomaticLabelDiffs,
+		},
+	}
+}
 
 func DataSourceIntegration() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: dataSourceIntegrationRead,
-		Schema:      resources.IntegrationSchema(),
+		Schema:      IntegrationSchema(),
 	}
 }
 
@@ -32,6 +47,7 @@ func dataSourceIntegrationRead(ctx context.Context, data *schema.ResourceData, m
 	diags = utils.DiagsCheckError(diags, data.Set("name", integration.Name), "Unable to read Integration name")
 	diags = utils.DiagsCheckError(diags, data.Set("settings", integration.Settings), "Unable to read Integration settings")
 	diags = utils.DiagsCheckError(diags, data.Set("external_id", integration.ExternalId), "Unable to read Integration external_id")
+	diags = utils.DiagsCheckError(diags, data.Set("label", integration.Label), "Unable to read Integration label")
 
 	data.SetId(integration.Id)
 

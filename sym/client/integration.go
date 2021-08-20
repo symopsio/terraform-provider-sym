@@ -11,6 +11,8 @@ type Integration struct {
 	Settings   Settings `json:"settings"`
 	Name       string   `json:"slug"`
 	ExternalId string   `json:"external_id"`
+	// Users don't need to care about label so defaults to value of Name
+	Label string `json:"label"`
 }
 
 func (s Integration) String() string {
@@ -39,7 +41,7 @@ func (i *integrationClient) Create(integration Integration) (string, error) {
 	log.Printf("Creating Sym Integration: %v", integration)
 
 	result := Integration{}
-	if _, err := i.HttpClient.Create("/integrations/", &integration, &result); err != nil {
+	if _, err := i.HttpClient.Create("/entities/integrations", &integration, &result); err != nil {
 		return "", err
 	}
 
@@ -55,7 +57,7 @@ func (i *integrationClient) Read(id string) (*Integration, error) {
 	log.Printf("Getting Sym Integration: %s", id)
 	result := Integration{}
 
-	if err := i.HttpClient.Read(fmt.Sprintf("/integrations/%s/", id), &result); err != nil {
+	if err := i.HttpClient.Read(fmt.Sprintf("/entities/integrations/%s", id), &result); err != nil {
 		return nil, err
 	}
 
@@ -67,7 +69,7 @@ func (i *integrationClient) Find(name string, integrationType string) (*Integrat
 	log.Printf("Getting Sym Integration by name: %s", name)
 	var result []Integration
 
-	if err := i.HttpClient.Read(fmt.Sprintf("/integrations/search/?slug=%s&type=%s", name, integrationType), &result); err != nil {
+	if err := i.HttpClient.Read(fmt.Sprintf("/entities/integrations?slug=%s&type=%s", name, integrationType), &result); err != nil {
 		return nil, err
 	}
 
@@ -83,7 +85,7 @@ func (i *integrationClient) Update(integration Integration) (string, error) {
 	log.Printf("Updating Sym Integration: %v", integration)
 	result := Integration{}
 
-	if _, err := i.HttpClient.Update(fmt.Sprintf("/integrations/%s/", integration.Id), &integration, &result); err != nil {
+	if _, err := i.HttpClient.Update(fmt.Sprintf("/entities/integrations/%s", integration.Id), &integration, &result); err != nil {
 		return "", err
 	}
 
@@ -98,7 +100,7 @@ func (i *integrationClient) Update(integration Integration) (string, error) {
 func (i *integrationClient) Delete(id string) (string, error) {
 	log.Printf("Deleting Sym Integration: %s", id)
 
-	if err := i.HttpClient.Delete(fmt.Sprintf("/integrations/%s/", id)); err != nil {
+	if err := i.HttpClient.Delete(fmt.Sprintf("/entities/integrations/%s", id)); err != nil {
 		return "", err
 	}
 
