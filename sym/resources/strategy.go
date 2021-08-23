@@ -26,6 +26,8 @@ func strategySchema() map[string]*schema.Schema {
 		"integration_id": utils.Required(schema.TypeString),
 		"settings":       utils.SettingsMap(),
 		"targets":        utils.StringList(true),
+		"name":           utils.Required(schema.TypeString),
+		"label":          utils.Required(schema.TypeString),
 	}
 }
 
@@ -37,6 +39,8 @@ func createStrategy(ctx context.Context, data *schema.ResourceData, meta interfa
 		Type:          data.Get("type").(string),
 		Settings:      getSettings(data),
 		IntegrationId: data.Get("integration_id").(string),
+		Name:          data.Get("name").(string),
+		Label:         data.Get("label").(string),
 	}
 	targets := data.Get("targets").([]interface{})
 	for i := range targets {
@@ -67,6 +71,8 @@ func readStrategy(ctx context.Context, data *schema.ResourceData, meta interface
 	diags = utils.DiagsCheckError(diags, data.Set("integration_id", strategy.IntegrationId), "Unable to read Strategy integration_id")
 	diags = utils.DiagsCheckError(diags, data.Set("targets", strategy.Targets), "Unable to read Strategy targets")
 	diags = utils.DiagsCheckError(diags, data.Set("settings", strategy.Settings), "Unable to read Strategy settings")
+	diags = utils.DiagsCheckError(diags, data.Set("name", strategy.Name), "Unable to read Strategy name")
+	diags = utils.DiagsCheckError(diags, data.Set("label", strategy.Label), "Unable to read Strategy label")
 
 	return diags
 }
@@ -80,6 +86,8 @@ func updateStrategy(ctx context.Context, data *schema.ResourceData, meta interfa
 		Type:          data.Get("type").(string),
 		IntegrationId: data.Get("integration_id").(string),
 		Settings:      getSettings(data),
+		Name:          data.Get("name").(string),
+		Label:         data.Get("label").(string),
 	}
 	targets := data.Get("targets").([]interface{})
 	for i := range targets {
