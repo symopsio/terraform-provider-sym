@@ -14,7 +14,7 @@ provider "sym" {
 # A strategy uses an integration to grant people access to targets
 resource "sym_strategy" "sso_main" {
   type = "aws_sso"
-  name = "sso-mai2n"
+  name = "sso-main"
   label = "SSO Main"
   integration_id = sym_integration.sso_main.id
   targets = [ sym_target.prod_break_glass.id ]

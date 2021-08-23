@@ -1,5 +1,5 @@
-from sym.annotations import reducer
-from sym.integrations import slack
+from sym.sdk.annotations import reducer
+from sym.sdk.integrations import slack
 
 
 @reducer

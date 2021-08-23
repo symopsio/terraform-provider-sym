@@ -10,7 +10,7 @@ terraform {
 }
 
 provider "sym" {
-  org = "healthy-health"
+  org = "sym"
 }
 
 # The AWS integration depends on a role that provides access to the various
@@ -18,20 +18,27 @@ provider "sym" {
 resource "sym_integration" "aws_context" {
   type = "permission_context"
   name = "aws-flow-context-test"
+  external_id = "123456789012"
 
   settings = {
     cloud       = "aws"                                  # only supported value, will include gcp, azure, private in future
     external_id = "1478F2AD-6091-41E6-B3D2-766CA2F173CB" # optional
     region      = "us-east-1"
-    role_arn    = "arn:aws:iam::123456789012:role/sym/RuntimeConnectorRole"
+    role_id    = "arn:aws:iam::123456789012:role/sym/RuntimeConnectorRole"
   }
 }
 
 
 resource "sym_strategy" "sso_main" {
   type = "aws_sso"
+  name = "flow-sso-main"
+  label = "Flow SSO Main"
   integration_id = sym_integration.aws_context.id
   targets = []
+
+  settings = {
+    instance_arn = "arn:aws:::instance/ssoinst-abcdefghi12314135325"
+  }
 }
 
 
@@ -42,10 +49,12 @@ resource "sym_flow" "this" {
   template       = "sym:template:approval:1.0.0"
   implementation = "impl.py"
 
-  environment = {
-    runtime_id = "sym_runtime.this.id"
-    slack_id   = "sym_integration.slack.id"
-  }
+  environment_id = sym_environment.sso_env.id
+
+  # environment = {
+  #   runtime_id = "sym_runtime.this.id"
+  #   slack_id   = "sym_integration.slack.id"
+  # }
 
   params = {
     strategy_id = sym_strategy.sso_main.id

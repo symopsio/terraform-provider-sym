@@ -8,6 +8,7 @@ import (
 type Runtime struct {
 	Id        string `json:"id,omitempty"`
 	Name      string `json:"slug"`
+	Label     string `json:"label"`
 	ContextId string `json:"context_id"`
 }
 
@@ -33,7 +34,7 @@ func (c *runtimeClient) Create(runtime Runtime) (string, error) {
 	log.Printf("Creating Runtime: %v", runtime)
 	result := Runtime{}
 
-	if _, err := c.HttpClient.Create("/runtimes/", &runtime, &result); err != nil {
+	if _, err := c.HttpClient.Create("/entities/runtimes", &runtime, &result); err != nil {
 		return "", err
 	}
 
@@ -49,7 +50,7 @@ func (c *runtimeClient) Read(id string) (*Runtime, error) {
 	log.Printf("Getting Runtime: %s", id)
 	result := Runtime{}
 
-	if err := c.HttpClient.Read(fmt.Sprintf("/runtimes/%s/", id), &result); err != nil {
+	if err := c.HttpClient.Read(fmt.Sprintf("/entities/runtimes/%s", id), &result); err != nil {
 		return nil, err
 	}
 
@@ -61,7 +62,7 @@ func (c *runtimeClient) Find(name string) (*Runtime, error) {
 	log.Printf("Getting Runtime by name: %s", name)
 	var result []Runtime
 
-	if err := c.HttpClient.Read(fmt.Sprintf("/runtimes/search/?slug=%s", name), &result); err != nil {
+	if err := c.HttpClient.Read(fmt.Sprintf("/entities/runtimes?slug=%s", name), &result); err != nil {
 		return nil, err
 	}
 
@@ -77,7 +78,7 @@ func (c *runtimeClient) Update(runtime Runtime) (string, error) {
 	log.Printf("Updating Runtime: %v", runtime)
 	result := Runtime{}
 
-	if _, err := c.HttpClient.Update(fmt.Sprintf("/runtimes/%s/", runtime.Id), &runtime, &result); err != nil {
+	if _, err := c.HttpClient.Update(fmt.Sprintf("/entities/runtimes/%s", runtime.Id), &runtime, &result); err != nil {
 		return "", err
 	}
 
@@ -92,7 +93,7 @@ func (c *runtimeClient) Update(runtime Runtime) (string, error) {
 func (c *runtimeClient) Delete(id string) (string, error) {
 	log.Printf("Deleting Runtime: %s", id)
 
-	if err := c.HttpClient.Delete(fmt.Sprintf("/runtimes/%s/", id)); err != nil {
+	if err := c.HttpClient.Delete(fmt.Sprintf("/entities/runtimes/%s", id)); err != nil {
 		return "", err
 	}
 
