@@ -69,18 +69,22 @@ func (c *symHttpClient) Do(method string, path string, payload interface{}) (str
 		return "", utils.ErrAPIConnect(path, requestID)
 	}
 
-	if resp.StatusCode == 404 {
-		return "", utils.ErrAPINotFound(path, requestID)
+	body, err := ioutil.ReadAll(resp.Body)
+	if resp.StatusCode == 400 {
+		errorBody := utils.ErrorResponse{}
+		json.Unmarshal([]byte(body), &errorBody)
+		return "", utils.ErrAPIBadRequest(errorBody.Errors)
 	} else if resp.StatusCode == 401 {
 		return "", utils.ErrConfigFileNoJWT
+	} else if resp.StatusCode == 404 {
+		return "", utils.ErrAPINotFound(path, requestID)
 	} else if resp.StatusCode >= 500 {
 		return "", utils.ErrAPIUnexpected(path, requestID, resp.StatusCode)
 	}
 
-	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return "", err
-	} else if resp.StatusCode >= 400 {
+	} else if resp.StatusCode > 400 {
 		return "", utils.ErrAPIUnexpected(path, requestID, resp.StatusCode)
 	}
 
