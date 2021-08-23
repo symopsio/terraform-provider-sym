@@ -10,6 +10,7 @@ type Secrets struct {
 	Type     string   `json:"type"`
 	Name     string   `json:"slug"`
 	Settings Settings `json:"settings"`
+	Label    string   `json:"label"` // Users don't need to care about label so defaults to value of Name
 }
 
 type SecretsClient interface {
@@ -34,7 +35,7 @@ func (c *secretsClient) Create(secrets Secrets) (string, error) {
 	log.Printf("Creating Secrets: %v", secrets)
 	result := Secrets{}
 
-	if _, err := c.HttpClient.Create("/secrets/", &secrets, &result); err != nil {
+	if _, err := c.HttpClient.Create("/entities/secret-sources", &secrets, &result); err != nil {
 		return "", err
 	}
 
@@ -50,7 +51,7 @@ func (c *secretsClient) Read(id string) (*Secrets, error) {
 	log.Printf("Getting Secrets: %s", id)
 	result := Secrets{}
 
-	if err := c.HttpClient.Read(fmt.Sprintf("/secrets/%s/", id), &result); err != nil {
+	if err := c.HttpClient.Read(fmt.Sprintf("/entities/secret-sources/%s", id), &result); err != nil {
 		return nil, err
 	}
 
@@ -62,7 +63,7 @@ func (c *secretsClient) Update(secrets Secrets) (string, error) {
 	log.Printf("Updating Secrets: %v", secrets)
 	result := Secrets{}
 
-	if _, err := c.HttpClient.Update(fmt.Sprintf("/secrets/%s/", secrets.Id), &secrets, &result); err != nil {
+	if _, err := c.HttpClient.Update(fmt.Sprintf("/entities/secret-sources/%s", secrets.Id), &secrets, &result); err != nil {
 		return "", err
 	}
 
@@ -77,7 +78,7 @@ func (c *secretsClient) Update(secrets Secrets) (string, error) {
 func (c *secretsClient) Delete(id string) (string, error) {
 	log.Printf("Deleting Secrets: %s", id)
 
-	if err := c.HttpClient.Delete(fmt.Sprintf("/secrets/%s/", id)); err != nil {
+	if err := c.HttpClient.Delete(fmt.Sprintf("/entities/secret-sources/%s", id)); err != nil {
 		return "", err
 	}
 
@@ -88,7 +89,7 @@ func (i *secretsClient) Find(name string, secretsType string) (*Secrets, error) 
 	log.Printf("Getting Sym Secrets by name: %s and type: %s", name, secretsType)
 	var result []Secrets
 
-	if err := i.HttpClient.Read(fmt.Sprintf("/secrets/search/?slug=%s&type=%s", name, secretsType), &result); err != nil {
+	if err := i.HttpClient.Read(fmt.Sprintf("/entities/secret-sources?slug=%s&type=%s", name, secretsType), &result); err != nil {
 		return nil, err
 	}
 

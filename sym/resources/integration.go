@@ -26,11 +26,7 @@ func IntegrationSchema() map[string]*schema.Schema {
 		"settings":    utils.SettingsMap(),
 		"name":        utils.Required(schema.TypeString),
 		"external_id": utils.Required(schema.TypeString),
-		"label": {
-			Type:             schema.TypeString,
-			Optional:         true,
-			DiffSuppressFunc: utils.SuppressAutomaticLabelDiffs,
-		},
+		"label":       utils.OptionalLabel(),
 	}
 }
 
@@ -38,17 +34,12 @@ func createIntegration(ctx context.Context, data *schema.ResourceData, meta inte
 	var diags diag.Diagnostics
 	c := meta.(*client.ApiClient)
 
-	label := data.Get("label")
-	if label == "" {
-		label = data.Get("name")
-	}
-
 	integration := client.Integration{
 		Type:       data.Get("type").(string),
 		Settings:   getSettings(data),
 		Name:       data.Get("name").(string),
 		ExternalId: data.Get("external_id").(string),
-		Label:      label.(string),
+		Label:      utils.GetOptionalFieldWithDefault(data, "label", "name"),
 	}
 
 	id, err := c.Integration.Create(integration)
@@ -84,18 +75,13 @@ func updateIntegration(ctx context.Context, data *schema.ResourceData, meta inte
 	var diags diag.Diagnostics
 	c := meta.(*client.ApiClient)
 
-	label := data.Get("label").(string)
-	if label == "" {
-		label = data.Get("name").(string)
-	}
-
 	integration := client.Integration{
 		Id:         data.Id(),
 		Type:       data.Get("type").(string),
 		Name:       data.Get("name").(string),
 		Settings:   getSettings(data),
 		ExternalId: data.Get("external_id").(string),
-		Label:      label,
+		Label:      utils.GetOptionalFieldWithDefault(data, "label", "name"),
 	}
 	if _, err := c.Integration.Update(integration); err != nil {
 		diags = append(diags, utils.DiagFromError(err, "Unable to update Integration"))

@@ -90,6 +90,14 @@ var (
 		}
 	}
 
+	OptionalLabel = func() *schema.Schema {
+		return &schema.Schema{
+			Type:             schema.TypeString,
+			Optional:         true,
+			DiffSuppressFunc: SuppressAutomaticLabelDiffs,
+		}
+	}
+
 	NotYetImplemented diag.Diagnostics = []diag.Diagnostic{
 		{
 			Severity: diag.Error,
@@ -97,3 +105,12 @@ var (
 		},
 	}
 )
+
+// Returns value from `field` if nontrivial else value from `defaultField`
+func GetOptionalFieldWithDefault(data *schema.ResourceData, field string, defaultField string) string {
+	value := data.Get(field)
+	if value == "" {
+		value = data.Get(defaultField)
+	}
+	return value.(string)
+}
