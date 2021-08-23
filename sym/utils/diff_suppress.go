@@ -124,28 +124,3 @@ func SuppressEquivalentFileContentDiffs(k string, old string, new string, d *sch
 
 	return bytes.Compare(newBytes, oldBytes) == 0
 }
-
-// SuppressAutomaticLabelDiffs is a DiffSuppressFunc that can be passed into
-// a schema when the provider receives data from the API for an entity which
-// has the "label" field automatically populated by default, so the user Terraform
-// won't include it.
-//
-//
-// e.g. if a Terraform has name but no label:
-// resource "sym_integration" "slack" {
-// 	type = "slack"
-// 	name = "tf-test"
-// 	external_id = "T1234567"
-//   }
-//
-// The API may still have label:
-// {"name": "tf-test", "label": "tf-test"}
-func SuppressAutomaticLabelDiffs(k string, old string, new string, d *schema.ResourceData) bool {
-	// Get what the label would be during update
-	newLabel := new
-	if newLabel == "" {
-		newLabel = d.Get("name").(string)
-	}
-
-	return old == newLabel
-}

@@ -17,6 +17,7 @@ provider "sym" {
 resource "sym_integration" "runtime_context" {
   type = "permission_context"
   name = "runtime-aws-secrets-test"
+  label = "Runtime Context"
   external_id = "123456789012"
   settings = {
     # Sym can assume this role to RW things in customer account
@@ -38,6 +39,7 @@ resource "sym_integration" "runtime_context" {
 resource "sym_secrets" "aws_test" {
   type = "aws_secrets_manager"
   name = "very-secret"
+  label = "Very Secret"
   settings = {
     context_id = sym_integration.runtime_context.id
   }
@@ -53,7 +55,8 @@ resource "sym_secret" "username" {
 
 
 resource "sym_secret" "password" {
-  name = "password2"
+  name = "password"
+  label = "Password"
   path = "/sym/tf-tests/password"
   source_id = sym_secrets.aws_test.id
 }

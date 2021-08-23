@@ -1,7 +1,7 @@
 terraform {
   required_providers {
     sym = {
-      source = "terraform.symops.com/symopsio/sym"
+      source  = "terraform.symops.com/symopsio/sym"
       version = "0.0.1"
     }
   }
@@ -14,15 +14,13 @@ provider "sym" {
 
 resource "sym_integration" "slack" {
   type = "slack"
-  name = "tf-test"
-  label = "Slack"
+  name = "tf-env-test"
   external_id = "T1234567"
 }
 
 resource "sym_integration" "runtime_context" {
   type = "permission_context"
-  name = "tf-test-context"
-  label = "runtime context"
+  name = "tf-env-test-context"
   external_id = "123456789012"
 
   settings = {
@@ -30,5 +28,22 @@ resource "sym_integration" "runtime_context" {
     external_id = "1478F2AD-6091-41E6-B3D2-766CA2F173CB"  # optional
     region      = "us-east-1"
     role_id    = "arn:aws:iam::123456789012:role/sym/RuntimeConnectorRole"
+  }
+}
+
+resource "sym_runtime" "this" {
+  name     = "test-env-runtime"
+  label = "Test Runtime"
+  context_id  = sym_integration.runtime_context.id
+}
+
+
+resource "sym_environment" "this" {
+  name = "env-sandbox"
+  label = "Sandbox"
+  runtime_id = sym_runtime.this.id
+
+  integrations = {
+    slack_id = sym_integration.slack.id
   }
 }

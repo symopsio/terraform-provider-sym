@@ -16,11 +16,7 @@ func IntegrationSchema() map[string]*schema.Schema {
 		"settings":    utils.SettingsMap(),
 		"name":        utils.Required(schema.TypeString),
 		"external_id": utils.Optional(schema.TypeString),
-		"label": {
-			Type:             schema.TypeString,
-			Optional:         true,
-			DiffSuppressFunc: utils.SuppressAutomaticLabelDiffs,
-		},
+		"label":       utils.Optional(schema.TypeString),
 	}
 }
 

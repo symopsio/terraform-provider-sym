@@ -24,7 +24,7 @@ func secretSchema() map[string]*schema.Schema {
 		"path":      utils.Required(schema.TypeString),
 		"source_id": utils.Required(schema.TypeString),
 		"name":      utils.Required(schema.TypeString),
-		"label":     utils.OptionalLabel(),
+		"label":     utils.Required(schema.TypeString),
 	}
 }
 
@@ -35,7 +35,7 @@ func createSecret(ctx context.Context, data *schema.ResourceData, meta interface
 		Path:     data.Get("path").(string),
 		SourceId: data.Get("source_id").(string),
 		Name:     data.Get("name").(string),
-		Label:    utils.GetOptionalFieldWithDefault(data, "label", "name"),
+		Label:    data.Get("label").(string),
 	}
 
 	id, err := c.Secret.Create(secret)
@@ -75,7 +75,7 @@ func updateSecret(ctx context.Context, data *schema.ResourceData, meta interface
 		Path:     data.Get("path").(string),
 		SourceId: data.Get("source_id").(string),
 		Name:     data.Get("name").(string),
-		Label:    utils.GetOptionalFieldWithDefault(data, "label", "name"),
+		Label:    data.Get("label").(string),
 	}
 	if _, err := c.Secret.Update(secret); err != nil {
 		diags = append(diags, utils.DiagFromError(err, "Unable to update Secret"))

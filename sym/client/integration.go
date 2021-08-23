@@ -11,8 +11,7 @@ type Integration struct {
 	Settings   Settings `json:"settings"`
 	Name       string   `json:"slug"`
 	ExternalId string   `json:"external_id"`
-	// Users don't need to care about label so defaults to value of Name
-	Label string `json:"label"`
+	Label      string   `json:"label"`
 }
 
 func (s Integration) String() string {

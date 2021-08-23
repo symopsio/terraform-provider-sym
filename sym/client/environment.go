@@ -11,6 +11,7 @@ import (
 type Environment struct {
 	Id           string            `json:"id,omitempty"`
 	Name         string            `json:"slug"`
+	Label        string            `json:"label"`
 	RuntimeId    string            `json:"runtime_id"`
 	Integrations map[string]string `json:"integrations"`
 }
@@ -18,9 +19,10 @@ type Environment struct {
 // String representation
 func (s Environment) String() string {
 	return fmt.Sprintf(
-		"{id=%s, name=%s}",
+		"{id=%s, name=%s, label=%s}",
 		s.Id,
 		s.Name,
+		s.Label,
 	)
 }
 
@@ -54,7 +56,7 @@ func (c *environmentClient) Create(environment Environment) (string, error) {
 	log.Printf("Creating Sym Environment: %v", environment)
 	result := Environment{}
 
-	if _, err := c.HttpClient.Create("/environments/", &environment, &result); err != nil {
+	if _, err := c.HttpClient.Create("/entities/environments", &environment, &result); err != nil {
 		return "", err
 	}
 
@@ -71,7 +73,7 @@ func (c *environmentClient) Read(id string) (*Environment, error) {
 	log.Printf("Getting Sym Environment: %s", id)
 	result := Environment{}
 
-	if err := c.HttpClient.Read(fmt.Sprintf("/environments/%s/", id), &result); err != nil {
+	if err := c.HttpClient.Read(fmt.Sprintf("/entities/environments/%s", id), &result); err != nil {
 		return nil, err
 	}
 
@@ -83,7 +85,7 @@ func (c *environmentClient) Find(name string) (*Environment, error) {
 	log.Printf("Getting Sym Environment by name: %s", name)
 	var result []Environment
 
-	if err := c.HttpClient.Read(fmt.Sprintf("/environments/search/?slug=%s", name), &result); err != nil {
+	if err := c.HttpClient.Read(fmt.Sprintf("/entities/environments?slug=%s", name), &result); err != nil {
 		return nil, err
 	}
 
@@ -101,7 +103,7 @@ func (c *environmentClient) Update(environment Environment) (string, error) {
 	log.Printf("Updating Sym Environment: %v", environment)
 	result := Environment{}
 
-	if _, err := c.HttpClient.Update(fmt.Sprintf("/environments/%s/", environment.Id), &environment, &result); err != nil {
+	if _, err := c.HttpClient.Update(fmt.Sprintf("/entities/environments/%s", environment.Id), &environment, &result); err != nil {
 		return "", err
 	}
 
@@ -117,7 +119,7 @@ func (c *environmentClient) Update(environment Environment) (string, error) {
 func (c *environmentClient) Delete(id string) (string, error) {
 	log.Printf("Deleting Sym Environment: %s", id)
 
-	if err := c.HttpClient.Delete(fmt.Sprintf("/environments/%s/", id)); err != nil {
+	if err := c.HttpClient.Delete(fmt.Sprintf("/entities/environments/%s", id)); err != nil {
 		return "", err
 	}
 

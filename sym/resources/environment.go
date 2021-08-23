@@ -25,6 +25,7 @@ func Environment() *schema.Resource {
 func EnvironmentSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"name":         utils.Required(schema.TypeString),
+		"label":        utils.Required(schema.TypeString),
 		"runtime_id":   utils.Required(schema.TypeString),
 		"integrations": utils.SettingsMap(),
 	}
@@ -39,6 +40,7 @@ func createEnvironment(ctx context.Context, data *schema.ResourceData, meta inte
 
 	environment := client.Environment{
 		Name:         data.Get("name").(string),
+		Label:        data.Get("label").(string),
 		RuntimeId:    data.Get("runtime_id").(string),
 		Integrations: getSettingsMap(data, "integrations"),
 	}
@@ -65,6 +67,7 @@ func readEnvironment(ctx context.Context, data *schema.ResourceData, meta interf
 	}
 
 	diags = utils.DiagsCheckError(diags, data.Set("name", environment.Name), "Unable to read Environment name")
+	diags = utils.DiagsCheckError(diags, data.Set("label", environment.Label), "Unable to read Environment label")
 	diags = utils.DiagsCheckError(diags, data.Set("runtime_id", environment.RuntimeId), "Unable to read RuntimeId")
 	diags = utils.DiagsCheckError(diags, data.Set("integrations", environment.Integrations), "Unable to read Environment integrations")
 
@@ -79,6 +82,7 @@ func updateEnvironment(ctx context.Context, data *schema.ResourceData, meta inte
 	environment := client.Environment{
 		Id:           data.Id(),
 		Name:         data.Get("name").(string),
+		Label:        data.Get("label").(string),
 		RuntimeId:    data.Get("name").(string),
 		Integrations: getSettingsMap(data, "integrations"),
 	}

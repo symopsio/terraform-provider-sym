@@ -26,7 +26,7 @@ func IntegrationSchema() map[string]*schema.Schema {
 		"settings":    utils.SettingsMap(),
 		"name":        utils.Required(schema.TypeString),
 		"external_id": utils.Required(schema.TypeString),
-		"label":       utils.OptionalLabel(),
+		"label":       utils.Required(schema.TypeString),
 	}
 }
 
@@ -39,7 +39,7 @@ func createIntegration(ctx context.Context, data *schema.ResourceData, meta inte
 		Settings:   getSettings(data),
 		Name:       data.Get("name").(string),
 		ExternalId: data.Get("external_id").(string),
-		Label:      utils.GetOptionalFieldWithDefault(data, "label", "name"),
+		Label:      data.Get("label").(string),
 	}
 
 	id, err := c.Integration.Create(integration)
@@ -81,7 +81,7 @@ func updateIntegration(ctx context.Context, data *schema.ResourceData, meta inte
 		Name:       data.Get("name").(string),
 		Settings:   getSettings(data),
 		ExternalId: data.Get("external_id").(string),
-		Label:      utils.GetOptionalFieldWithDefault(data, "label", "name"),
+		Label:      data.Get("label").(string),
 	}
 	if _, err := c.Integration.Update(integration); err != nil {
 		diags = append(diags, utils.DiagFromError(err, "Unable to update Integration"))

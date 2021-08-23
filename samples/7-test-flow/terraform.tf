@@ -8,13 +8,5 @@ terraform {
 }
 
 provider "sym" {
-  org = "asics"
-}
-
-data "sym_environment" "foo" {
-    name = "sandbox"
-}
-
-output "runtime_id" {
-    value = data.sym_environment.foo.id
+  org = "sym"
 }
