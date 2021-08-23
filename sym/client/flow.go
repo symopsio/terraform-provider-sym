@@ -21,7 +21,6 @@ type Flow struct {
 	Label          string    `json:"label"`
 	Template       string    `json:"template"`
 	Implementation string    `json:"implementation"`
-	Environment    Settings  `json:"environment"`
 	EnvironmentId  string    `json:"environment_id"`
 	Vars           Settings  `json:"vars"`
 	Params         APIParams `json:"params"`
