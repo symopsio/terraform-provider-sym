@@ -14,6 +14,7 @@ provider "sym" {
 resource "sym_integration" "runtime_context" {
   type = "permission_context"
   name = "tf-runtime-test-context"
+  label = "Runtime Context"
   external_id = "123456789012"
 
   settings = {

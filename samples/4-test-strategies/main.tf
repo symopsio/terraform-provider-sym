@@ -42,6 +42,7 @@ resource "sym_target" "prod_break_glass" {
 resource "sym_integration" "sso_main" {
   type = "permission_context"
   name = "sso-main-strategies-test"
+  label = "SSO Main"
   external_id = "123456789011"
 
   settings = {

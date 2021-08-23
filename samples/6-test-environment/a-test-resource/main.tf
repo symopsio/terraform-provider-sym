@@ -15,12 +15,14 @@ provider "sym" {
 resource "sym_integration" "slack" {
   type = "slack"
   name = "tf-env-test"
+  label = "Slack"
   external_id = "T1234567"
 }
 
 resource "sym_integration" "runtime_context" {
   type = "permission_context"
   name = "tf-env-test-context"
+  label = "Runtime Context"
   external_id = "123456789012"
 
   settings = {

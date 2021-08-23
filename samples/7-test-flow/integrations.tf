@@ -3,6 +3,7 @@
 resource "sym_integration" "runtime_context" {
   type = "permission_context"
   name = "aws-flow-context-test"
+  label = "Runtime context"
   external_id = "123456789012"
 
   settings = {
@@ -17,5 +18,6 @@ resource "sym_integration" "runtime_context" {
 resource "sym_integration" "slack" {
   type = "slack"
   name = "tf-flow-test"
+  label = "Slack"
   external_id = "T1234567"
 }
