@@ -22,6 +22,7 @@ func Target() *schema.Resource {
 func targetSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"type":     utils.Required(schema.TypeString),
+		"name":     utils.Required(schema.TypeString),
 		"label":    utils.Required(schema.TypeString),
 		"settings": utils.SettingsMap(),
 	}
@@ -31,6 +32,7 @@ func createTarget(ctx context.Context, data *schema.ResourceData, meta interface
 	c := meta.(*client.ApiClient)
 	target := client.Target{
 		Type:     data.Get("type").(string),
+		Name:     data.Get("name").(string),
 		Label:    data.Get("label").(string),
 		Settings: getSettings(data),
 	}
@@ -56,6 +58,7 @@ func readTarget(ctx context.Context, data *schema.ResourceData, meta interface{}
 	}
 
 	diags = utils.DiagsCheckError(diags, data.Set("type", target.Type), "Unable to read Target type")
+	diags = utils.DiagsCheckError(diags, data.Set("name", target.Name), "Unable to read Target name")
 	diags = utils.DiagsCheckError(diags, data.Set("label", target.Label), "Unable to read Target label")
 	diags = utils.DiagsCheckError(diags, data.Set("settings", target.Settings), "Unable to read Target settings")
 
@@ -69,6 +72,7 @@ func updateTarget(ctx context.Context, data *schema.ResourceData, meta interface
 	target := client.Target{
 		Id:       data.Id(),
 		Type:     data.Get("type").(string),
+		Name:     data.Get("name").(string),
 		Label:    data.Get("label").(string),
 		Settings: getSettings(data),
 	}
