@@ -18,7 +18,7 @@ data "sym_integration" "data_slack" {
 
 data "sym_integration" "data_runtime" {
   type = "permission_context"
-  name = "tf-test"
+  name = "tf-test-context"
 }
 
 output "data_slack_workspace_id" {

@@ -11,18 +11,10 @@ provider "sym" {
   org = "sym"
 }
 
-
-resource "sym_integration" "slack" {
-  type = "slack"
-  name = "tf-test"
-  label = "Slack"
-  external_id = "T1234567"
-}
-
 resource "sym_integration" "runtime_context" {
   type = "permission_context"
-  name = "tf-test-context"
-  label = "runtime context"
+  name = "tf-runtime-test-context"
+  label = "Runtime Context"
   external_id = "123456789012"
 
   settings = {
@@ -32,3 +24,10 @@ resource "sym_integration" "runtime_context" {
     role_id    = "arn:aws:iam::123456789012:role/sym/RuntimeConnectorRole"
   }
 }
+
+resource "sym_runtime" "this" {
+  name     = "test-runtime"
+  label = "Test Runtime"
+  context_id  = sym_integration.runtime_context.id
+}
+

@@ -12,7 +12,8 @@ import (
 // The difference is that runtime_id is not required here.
 func EnvironmentDataSourceSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-		"name": utils.Required(schema.TypeString),
+		"name":  utils.Required(schema.TypeString),
+		"label": utils.Optional(schema.TypeString),
 		"runtime_id": {
 			Type:     schema.TypeString,
 			Optional: true,
@@ -40,6 +41,7 @@ func dataSourceEnvironmentRead(ctx context.Context, data *schema.ResourceData, m
 	}
 
 	diags = utils.DiagsCheckError(diags, data.Set("name", environment.Name), "Unable to read Environment name")
+	diags = utils.DiagsCheckError(diags, data.Set("label", environment.Label), "Unable to read Environment label")
 	diags = utils.DiagsCheckError(diags, data.Set("runtime_id", environment.RuntimeId), "Unable to read Environment runtime_id")
 	diags = utils.DiagsCheckError(diags, data.Set("integrations", environment.Integrations), "Unable to read Environment integrations")
 

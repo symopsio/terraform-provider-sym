@@ -21,6 +21,7 @@ func DataSourceRuntime() *schema.Resource {
 func runtimeSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"name":       utils.Required(schema.TypeString),
+		"label":      utils.Optional(schema.TypeString),
 		"context_id": utils.Optional(schema.TypeString),
 	}
 }
@@ -37,6 +38,7 @@ func dataSourceRuntimeRead(ctx context.Context, data *schema.ResourceData, meta 
 	}
 
 	diags = utils.DiagsCheckError(diags, data.Set("name", runtime.Name), "Unable to read Runtime name")
+	diags = utils.DiagsCheckError(diags, data.Set("label", runtime.Label), "Unable to read Runtime label")
 	diags = utils.DiagsCheckError(diags, data.Set("context_id", runtime.ContextId), "Unable to read Runtime context_id")
 
 	data.SetId(runtime.Id)

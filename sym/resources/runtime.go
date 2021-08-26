@@ -23,6 +23,7 @@ func Runtime() *schema.Resource {
 func runtimeSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"name":       utils.Required(schema.TypeString),
+		"label":      utils.Required(schema.TypeString),
 		"context_id": utils.Required(schema.TypeString),
 	}
 }
@@ -31,6 +32,7 @@ func createRuntime(ctx context.Context, data *schema.ResourceData, meta interfac
 	c := meta.(*client.ApiClient)
 	runtime := client.Runtime{
 		Name:      data.Get("name").(string),
+		Label:     data.Get("label").(string),
 		ContextId: data.Get("context_id").(string),
 	}
 
@@ -55,6 +57,7 @@ func readRuntime(ctx context.Context, data *schema.ResourceData, meta interface{
 	}
 
 	diags = utils.DiagsCheckError(diags, data.Set("name", runtime.Name), "Unable to read Runtime name")
+	diags = utils.DiagsCheckError(diags, data.Set("label", runtime.Name), "Unable to read Runtime label")
 	diags = utils.DiagsCheckError(diags, data.Set("context_id", runtime.ContextId), "Unable to read Runtime context_id")
 
 	return diags
@@ -67,6 +70,7 @@ func updateRuntime(ctx context.Context, data *schema.ResourceData, meta interfac
 	runtime := client.Runtime{
 		Id:        data.Id(),
 		Name:      data.Get("name").(string),
+		Label:     data.Get("label").(string),
 		ContextId: data.Get("context_id").(string),
 	}
 

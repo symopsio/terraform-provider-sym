@@ -21,7 +21,6 @@ type Flow struct {
 	Label          string    `json:"label"`
 	Template       string    `json:"template"`
 	Implementation string    `json:"implementation"`
-	Environment    Settings  `json:"environment"`
 	EnvironmentId  string    `json:"environment_id"`
 	Vars           Settings  `json:"vars"`
 	Params         APIParams `json:"params"`
@@ -100,7 +99,7 @@ func (c *flowClient) Create(flow Flow) (string, error) {
 	log.Printf("Creating Sym Flow: %v", flow)
 	result := Flow{}
 
-	if _, err := c.HttpClient.Create("/flows/", &flow, &result); err != nil {
+	if _, err := c.HttpClient.Create("/entities/flows", &flow, &result); err != nil {
 		return "", err
 	}
 
@@ -116,7 +115,7 @@ func (c *flowClient) Read(id string) (*Flow, error) {
 	log.Printf("Getting Sym Flow: %s", id)
 	result := Flow{}
 
-	if err := c.HttpClient.Read(fmt.Sprintf("/flows/%s/", id), &result); err != nil {
+	if err := c.HttpClient.Read(fmt.Sprintf("/entities/flows/%s", id), &result); err != nil {
 		return nil, err
 	}
 
@@ -128,7 +127,7 @@ func (c *flowClient) Update(flow Flow) (string, error) {
 	log.Printf("Updating Sym Flow: %v", flow)
 	result := Flow{}
 
-	if _, err := c.HttpClient.Update(fmt.Sprintf("/flows/%s/", flow.Id), &flow, &result); err != nil {
+	if _, err := c.HttpClient.Update(fmt.Sprintf("/entities/flows/%s", flow.Id), &flow, &result); err != nil {
 		return "", err
 	}
 
@@ -143,7 +142,7 @@ func (c *flowClient) Update(flow Flow) (string, error) {
 func (c *flowClient) Delete(id string) (string, error) {
 	log.Printf("Deleting Sym Flow: %s", id)
 
-	if err := c.HttpClient.Delete(fmt.Sprintf("/flows/%s/", id)); err != nil {
+	if err := c.HttpClient.Delete(fmt.Sprintf("/entities/flows/%s", id)); err != nil {
 		return "", err
 	}
 

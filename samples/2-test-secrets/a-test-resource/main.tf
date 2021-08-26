@@ -8,7 +8,7 @@ terraform {
 }
 
 provider "sym" {
-  org = "asics"
+  org = "sym"
 }
 
 
@@ -17,11 +17,13 @@ provider "sym" {
 resource "sym_integration" "runtime_context" {
   type = "permission_context"
   name = "runtime-aws-secrets-test"
+  label = "Runtime Context"
+  external_id = "123456789012"
   settings = {
     # Sym can assume this role to RW things in customer account
     # The role is created by a TF module independent of this config (for now)
     cloud = "aws"
-    role_arn = "arn:aws:iam::123456789012:role/sym/SymExecutionRole"
+    role_id = "arn:aws:iam::123456789012:role/sym/SymExecutionRole"
     region = "us-east-1"
   }
 }
@@ -37,19 +39,24 @@ resource "sym_integration" "runtime_context" {
 resource "sym_secrets" "aws_test" {
   type = "aws_secrets_manager"
   name = "very-secret"
+  label = "Very Secret"
   settings = {
-    context_id = "context-id-123"
+    context_id = sym_integration.runtime_context.id
   }
 }
 
 
 resource "sym_secret" "username" {
+  name = "username"
+  label = "Username"
   path = "/sym/tf-tests/username"
   source_id = sym_secrets.aws_test.id
 }
 
 
 resource "sym_secret" "password" {
+  name = "password"
+  label = "Password"
   path = "/sym/tf-tests/password"
   source_id = sym_secrets.aws_test.id
 }

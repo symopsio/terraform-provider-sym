@@ -43,11 +43,7 @@ func flowSchema() map[string]*schema.Schema {
 				return utils.ParseImpl(val.(string))
 			},
 		},
-		"vars": utils.SettingsMap(),
-		"environment": utils.Deprecated(
-			utils.SettingsMap(),
-			"The environment field is deprecated. Please use environment_id with a sym_environment resource.",
-		),
+		"vars":           utils.SettingsMap(),
 		"environment_id": utils.Required(schema.TypeString),
 		"params": {
 			Type:             schema.TypeMap,
@@ -117,7 +113,6 @@ func createFlow(ctx context.Context, data *schema.ResourceData, meta interface{}
 		Name:          data.Get("name").(string),
 		Label:         data.Get("label").(string),
 		Template:      data.Get("template").(string),
-		Environment:   getSettingsMap(data, "environment"),
 		EnvironmentId: data.Get("environment_id").(string),
 		Vars:          getSettingsMap(data, "vars"),
 	}
@@ -162,7 +157,6 @@ func readFlow(ctx context.Context, data *schema.ResourceData, meta interface{}) 
 	diags = utils.DiagsCheckError(diags, data.Set("label", flow.Label), "Unable to read Flow label")
 	diags = utils.DiagsCheckError(diags, data.Set("template", flow.Template), "Unable to read Flow template")
 	diags = utils.DiagsCheckError(diags, data.Set("environment_id", flow.EnvironmentId), "Unable to read Flow environment_id")
-	diags = utils.DiagsCheckError(diags, data.Set("environment", flow.Environment), "Unable to read Flow environment")
 	diags = utils.DiagsCheckError(diags, data.Set("vars", flow.Vars), "Unable to read Flow vars")
 	// Base64 -> Text
 	diags = utils.DiagsCheckError(diags, data.Set("implementation", utils.ParseRemoteImpl(flow.Implementation)), "Unable to read Flow implementation")
@@ -186,7 +180,6 @@ func updateFlow(ctx context.Context, data *schema.ResourceData, meta interface{}
 		Name:          data.Get("name").(string),
 		Label:         data.Get("label").(string),
 		Template:      data.Get("template").(string),
-		Environment:   getSettingsMap(data, "environment"),
 		EnvironmentId: data.Get("environment_id").(string),
 		Vars:          getSettingsMap(data, "vars"),
 	}

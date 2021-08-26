@@ -4,6 +4,19 @@ import (
 	"fmt"
 )
 
+type Error struct {
+	Field   string `json:"field"`
+	Message string `json:"message"`
+}
+
+type ErrorResponse struct {
+	Error       bool    `json:"error"`
+	Errors      []Error `json:"errors"`
+	Code        int     `json:"code"`
+	StatusCode  int     `json:"status_code"`
+	IsRetryable bool    `json:"is_retryable"`
+}
+
 // GenerateError generates Sym errors in a standard format.
 func GenerateError(detail string, docs string) error {
 	return fmt.Errorf("%s\nFor more details, see %s", detail, docs)
@@ -45,5 +58,10 @@ var ErrAPIConnect = func(endpoint string, requestId string) error {
 
 var ErrAPIUnexpected = func(endpoint string, requestId string, statusCode int) error {
 	errorMessage := fmt.Sprintf("An unexpected error occurred while connecting to the Sym API. Please reach out to Sym Support.\nURL: %s\nStatus Code: %v\nRequest ID: %s", endpoint, statusCode, requestId)
+	return GenerateError(errorMessage, DocsSupport)
+}
+
+var ErrAPIBadRequest = func(messages []Error) error {
+	errorMessage := fmt.Sprintf("The Sym API returned a bad request error: %v", messages)
 	return GenerateError(errorMessage, DocsSupport)
 }
