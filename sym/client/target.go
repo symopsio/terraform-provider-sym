@@ -9,7 +9,7 @@ type Target struct {
 	Id       string   `json:"id,omitempty"`
 	Type     string   `json:"type"`
 	Name     string   `json:"slug"`
-	Label    string   `json:"label"`
+	Label    string   `json:"label,omitempty"`
 	Settings Settings `json:"settings"`
 }
 

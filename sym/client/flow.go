@@ -18,7 +18,7 @@ type ParamField struct {
 type Flow struct {
 	Id             string    `json:"id,omitempty"`
 	Name           string    `json:"slug"`
-	Label          string    `json:"label"`
+	Label          string    `json:"label,omitempty"`
 	Template       string    `json:"template"`
 	Implementation string    `json:"implementation"`
 	EnvironmentId  string    `json:"environment_id"`

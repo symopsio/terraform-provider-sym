@@ -23,7 +23,7 @@ func targetSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"type":     utils.Required(schema.TypeString),
 		"name":     utils.Required(schema.TypeString),
-		"label":    utils.Required(schema.TypeString),
+		"label":    utils.Optional(schema.TypeString),
 		"settings": utils.SettingsMap(),
 	}
 }

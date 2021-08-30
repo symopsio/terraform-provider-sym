@@ -33,7 +33,7 @@ func Flow() *schema.Resource {
 func flowSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"name":     utils.Required(schema.TypeString),
-		"label":    utils.Required(schema.TypeString),
+		"label":    utils.Optional(schema.TypeString),
 		"template": utils.Required(schema.TypeString),
 		"implementation": {
 			Type:             schema.TypeString,
