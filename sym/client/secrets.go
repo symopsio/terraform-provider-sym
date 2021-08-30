@@ -10,7 +10,7 @@ type Secrets struct {
 	Type     string   `json:"type"`
 	Name     string   `json:"slug"`
 	Settings Settings `json:"settings"`
-	Label    string   `json:"label"`
+	Label    string   `json:"label,omitempty"`
 }
 
 type SecretsClient interface {

@@ -11,7 +11,7 @@ import (
 type Environment struct {
 	Id           string            `json:"id,omitempty"`
 	Name         string            `json:"slug"`
-	Label        string            `json:"label"`
+	Label        string            `json:"label,omitempty"`
 	RuntimeId    string            `json:"runtime_id"`
 	Integrations map[string]string `json:"integrations"`
 }

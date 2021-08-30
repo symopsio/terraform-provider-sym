@@ -25,7 +25,7 @@ func Environment() *schema.Resource {
 func EnvironmentSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"name":         utils.Required(schema.TypeString),
-		"label":        utils.Required(schema.TypeString),
+		"label":        utils.Optional(schema.TypeString),
 		"runtime_id":   utils.Required(schema.TypeString),
 		"integrations": utils.SettingsMap(),
 	}

@@ -11,7 +11,7 @@ type Integration struct {
 	Settings   Settings `json:"settings"`
 	Name       string   `json:"slug"`
 	ExternalId string   `json:"external_id"`
-	Label      string   `json:"label"`
+	Label      string   `json:"label,omitempty"`
 }
 
 func (s Integration) String() string {
