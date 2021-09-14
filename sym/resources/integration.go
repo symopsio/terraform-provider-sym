@@ -24,7 +24,7 @@ func IntegrationSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"type":        utils.Required(schema.TypeString),
 		"settings":    utils.SettingsMap(),
-		"name":        utils.Required(schema.TypeString),
+		"name":        utils.Optional(schema.TypeString),
 		"external_id": utils.Required(schema.TypeString),
 		"label":       utils.Optional(schema.TypeString),
 	}

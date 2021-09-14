@@ -6,6 +6,7 @@ package resources
 
 import (
 	"context"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/symopsio/terraform-provider-sym/sym/client"
@@ -24,7 +25,7 @@ func Environment() *schema.Resource {
 
 func EnvironmentSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-		"name":         utils.Required(schema.TypeString),
+		"name":         utils.Optional(schema.TypeString),
 		"label":        utils.Optional(schema.TypeString),
 		"runtime_id":   utils.Required(schema.TypeString),
 		"integrations": utils.SettingsMap(),

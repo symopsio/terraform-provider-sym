@@ -22,7 +22,7 @@ func Secrets() *schema.Resource {
 func SecretsSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"type":     utils.Required(schema.TypeString),
-		"name":     utils.Required(schema.TypeString),
+		"name":     utils.Optional(schema.TypeString),
 		"label":    utils.Optional(schema.TypeString),
 		"settings": utils.SettingsMap(),
 	}

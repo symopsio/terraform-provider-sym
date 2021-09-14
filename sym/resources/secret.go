@@ -23,7 +23,7 @@ func secretSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"path":      utils.Required(schema.TypeString),
 		"source_id": utils.Required(schema.TypeString),
-		"name":      utils.Required(schema.TypeString),
+		"name":      utils.Optional(schema.TypeString),
 		"label":     utils.Optional(schema.TypeString),
 	}
 }

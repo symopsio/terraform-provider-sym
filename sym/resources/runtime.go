@@ -22,7 +22,7 @@ func Runtime() *schema.Resource {
 
 func runtimeSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-		"name":       utils.Required(schema.TypeString),
+		"name":       utils.Optional(schema.TypeString),
 		"label":      utils.Optional(schema.TypeString),
 		"context_id": utils.Required(schema.TypeString),
 	}

@@ -9,7 +9,7 @@ type Secret struct {
 	Id       string `json:"id,omitempty"`
 	Path     string `json:"path"`
 	SourceId string `json:"source_id"`
-	Name     string `json:"slug"`
+	Name     string `json:"slug,omitempty"`
 	Label    string `json:"label,omitempty"`
 }
 

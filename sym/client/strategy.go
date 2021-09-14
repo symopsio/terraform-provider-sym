@@ -22,7 +22,7 @@ type Strategy struct {
 	IntegrationId string   `json:"integration_id"`
 	Targets       []string `json:"targets"`
 	Settings      Settings `json:"settings"`
-	Name          string   `json:"slug"`
+	Name          string   `json:"slug,omitempty"`
 	Label         string   `json:"label,omitempty"`
 }
 

@@ -9,7 +9,7 @@ type Integration struct {
 	Id         string   `json:"id,omitempty"`
 	Type       string   `json:"type"`
 	Settings   Settings `json:"settings"`
-	Name       string   `json:"slug"`
+	Name       string   `json:"slug,omitempty"`
 	ExternalId string   `json:"external_id"`
 	Label      string   `json:"label,omitempty"`
 }

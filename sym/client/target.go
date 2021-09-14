@@ -8,7 +8,7 @@ import (
 type Target struct {
 	Id       string   `json:"id,omitempty"`
 	Type     string   `json:"type"`
-	Name     string   `json:"slug"`
+	Name     string   `json:"slug,omitempty"`
 	Label    string   `json:"label,omitempty"`
 	Settings Settings `json:"settings"`
 }

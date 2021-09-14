@@ -7,7 +7,7 @@ import (
 
 type Runtime struct {
 	Id        string `json:"id,omitempty"`
-	Name      string `json:"slug"`
+	Name      string `json:"slug,omitempty"`
 	Label     string `json:"label,omitempty"`
 	ContextId string `json:"context_id"`
 }
