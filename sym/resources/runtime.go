@@ -57,7 +57,7 @@ func readRuntime(ctx context.Context, data *schema.ResourceData, meta interface{
 	}
 
 	diags = utils.DiagsCheckError(diags, data.Set("name", runtime.Name), "Unable to read Runtime name")
-	diags = utils.DiagsCheckError(diags, data.Set("label", runtime.Name), "Unable to read Runtime label")
+	diags = utils.DiagsCheckError(diags, data.Set("label", runtime.Label), "Unable to read Runtime label")
 	diags = utils.DiagsCheckError(diags, data.Set("context_id", runtime.ContextId), "Unable to read Runtime context_id")
 
 	return diags
