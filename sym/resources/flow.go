@@ -189,9 +189,9 @@ func updateFlow(ctx context.Context, data *schema.ResourceData, meta interface{}
 	// If the diff was suppressed, we'll have a text string here already, as it was decoded by the StateFunc.
 	// Therefore, check if this is a filename or not. If it's not, assume it is the decoded impl.
 	if b, err := ioutil.ReadFile(implementation); err != nil {
-		flow.Implementation = base64.StdEncoding.EncodeToString([]byte(implementation))
+		implementation = base64.StdEncoding.EncodeToString([]byte(implementation))
 	} else {
-		flow.Implementation = base64.StdEncoding.EncodeToString(b)
+		implementation = base64.StdEncoding.EncodeToString(b)
 	}
 
 	if _, err := base64.StdEncoding.DecodeString(implementation); err == nil {
