@@ -6,6 +6,7 @@ package resources
 
 import (
 	"context"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/symopsio/terraform-provider-sym/sym/client"
@@ -83,7 +84,7 @@ func updateEnvironment(ctx context.Context, data *schema.ResourceData, meta inte
 		Id:           data.Id(),
 		Name:         data.Get("name").(string),
 		Label:        data.Get("label").(string),
-		RuntimeId:    data.Get("name").(string),
+		RuntimeId:    data.Get("runtime_id").(string),
 		Integrations: getSettingsMap(data, "integrations"),
 	}
 
