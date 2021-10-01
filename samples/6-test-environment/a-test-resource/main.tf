@@ -29,7 +29,7 @@ resource "sym_integration" "runtime_context" {
     cloud       = "aws"                                  # only supported value, will include gcp, azure, private in future
     external_id = "1478F2AD-6091-41E6-B3D2-766CA2F173CB"  # optional
     region      = "us-east-1"
-    role_id    = "arn:aws:iam::123456789012:role/sym/RuntimeConnectorRole"
+    role_arn    = "arn:aws:iam::123456789012:role/sym/RuntimeConnectorRole"
   }
 }
 

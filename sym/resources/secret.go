@@ -23,7 +23,6 @@ func secretSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"path":      utils.Required(schema.TypeString),
 		"source_id": utils.Required(schema.TypeString),
-		"name":      utils.Required(schema.TypeString),
 		"label":     utils.Optional(schema.TypeString),
 	}
 }
@@ -34,7 +33,6 @@ func createSecret(ctx context.Context, data *schema.ResourceData, meta interface
 	secret := client.Secret{
 		Path:     data.Get("path").(string),
 		SourceId: data.Get("source_id").(string),
-		Name:     data.Get("name").(string),
 		Label:    data.Get("label").(string),
 	}
 
@@ -60,7 +58,6 @@ func readSecret(ctx context.Context, data *schema.ResourceData, meta interface{}
 
 	diags = utils.DiagsCheckError(diags, data.Set("path", secret.Path), "Unable to read Secret path")
 	diags = utils.DiagsCheckError(diags, data.Set("source_id", secret.SourceId), "Unable to read Secret source_id")
-	diags = utils.DiagsCheckError(diags, data.Set("name", secret.Name), "Unable to read Secret name")
 	diags = utils.DiagsCheckError(diags, data.Set("label", secret.Label), "Unable to read Secret label")
 
 	return diags
@@ -74,7 +71,6 @@ func updateSecret(ctx context.Context, data *schema.ResourceData, meta interface
 		Id:       data.Id(),
 		Path:     data.Get("path").(string),
 		SourceId: data.Get("source_id").(string),
-		Name:     data.Get("name").(string),
 		Label:    data.Get("label").(string),
 	}
 	if _, err := c.Secret.Update(secret); err != nil {

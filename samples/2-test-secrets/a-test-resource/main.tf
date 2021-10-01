@@ -23,7 +23,7 @@ resource "sym_integration" "runtime_context" {
     # Sym can assume this role to RW things in customer account
     # The role is created by a TF module independent of this config (for now)
     cloud = "aws"
-    role_id = "arn:aws:iam::123456789012:role/sym/SymExecutionRole"
+    role_arn = "arn:aws:iam::123456789012:role/sym/SymExecutionRole"
     region = "us-east-1"
   }
 }
@@ -47,15 +47,12 @@ resource "sym_secrets" "aws_test" {
 
 
 resource "sym_secret" "username" {
-  name = "username"
   label = "Username"
   path = "/sym/tf-tests/username"
   source_id = sym_secrets.aws_test.id
 }
 
-
 resource "sym_secret" "password" {
-  name = "password"
   label = "Password"
   path = "/sym/tf-tests/password"
   source_id = sym_secrets.aws_test.id

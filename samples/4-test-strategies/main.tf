@@ -47,7 +47,7 @@ resource "sym_integration" "sso_main" {
 
   settings = {
     cloud = "aws"
-    role_id = "arn:aws:::instance/ssoinst-abcdefghi12314135325"
+    role_arn = "arn:aws:::instance/ssoinst-abcdefghi12314135325"
     external_id = "1478F2AD-6091-41E6-B3D2-766CA2F173CB"
     region = "us-east-1"
   }
