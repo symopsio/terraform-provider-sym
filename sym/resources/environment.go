@@ -25,10 +25,11 @@ func Environment() *schema.Resource {
 
 func EnvironmentSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-		"name":         utils.Required(schema.TypeString),
-		"label":        utils.Optional(schema.TypeString),
-		"runtime_id":   utils.Required(schema.TypeString),
-		"integrations": utils.SettingsMap(),
+		"name":            utils.Required(schema.TypeString),
+		"label":           utils.Optional(schema.TypeString),
+		"runtime_id":      utils.Required(schema.TypeString),
+		"integrations":    utils.SettingsMap(),
+		"error_logger_id": utils.Optional(schema.TypeString),
 	}
 }
 
@@ -40,10 +41,11 @@ func createEnvironment(ctx context.Context, data *schema.ResourceData, meta inte
 	c := meta.(*client.ApiClient)
 
 	environment := client.Environment{
-		Name:         data.Get("name").(string),
-		Label:        data.Get("label").(string),
-		RuntimeId:    data.Get("runtime_id").(string),
-		Integrations: getSettingsMap(data, "integrations"),
+		Name:          data.Get("name").(string),
+		Label:         data.Get("label").(string),
+		RuntimeId:     data.Get("runtime_id").(string),
+		Integrations:  getSettingsMap(data, "integrations"),
+		ErrorLoggerId: data.Get("error_logger_id").(string),
 	}
 
 	if id, err := c.Environment.Create(environment); err != nil {
@@ -71,6 +73,7 @@ func readEnvironment(ctx context.Context, data *schema.ResourceData, meta interf
 	diags = utils.DiagsCheckError(diags, data.Set("label", environment.Label), "Unable to read Environment label")
 	diags = utils.DiagsCheckError(diags, data.Set("runtime_id", environment.RuntimeId), "Unable to read RuntimeId")
 	diags = utils.DiagsCheckError(diags, data.Set("integrations", environment.Integrations), "Unable to read Environment integrations")
+	diags = utils.DiagsCheckError(diags, data.Set("error_logger_id", environment.ErrorLoggerId), "Unable to read ErrorLoggerId")
 
 	return diags
 }
@@ -81,11 +84,12 @@ func updateEnvironment(ctx context.Context, data *schema.ResourceData, meta inte
 	c := meta.(*client.ApiClient)
 
 	environment := client.Environment{
-		Id:           data.Id(),
-		Name:         data.Get("name").(string),
-		Label:        data.Get("label").(string),
-		RuntimeId:    data.Get("runtime_id").(string),
-		Integrations: getSettingsMap(data, "integrations"),
+		Id:            data.Id(),
+		Name:          data.Get("name").(string),
+		Label:         data.Get("label").(string),
+		RuntimeId:     data.Get("runtime_id").(string),
+		Integrations:  getSettingsMap(data, "integrations"),
+		ErrorLoggerId: data.Get("error_logger_id").(string),
 	}
 
 	if _, err := c.Environment.Update(environment); err != nil {
