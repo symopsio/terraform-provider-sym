@@ -8,21 +8,24 @@ import (
 )
 
 // Type to be marshalled into JSON
+
 type Environment struct {
-	Id           string            `json:"id,omitempty"`
-	Name         string            `json:"slug"`
-	Label        string            `json:"label,omitempty"`
-	RuntimeId    string            `json:"runtime_id"`
-	Integrations map[string]string `json:"integrations"`
+	Id            string            `json:"id,omitempty"`
+	Name          string            `json:"slug"`
+	Label         string            `json:"label,omitempty"`
+	RuntimeId     string            `json:"runtime_id"`
+	Integrations  map[string]string `json:"integrations"`
+	ErrorLoggerId string            `json:"error_logger_id,omitempty"`
 }
 
 // String representation
 func (s Environment) String() string {
 	return fmt.Sprintf(
-		"{id=%s, name=%s, label=%s}",
+		"{id=%s, name=%s, label=%s, error_reporting=%s}",
 		s.Id,
 		s.Name,
 		s.Label,
+		s.ErrorLoggerId,
 	)
 }
 

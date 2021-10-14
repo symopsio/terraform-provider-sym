@@ -12,6 +12,7 @@ type ApiClient struct {
 	Flow        FlowClient
 	Runtime     RuntimeClient
 	Environment EnvironmentClient
+	ErrorLogger ErrorLoggerClient
 }
 
 // New creates a new symflow client
@@ -26,6 +27,7 @@ func New() *ApiClient {
 		Flow:        NewFlowClient(httpClient),
 		Runtime:     NewRuntimeClient(httpClient),
 		Environment: NewEnvironmentClient(httpClient),
+		ErrorLogger: NewErrorLoggerClient(httpClient),
 	}
 }
 
