@@ -4,28 +4,30 @@ import "os"
 
 // ApiClient interact with the Sym API
 type ApiClient struct {
-	Integration IntegrationClient
-	Secret      SecretClient
-	Secrets     SecretsClient
-	Target      TargetClient
-	Strategy    StrategyClient
-	Flow        FlowClient
-	Runtime     RuntimeClient
-	Environment EnvironmentClient
+	Integration    IntegrationClient
+	Secret         SecretClient
+	Secrets        SecretsClient
+	Target         TargetClient
+	Strategy       StrategyClient
+	Flow           FlowClient
+	Runtime        RuntimeClient
+	Environment    EnvironmentClient
+	LogDestination LogDestinationClient
 }
 
 // New creates a new symflow client
 func New() *ApiClient {
 	httpClient := NewSymHttpClient(getApiUrl())
 	return &ApiClient{
-		Integration: NewIntegrationClient(httpClient),
-		Secret:      NewSecretClient(httpClient),
-		Secrets:     NewSecretsClient(httpClient),
-		Target:      NewTargetClient(httpClient),
-		Strategy:    NewStrategyClient(httpClient),
-		Flow:        NewFlowClient(httpClient),
-		Runtime:     NewRuntimeClient(httpClient),
-		Environment: NewEnvironmentClient(httpClient),
+		Integration:    NewIntegrationClient(httpClient),
+		Secret:         NewSecretClient(httpClient),
+		Secrets:        NewSecretsClient(httpClient),
+		Target:         NewTargetClient(httpClient),
+		Strategy:       NewStrategyClient(httpClient),
+		Flow:           NewFlowClient(httpClient),
+		Runtime:        NewRuntimeClient(httpClient),
+		Environment:    NewEnvironmentClient(httpClient),
+		LogDestination: NewLogDestinationClient(httpClient),
 	}
 }
 
