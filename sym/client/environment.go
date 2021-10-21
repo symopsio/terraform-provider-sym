@@ -10,12 +10,13 @@ import (
 // Type to be marshalled into JSON
 
 type Environment struct {
-	Id            string            `json:"id,omitempty"`
-	Name          string            `json:"slug"`
-	Label         string            `json:"label,omitempty"`
-	RuntimeId     string            `json:"runtime_id"`
-	Integrations  map[string]string `json:"integrations"`
-	ErrorLoggerId string            `json:"error_logger_id,omitempty"`
+	Id                string            `json:"id,omitempty"`
+	Name              string            `json:"slug"`
+	Label             string            `json:"label,omitempty"`
+	RuntimeId         string            `json:"runtime_id"`
+	Integrations      map[string]string `json:"integrations"`
+	ErrorLoggerId     string            `json:"error_logger_id,omitempty"`
+	LogDestinationIds []string          `json:"log_destination_ids,omitempty"`
 }
 
 // String representation

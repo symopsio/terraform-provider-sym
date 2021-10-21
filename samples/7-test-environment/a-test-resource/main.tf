@@ -39,11 +39,21 @@ resource "sym_runtime" "this" {
   context_id  = sym_integration.runtime_context.id
 }
 
+resource "sym_log_destination" "data_stream" {
+  type    = "kinesis_data_stream"
+  settings = {
+    stream_name = "tftest-env-data-stream"
+    permission_context_id = sym_integration.runtime_context.id
+  }
+}
+
+
 
 resource "sym_environment" "this" {
   name = "env-sandbox"
   label = "Sandbox"
   runtime_id = sym_runtime.this.id
+  log_destination_ids = [sym_log_destination.data_stream.id]
 
   integrations = {
     slack_id = sym_integration.slack.id

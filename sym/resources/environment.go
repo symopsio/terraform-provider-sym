@@ -25,11 +25,12 @@ func Environment() *schema.Resource {
 
 func EnvironmentSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-		"name":            utils.Required(schema.TypeString),
-		"label":           utils.Optional(schema.TypeString),
-		"runtime_id":      utils.Required(schema.TypeString),
-		"integrations":    utils.SettingsMap(),
-		"error_logger_id": utils.Optional(schema.TypeString),
+		"name":                utils.Required(schema.TypeString),
+		"label":               utils.Optional(schema.TypeString),
+		"runtime_id":          utils.Required(schema.TypeString),
+		"integrations":        utils.SettingsMap(),
+		"error_logger_id":     utils.Optional(schema.TypeString),
+		"log_destination_ids": utils.StringList(false),
 	}
 }
 
@@ -46,6 +47,11 @@ func createEnvironment(ctx context.Context, data *schema.ResourceData, meta inte
 		RuntimeId:     data.Get("runtime_id").(string),
 		Integrations:  getSettingsMap(data, "integrations"),
 		ErrorLoggerId: data.Get("error_logger_id").(string),
+	}
+
+	logDestinationIds := data.Get("log_destination_ids").([]interface{})
+	for i := range logDestinationIds {
+		environment.LogDestinationIds = append(environment.LogDestinationIds, logDestinationIds[i].(string))
 	}
 
 	if id, err := c.Environment.Create(environment); err != nil {
@@ -74,6 +80,7 @@ func readEnvironment(ctx context.Context, data *schema.ResourceData, meta interf
 	diags = utils.DiagsCheckError(diags, data.Set("runtime_id", environment.RuntimeId), "Unable to read RuntimeId")
 	diags = utils.DiagsCheckError(diags, data.Set("integrations", environment.Integrations), "Unable to read Environment integrations")
 	diags = utils.DiagsCheckError(diags, data.Set("error_logger_id", environment.ErrorLoggerId), "Unable to read ErrorLoggerId")
+	diags = utils.DiagsCheckError(diags, data.Set("log_destination_ids", environment.LogDestinationIds), "Unable to read Environment log destination ids")
 
 	return diags
 }
@@ -90,6 +97,11 @@ func updateEnvironment(ctx context.Context, data *schema.ResourceData, meta inte
 		RuntimeId:     data.Get("runtime_id").(string),
 		Integrations:  getSettingsMap(data, "integrations"),
 		ErrorLoggerId: data.Get("error_logger_id").(string),
+	}
+
+	logDestinationIds := data.Get("log_destination_ids").([]interface{})
+	for i := range logDestinationIds {
+		environment.LogDestinationIds = append(environment.LogDestinationIds, logDestinationIds[i].(string))
 	}
 
 	if _, err := c.Environment.Update(environment); err != nil {
