@@ -12,6 +12,7 @@ type ApiClient struct {
 	Flow           FlowClient
 	Runtime        RuntimeClient
 	Environment    EnvironmentClient
+	ErrorLogger    ErrorLoggerClient
 	LogDestination LogDestinationClient
 }
 
@@ -27,6 +28,7 @@ func New() *ApiClient {
 		Flow:           NewFlowClient(httpClient),
 		Runtime:        NewRuntimeClient(httpClient),
 		Environment:    NewEnvironmentClient(httpClient),
+		ErrorLogger:    NewErrorLoggerClient(httpClient),
 		LogDestination: NewLogDestinationClient(httpClient),
 	}
 }

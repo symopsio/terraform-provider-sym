@@ -34,6 +34,7 @@ func Provider() *schema.Provider {
 			"sym_integration":     resources.Integration(),
 			"sym_runtime":         resources.Runtime(),
 			"sym_environment":     resources.Environment(),
+			"sym_error_logger":    resources.ErrorLogger(),
 			"sym_log_destination": resources.LogDestination(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
