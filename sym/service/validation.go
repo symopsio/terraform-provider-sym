@@ -19,8 +19,7 @@ type validationService struct {
 
 // Constructor for validationService
 func NewValidationService() validationService {
-	exe := "symflow"
-	return validationService{symflowService: NewSymflowService(exe)}
+	return validationService{symflowService: NewSymflowService()}
 }
 
 /////////////////
@@ -48,10 +47,15 @@ func (s *validationService) EnsureLoggedInToOrg(org string) error {
 }
 
 // Check if validation is disabled via an environment variable
+// Or if the Sym token is provided through an evironment variable (in which case, the config file is optional)
 func (s *validationService) ShouldValidate() bool {
-	skip_validation, exists := os.LookupEnv("SYM_TF_SKIP_VALIDATION")
+	skip_validation, skip_validation_env_exists := os.LookupEnv("SYM_TF_SKIP_VALIDATION")
 
-	if !exists {
+	_, sym_jwt_exists := os.LookupEnv(SYM_JWT)
+
+	if sym_jwt_exists {
+		return false
+	} else if !skip_validation_env_exists {
 		return true
 	}
 

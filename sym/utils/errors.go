@@ -31,10 +31,9 @@ const (
 )
 
 var (
-	ErrConfigFileDoesNotExist = GenerateError("No local Sym config was found. Have you installed the `symflow` CLI?", DocsSymflowInstall)
-	ErrConfigFileNoJWT        = GenerateError("Your Sym access token is missing or invalid. Have you run `symflow login`?", DocsSymflowLogin)
+	ErrConfigFileNoJWT        = GenerateError("Your Sym access token is missing or invalid. Have you run `symflow login` or set $SYM_JWT?", DocsSymflowLogin)
 	ErrSymflowNotInstalled    = GenerateError("`symflow` is not installed, please install it and login.", DocsSymflowInstall)
-	ErrSymflowNoOrgConfigured = GenerateError("You do not have an org configured via `symflow`, please run `symflow login`", DocsSymflowLogin)
+	ErrSymflowNoOrgConfigured = GenerateError("You do not have an org configured via `symflow`, please run `symflow login` or set $SYM_JWT with your Sym access token", DocsSymflowLogin)
 )
 
 var ErrSymflowWrongOrg = func(symflowOrg string, providerOrg string) error {
