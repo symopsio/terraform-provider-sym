@@ -9,13 +9,14 @@ import (
 	"strings"
 
 	"github.com/google/uuid"
+	"github.com/symopsio/terraform-provider-sym/sym/service"
 	"github.com/symopsio/terraform-provider-sym/sym/utils"
 )
 
 func NewSymHttpClient(apiUrl string) SymHttpClient {
 	return &symHttpClient{
-		apiUrl:       apiUrl,
-		configReader: NewConfigReader(),
+		apiUrl:         apiUrl,
+		symflowService: service.NewSymflowService(),
 	}
 }
 
@@ -28,12 +29,12 @@ type SymHttpClient interface {
 }
 
 type symHttpClient struct {
-	apiUrl       string
-	configReader ConfigReader
+	apiUrl         string
+	symflowService service.SymflowService
 }
 
 func (c *symHttpClient) getJwt() (string, error) {
-	return c.configReader.GetJwt()
+	return c.symflowService.GetJwt()
 }
 
 func (c *symHttpClient) getUrl(path string) string {

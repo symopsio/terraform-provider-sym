@@ -5,17 +5,17 @@ import (
 )
 
 func TestGetVersion(t *testing.T) {
-	svc := NewSymflowService("symflow")
+	svc := NewSymflowService()
 	_, err := svc.GetVersion()
 
 	if err != nil {
+		t.Log(err)
 		t.Fail()
 	}
 }
 
 func TestGetValidConfigValue(t *testing.T) {
-	exe := "symflow"
-	svc := NewSymflowService(exe)
+	svc := NewSymflowService()
 	_, err := svc.GetConfigValue("org")
 
 	if err != nil {
