@@ -42,16 +42,18 @@ resource "sym_integration" "firehose" {
 
 resource "sym_log_destination" "data_stream" {
   type    = "kinesis_data_stream"
+
+  integration_id = sym_integration.data_stream.id
   settings = {
     stream_name = "tftest-log-data-stream"
-    permission_context_id = sym_integration.data_stream.id
   }
 }
 
 resource "sym_log_destination" "firehose" {
   type    = "kinesis_firehose"
+
+  integration_id = sym_integration.firehose.id
   settings = {
     stream_name = "tftest-log-firehose"
-    permission_context_id = sym_integration.firehose.id
   }
 }
