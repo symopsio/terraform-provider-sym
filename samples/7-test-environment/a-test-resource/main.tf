@@ -41,9 +41,10 @@ resource "sym_runtime" "this" {
 
 resource "sym_log_destination" "data_stream" {
   type    = "kinesis_data_stream"
+
+  integration_id = sym_integration.runtime_context.id
   settings = {
     stream_name = "tftest-env-data-stream"
-    permission_context_id = sym_integration.runtime_context.id
   }
 }
 

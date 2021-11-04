@@ -22,8 +22,9 @@ func LogDestination() *schema.Resource {
 
 func LogDestinationSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-		"type":     utils.Required(schema.TypeString),
-		"settings": utils.SettingsMap(),
+		"type":           utils.Required(schema.TypeString),
+		"integration_id": utils.Required(schema.TypeString),
+		"settings":       utils.SettingsMap(),
 	}
 }
 
@@ -32,8 +33,9 @@ func createLogDestination(ctx context.Context, data *schema.ResourceData, meta i
 	c := meta.(*client.ApiClient)
 
 	destination := client.LogDestination{
-		Type:     data.Get("type").(string),
-		Settings: getSettings(data),
+		Type:          data.Get("type").(string),
+		IntegrationId: data.Get("integration_id").(string),
+		Settings:      getSettings(data),
 	}
 
 	id, err := c.LogDestination.Create(destination)
@@ -57,6 +59,7 @@ func readLogDestination(ctx context.Context, data *schema.ResourceData, meta int
 	}
 
 	diags = utils.DiagsCheckError(diags, data.Set("type", destination.Type), "Unable to read LogDestination type")
+	diags = utils.DiagsCheckError(diags, data.Set("integration_id", destination.IntegrationId), "Unable to read LogDestination integration_id")
 	diags = utils.DiagsCheckError(diags, data.Set("settings", destination.Settings), "Unable to read LogDestination settings")
 
 	return diags
@@ -67,9 +70,10 @@ func updateLogDestination(ctx context.Context, data *schema.ResourceData, meta i
 	c := meta.(*client.ApiClient)
 
 	destination := client.LogDestination{
-		Id:       data.Id(),
-		Type:     data.Get("type").(string),
-		Settings: getSettings(data),
+		Id:            data.Id(),
+		Type:          data.Get("type").(string),
+		IntegrationId: data.Get("integration_id").(string),
+		Settings:      getSettings(data),
 	}
 	if _, err := c.LogDestination.Update(destination); err != nil {
 		diags = append(diags, utils.DiagFromError(err, "Unable to update LogDestination"))
