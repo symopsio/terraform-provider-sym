@@ -2,6 +2,7 @@ package resources
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/symopsio/terraform-provider-sym/sym/utils"
 
@@ -23,12 +24,28 @@ func Strategy() *schema.Resource {
 func strategySchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"type":           utils.Required(schema.TypeString),
-		"integration_id": utils.Required(schema.TypeString),
+		"integration_id": utils.Optional(schema.TypeString),
 		"settings":       utils.SettingsMap(),
 		"targets":        utils.StringList(true),
 		"name":           utils.Required(schema.TypeString),
 		"label":          utils.Optional(schema.TypeString),
 	}
+}
+
+func validateStrategy(diags diag.Diagnostics, strategy *client.Strategy) diag.Diagnostics {
+	if strategy.IntegrationId == "" {
+		if strategy.Type == "http" {
+			strategy.IntegrationId = NullPlaceholer
+		} else {
+			diags = append(diags, diag.Diagnostic{
+				Severity: diag.Error,
+				Summary:  "Strategy requires an Integration",
+				Detail:   fmt.Sprintf("Please check the docs for %s Strategies and specify an `integration_id` in your config.", strategy.Type),
+			})
+		}
+	}
+
+	return diags
 }
 
 func createStrategy(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -45,6 +62,10 @@ func createStrategy(ctx context.Context, data *schema.ResourceData, meta interfa
 	targets := data.Get("targets").([]interface{})
 	for i := range targets {
 		strategy.Targets = append(strategy.Targets, targets[i].(string))
+	}
+
+	if diags = validateStrategy(diags, &strategy); diags.HasError() {
+		return diags
 	}
 
 	id, err := c.Strategy.Create(strategy)
@@ -93,6 +114,11 @@ func updateStrategy(ctx context.Context, data *schema.ResourceData, meta interfa
 	for i := range targets {
 		strategy.Targets = append(strategy.Targets, targets[i].(string))
 	}
+
+	if diags = validateStrategy(diags, &strategy); diags.HasError() {
+		return diags
+	}
+
 	if _, err := c.Strategy.Update(strategy); err != nil {
 		diags = append(diags, utils.DiagFromError(err, "Unable to update Strategy"))
 	}
