@@ -13,6 +13,14 @@ var (
 		}
 	}
 
+	RequiredWithDefault = func(valueType schema.ValueType, defaultFunc schema.SchemaDefaultFunc) *schema.Schema {
+		return &schema.Schema{
+			Type:        valueType,
+			Required:    true,
+			DefaultFunc: defaultFunc,
+		}
+	}
+
 	Optional = func(valueType schema.ValueType) *schema.Schema {
 		return &schema.Schema{
 			Type:     valueType,
