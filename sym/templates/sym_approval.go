@@ -2,6 +2,7 @@ package templates
 
 import (
 	"encoding/json"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/symopsio/terraform-provider-sym/sym/client"
 	"github.com/symopsio/terraform-provider-sym/sym/utils"
@@ -86,8 +87,8 @@ func apiParamsToTFParams(apiParams client.APIParams) (*HCLParamMap, error) {
 		return nil, err
 	}
 
-	if apiParamsStrategyId, ok := apiParams["strategy_id"].(string); ok {
-		strategyID = apiParamsStrategyId
+	if apiParamsStrategyID, ok := apiParams["strategy_id"].(string); ok {
+		strategyID = apiParamsStrategyID
 	}
 	params := map[string]string{
 		"strategy_id":        strategyID,
