@@ -2,7 +2,6 @@ package templates
 
 import (
 	"encoding/json"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/symopsio/terraform-provider-sym/sym/client"
 	"github.com/symopsio/terraform-provider-sym/sym/utils"
@@ -66,23 +65,33 @@ func (t *SymApprovalTemplate) terraformToAPI(params *HCLParamMap) client.APIPara
 }
 
 func (t *SymApprovalTemplate) APIToTerraform(apiParams client.APIParams) (*HCLParamMap, error) {
-	var paramFields []client.ParamField
-
-	for _, fieldInterface := range apiParams["prompt_fields"].([]interface{}) {
-		paramFields = append(paramFields, *client.ParamFieldFromMap(fieldInterface.(map[string]interface{})))
-	}
-
-	fieldsJSON, err := json.Marshal(paramFields)
-	if err != nil {
-		return nil, err
-	}
-	params := map[string]string{
-		"strategy_id":        apiParams["strategy_id"].(string),
-		"prompt_fields_json": string(fieldsJSON),
-	}
-	return &HCLParamMap{Params: params}, nil
+	return apiParamsToTFParams(apiParams)
 }
 
 func (t *SymApprovalTemplate) APIToTerraformKeyMap() map[string]string {
 	return map[string]string{"prompt_fields": "prompt_fields_json"}
+}
+
+func apiParamsToTFParams(apiParams client.APIParams) (*HCLParamMap, error) {
+	paramFields := make([]client.ParamField, 0)
+	strategyID := ""
+
+	if promptFields, ok := apiParams["prompt_fields"].([]interface{}); ok {
+		for _, fieldInterface := range promptFields {
+			paramFields = append(paramFields, *client.ParamFieldFromMap(fieldInterface.(map[string]interface{})))
+		}
+	}
+	fieldsJSON, err := json.Marshal(paramFields)
+	if err != nil {
+		return nil, err
+	}
+
+	if apiParamsStrategyId, ok := apiParams["strategy_id"].(string); ok {
+		strategyID = apiParamsStrategyId
+	}
+	params := map[string]string{
+		"strategy_id":        strategyID,
+		"prompt_fields_json": string(fieldsJSON),
+	}
+	return &HCLParamMap{Params: params}, nil
 }
