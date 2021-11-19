@@ -2,8 +2,10 @@ package templates
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
 	"github.com/symopsio/terraform-provider-sym/sym/client"
 	"github.com/symopsio/terraform-provider-sym/sym/utils"
 )
@@ -75,21 +77,26 @@ func (t *SymApprovalTemplate) APIToTerraformKeyMap() map[string]string {
 
 func apiParamsToTFParams(apiParams client.APIParams) (*HCLParamMap, error) {
 	paramFields := make([]client.ParamField, 0)
-	strategyID := ""
+	errMsg := "an unexpected error occurred, please contact Sym support"
 
-	if promptFields, ok := apiParams["prompt_fields"].([]interface{}); ok {
-		for _, fieldInterface := range promptFields {
-			paramFields = append(paramFields, *client.ParamFieldFromMap(fieldInterface.(map[string]interface{})))
-		}
+	promptFields, ok := apiParams["prompt_fields"].([]interface{})
+	if !ok {
+		return nil, fmt.Errorf("%s: API Response did not contain required field: `prompt_fields`", errMsg)
+	}
+	for _, fieldInterface := range promptFields {
+		paramFields = append(paramFields, *client.ParamFieldFromMap(fieldInterface.(map[string]interface{})))
 	}
 	fieldsJSON, err := json.Marshal(paramFields)
 	if err != nil {
 		return nil, err
 	}
 
-	if apiParamsStrategyID, ok := apiParams["strategy_id"].(string); ok {
-		strategyID = apiParamsStrategyID
+	apiParamsStrategyID, ok := apiParams["strategy_id"].(string)
+	if !ok {
+		return nil, fmt.Errorf("%s: API Response did not contain required field: `strategy_id`", errMsg)
 	}
+
+	strategyID := apiParamsStrategyID
 	params := map[string]string{
 		"strategy_id":        strategyID,
 		"prompt_fields_json": string(fieldsJSON),

@@ -1,9 +1,10 @@
 package templates
 
 import (
-	"github.com/symopsio/terraform-provider-sym/sym/client"
 	"reflect"
 	"testing"
+
+	"github.com/symopsio/terraform-provider-sym/sym/client"
 )
 
 func Test_apiParamsToTFParams(t *testing.T) {
@@ -16,13 +17,8 @@ func Test_apiParamsToTFParams(t *testing.T) {
 		{
 			"no-data",
 			client.APIParams{},
-			&HCLParamMap{
-				Params: map[string]string{
-					"strategy_id":        "",
-					"prompt_fields_json": "[]",
-				},
-			},
-			false,
+			nil,
+			true,
 		},
 		{
 			"no-strategy-id",
@@ -32,23 +28,30 @@ func Test_apiParamsToTFParams(t *testing.T) {
 					map[string]interface{}{"name": "urgency", "type": "string", "required": true, "allowed_values": []interface{}{"Low", "Medium", "High"}},
 				},
 			},
-			&HCLParamMap{
-				Params: map[string]string{
-					"strategy_id":        "",
-					"prompt_fields_json": `[{"name":"reason","type":"string","required":true,"label":"Reason"},{"name":"urgency","type":"string","required":true,"allowed_values":["Low","Medium","High"]}]`,
-				},
-			},
-			false,
+			nil,
+			true,
 		},
 		{
 			"no-prompt-fields",
 			client.APIParams{
 				"strategy_id": "haha-business",
 			},
+			nil,
+			true,
+		},
+		{
+			"good-data",
+			client.APIParams{
+				"strategy_id": "haha-business",
+				"prompt_fields": []interface{}{
+					map[string]interface{}{"name": "reason", "type": "string", "required": true, "label": "Reason"},
+					map[string]interface{}{"name": "urgency", "type": "string", "required": true, "allowed_values": []interface{}{"Low", "Medium", "High"}},
+				},
+			},
 			&HCLParamMap{
 				Params: map[string]string{
 					"strategy_id":        "haha-business",
-					"prompt_fields_json": "[]",
+					"prompt_fields_json": `[{"name":"reason","type":"string","required":true,"label":"Reason"},{"name":"urgency","type":"string","required":true,"allowed_values":["Low","Medium","High"]}]`,
 				},
 			},
 			false,
