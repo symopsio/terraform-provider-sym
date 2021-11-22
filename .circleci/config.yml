@@ -12,7 +12,7 @@ commands:
 jobs:
   build:
     docker:
-      - image: circleci/golang:1.14
+      - image: circleci/golang:1.16
     steps:
       - checkout
       - restore_pkg_cache
@@ -23,7 +23,7 @@ jobs:
             - "/go/pkg"
   release:
     docker:
-      - image: circleci/golang:1.14
+      - image: circleci/golang:1.16
     steps:
       - checkout
       - restore_pkg_cache

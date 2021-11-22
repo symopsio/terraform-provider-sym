@@ -1,6 +1,6 @@
 module github.com/symopsio/terraform-provider-sym
 
-go 1.14
+go 1.16
 
 // replace github.com/symopsio/protos/go => ../protos/go
 
