@@ -5,10 +5,10 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
 	"github.com/symopsio/terraform-provider-sym/sym/client"
 	"github.com/symopsio/terraform-provider-sym/sym/data_sources"
 	"github.com/symopsio/terraform-provider-sym/sym/resources"
-	"github.com/symopsio/terraform-provider-sym/sym/service"
 	"github.com/symopsio/terraform-provider-sym/sym/utils"
 )
 
@@ -51,9 +51,8 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}
 	var diags diag.Diagnostics
 	terraformOrg := d.Get("org").(string)
 
-	validationService := service.NewValidationService()
-	if validationService.ShouldValidate() {
-		err := validationService.EnsureLoggedInToOrg(terraformOrg)
+	if utils.ShouldValidate() {
+		err := utils.ValidateSymOrg(terraformOrg)
 		if err != nil {
 			diags = append(diags, utils.DiagFromError(err, "Validation failed"))
 			return nil, diags

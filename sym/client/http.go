@@ -9,14 +9,13 @@ import (
 	"strings"
 
 	"github.com/google/uuid"
-	"github.com/symopsio/terraform-provider-sym/sym/service"
+
 	"github.com/symopsio/terraform-provider-sym/sym/utils"
 )
 
 func NewSymHttpClient(apiUrl string) SymHttpClient {
 	return &symHttpClient{
-		apiUrl:         apiUrl,
-		symflowService: service.NewSymflowService(),
+		apiUrl: apiUrl,
 	}
 }
 
@@ -29,12 +28,7 @@ type SymHttpClient interface {
 }
 
 type symHttpClient struct {
-	apiUrl         string
-	symflowService service.SymflowService
-}
-
-func (c *symHttpClient) getJwt() (string, error) {
-	return c.symflowService.GetJwt()
+	apiUrl string
 }
 
 func (c *symHttpClient) getUrl(path string) string {
@@ -43,7 +37,7 @@ func (c *symHttpClient) getUrl(path string) string {
 }
 
 func (c *symHttpClient) Do(method string, path string, payload interface{}) (string, error) {
-	jwt, err := c.getJwt()
+	jwt, err := utils.GetJWT()
 	if err != nil {
 		return "", err
 	}
@@ -73,7 +67,7 @@ func (c *symHttpClient) Do(method string, path string, payload interface{}) (str
 	body, err := ioutil.ReadAll(resp.Body)
 	if resp.StatusCode == 400 {
 		errorBody := utils.ErrorResponse{}
-		json.Unmarshal([]byte(body), &errorBody)
+		json.Unmarshal(body, &errorBody)
 		return "", utils.ErrAPIBadRequest(errorBody.Errors)
 	} else if resp.StatusCode == 401 {
 		return "", utils.ErrConfigFileNoJWT

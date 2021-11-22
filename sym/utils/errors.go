@@ -32,7 +32,7 @@ const (
 
 var (
 	ErrConfigFileNoJWT        = GenerateError("Your Sym access token is missing or invalid. Have you run `symflow login` or set $SYM_JWT?", DocsSymflowLogin)
-	ErrSymflowNotInstalled    = GenerateError("`symflow` is not installed, please install it and login.", DocsSymflowInstall)
+	ErrSymflowNotInstalled    = GenerateError("`symflow` is not installed, please install it and run `symflow login`.", DocsSymflowInstall)
 	ErrSymflowNoOrgConfigured = GenerateError("You do not have an org configured via `symflow`, please run `symflow login` or set $SYM_JWT with your Sym access token", DocsSymflowLogin)
 )
 
