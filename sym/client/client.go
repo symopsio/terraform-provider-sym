@@ -1,6 +1,10 @@
 package client
 
-import "os"
+import (
+	"os"
+
+	"github.com/symopsio/terraform-provider-sym/sym/utils"
+)
 
 // ApiClient interact with the Sym API
 type ApiClient struct {
@@ -17,8 +21,14 @@ type ApiClient struct {
 }
 
 // New creates a new symflow client
-func New() *ApiClient {
-	httpClient := NewSymHttpClient(getApiUrl())
+func New() (*ApiClient, error) {
+	jwt, err := utils.GetJWT()
+	if err != nil {
+		return nil, err
+	}
+
+	httpClient := NewSymHttpClient(getApiUrl(), jwt)
+
 	return &ApiClient{
 		Integration:    NewIntegrationClient(httpClient),
 		Secret:         NewSecretClient(httpClient),
@@ -30,7 +40,7 @@ func New() *ApiClient {
 		Environment:    NewEnvironmentClient(httpClient),
 		ErrorLogger:    NewErrorLoggerClient(httpClient),
 		LogDestination: NewLogDestinationClient(httpClient),
-	}
+	}, nil
 }
 
 func getApiUrl() string {

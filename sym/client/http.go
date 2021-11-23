@@ -13,9 +13,10 @@ import (
 	"github.com/symopsio/terraform-provider-sym/sym/utils"
 )
 
-func NewSymHttpClient(apiUrl string) SymHttpClient {
+func NewSymHttpClient(apiUrl, token string) SymHttpClient {
 	return &symHttpClient{
 		apiUrl: apiUrl,
+		jwt:    token,
 	}
 }
 
@@ -29,6 +30,7 @@ type SymHttpClient interface {
 
 type symHttpClient struct {
 	apiUrl string
+	jwt    string
 }
 
 func (c *symHttpClient) getUrl(path string) string {
@@ -37,11 +39,6 @@ func (c *symHttpClient) getUrl(path string) string {
 }
 
 func (c *symHttpClient) Do(method string, path string, payload interface{}) (string, error) {
-	jwt, err := utils.GetJWT()
-	if err != nil {
-		return "", err
-	}
-
 	url := c.getUrl(path)
 	b, err := json.Marshal(payload)
 	if err != nil {
@@ -55,7 +52,7 @@ func (c *symHttpClient) Do(method string, path string, payload interface{}) (str
 	}
 
 	requestID := uuid.New().String()
-	req.Header.Set("Authorization", "Bearer "+jwt)
+	req.Header.Set("Authorization", "Bearer "+c.jwt)
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("X-Sym-Request-ID", requestID)
 	resp, err := http.DefaultClient.Do(req)

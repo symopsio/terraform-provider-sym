@@ -59,6 +59,10 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}
 		}
 	}
 
-	c := client.New()
+	c, err := client.New()
+	if err != nil {
+		diags = append(diags, utils.DiagFromError(err, "Authentication failed"))
+		return nil, diags
+	}
 	return c, diags
 }
