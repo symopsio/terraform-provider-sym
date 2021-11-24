@@ -2,6 +2,7 @@ package utils
 
 import (
 	"os"
+	"strings"
 	"testing"
 )
 
@@ -11,17 +12,16 @@ func Test_Config(t *testing.T) {
 		tfOrg string
 	}
 	tests := []struct {
-		name              string
-		args              args
-		precondition      func()
-		want              *Config
-		wantConfigError   bool
-		wantValidateError bool
+		name          string
+		args          args
+		precondition  func()
+		want          *Config
+		expectedError error
 	}{
 		{
 			"good-config",
 			args{
-				path:  "./testdata/config.yml",
+				path:  "./testdata/good-config.yml",
 				tfOrg: "my-fancy-org",
 			},
 			nil,
@@ -32,13 +32,12 @@ func Test_Config(t *testing.T) {
 				Org:             "my-fancy-org",
 				LastUpdateCheck: "something-o-clock",
 			},
-			false,
-			false,
+			nil,
 		},
 		{
 			"org-mismatch",
 			args{
-				path:  "./testdata/config.yml",
+				path:  "./testdata/good-config.yml",
 				tfOrg: "bad-wrong-org",
 			},
 			nil,
@@ -49,13 +48,12 @@ func Test_Config(t *testing.T) {
 				Org:             "my-fancy-org",
 				LastUpdateCheck: "something-o-clock",
 			},
-			false,
-			true,
+			ErrSymflowWrongOrg("my-fancy-org", "bad-wrong-org"),
 		},
 		{
 			"org-mismatch-skip-validation",
 			args{
-				path:  "./testdata/config.yml",
+				path:  "./testdata/good-config.yml",
 				tfOrg: "bad-wrong-org",
 			},
 			func() {
@@ -68,8 +66,7 @@ func Test_Config(t *testing.T) {
 				Org:             "my-fancy-org",
 				LastUpdateCheck: "something-o-clock",
 			},
-			false,
-			false,
+			nil,
 		},
 		{
 			"good-jwt",
@@ -81,8 +78,7 @@ func Test_Config(t *testing.T) {
 			&Config{
 				AuthToken: &AuthToken{AccessToken: "something"},
 			},
-			false,
-			false,
+			nil,
 		},
 		{
 			"no-config-no-jwt",
@@ -92,8 +88,29 @@ func Test_Config(t *testing.T) {
 			},
 			nil,
 			nil,
-			true,
-			false,
+			ErrConfigFileDoesNotExist,
+		},
+		{
+			"incomplete-config-no-jwt",
+			args{
+				path:  "./testdata/only-last-updated.yml",
+				tfOrg: "my-fancy-org",
+			},
+			nil,
+			nil,
+			ErrSymflowNoOrgConfigured,
+		},
+		{
+			"use-jwt-if-both-config-and-jwt",
+			args{
+				path:  "./testdata/good-config.yml",
+				tfOrg: "bad-wrong-org", // org is not validated if SYM_JWT is set
+			},
+			func() { os.Setenv(JWTEnvVar, "something") },
+			&Config{
+				AuthToken: &AuthToken{AccessToken: "something"},
+			},
+			nil,
 		},
 	}
 	for _, tt := range tests {
@@ -108,18 +125,18 @@ func Test_Config(t *testing.T) {
 				tfOrg = "my-fancy-org"
 			}
 			got, err := GetConfig(tt.args.path)
-			if (err != nil) != tt.wantConfigError {
-				t.Errorf("GetConfig() error = %v, wantErr %v", err, tt.wantConfigError)
+			if err != nil && !strings.Contains(err.Error(), tt.expectedError.Error()) {
+				t.Errorf("GetConfig() error = %v, wantErr %q", err, tt.expectedError)
 				return
 			}
 			if got != nil {
 				err = got.ValidateOrg(tt.args.tfOrg)
-				if (err != nil) != tt.wantValidateError {
-					t.Errorf("Config.ValidateOrg() error = %v, wantErr %v", err, tt.wantValidateError)
+				if (err != nil) && !strings.Contains(err.Error(), tt.expectedError.Error()) {
+					t.Errorf("Config.ValidateOrg() error = %v, wantErr %q", err, tt.expectedError)
 					return
 				}
 			}
-			if !tt.wantConfigError && !tt.wantValidateError {
+			if tt.expectedError == nil {
 				if got.Org != tt.want.Org {
 					t.Errorf("Config.Org got = %v, want %v", got.Org, tt.want.Org)
 				}

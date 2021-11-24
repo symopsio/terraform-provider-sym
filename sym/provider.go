@@ -60,7 +60,7 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}
 
 	cfg, err := utils.GetDefaultConfig()
 	if err != nil {
-		diags = append(diags, utils.DiagFromError(err, "Failed to get necessary config"))
+		diags = append(diags, utils.DiagFromError(err, "Validation failed"))
 		return nil, diags
 	}
 

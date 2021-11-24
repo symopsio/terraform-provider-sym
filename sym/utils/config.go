@@ -38,26 +38,31 @@ func (c *Config) ValidateOrg(tfOrg string) error {
 // GetConfig reads the Sym config file at the given path and relevant environment variables
 // and returns a Config
 func GetConfig(path string) (*Config, error) {
-	jwt := os.Getenv(JWTEnvVar)
-
 	var cfg Config
+
+	// If SYM_JWT is set, just use that.
+	jwt := os.Getenv(JWTEnvVar)
+	if jwt != "" {
+		cfg.AuthToken = &AuthToken{
+			AccessToken: jwt,
+		}
+		return &cfg, nil
+	}
+
+	// Read the config file.
 	f, err := os.ReadFile(path)
 	if err != nil {
-		// It's possible that SYM_JWT is set. If so, it's fine that this file doesn't exist, just return Config
-		// with the JWT set as access token.
-		if jwt != "" {
-			cfg.AuthToken = &AuthToken{
-				AccessToken: jwt,
-			}
-			return &cfg, nil
-		}
-		// Otherwise, return an error about the config file.
 		return nil, ErrConfigFileDoesNotExist
 	}
 
 	err = yaml.Unmarshal(f, &cfg)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse Sym configuration")
+	}
+
+	// If there is no AuthToken, return an error to log in.
+	if cfg.AuthToken == nil || cfg.AuthToken.AccessToken == "" {
+		return nil, ErrSymflowNoOrgConfigured
 	}
 
 	return &cfg, nil
