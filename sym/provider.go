@@ -51,18 +51,25 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}
 	var diags diag.Diagnostics
 	terraformOrg := d.Get("org").(string)
 
-	if utils.ShouldValidate() {
-		err := utils.ValidateSymOrg(terraformOrg)
-		if err != nil {
-			diags = append(diags, utils.DiagFromError(err, "Validation failed"))
-			return nil, diags
-		}
-	}
-
-	c, err := client.New()
+	// Make sure Symflow is present
+	err := utils.EnsureSymflow()
 	if err != nil {
-		diags = append(diags, utils.DiagFromError(err, "Authentication failed"))
+		diags = append(diags, utils.DiagFromError(err, "Symflow CLI missing"))
 		return nil, diags
 	}
+
+	cfg, err := utils.GetDefaultConfig()
+	if err != nil {
+		diags = append(diags, utils.DiagFromError(err, "Failed to get necessary config"))
+		return nil, diags
+	}
+
+	err = cfg.ValidateOrg(terraformOrg)
+	if err != nil {
+		diags = append(diags, utils.DiagFromError(err, "Validation failed"))
+		return nil, diags
+	}
+
+	c := client.New(cfg.AuthToken.AccessToken)
 	return c, diags
 }
