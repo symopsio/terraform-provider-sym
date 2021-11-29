@@ -17,6 +17,7 @@ jobs:
       - checkout
       - restore_pkg_cache
       - run: GOPRIVATE="github.com/symopsio" make
+      - run: make test
       - save_cache:
           key: *cache_name
           paths:

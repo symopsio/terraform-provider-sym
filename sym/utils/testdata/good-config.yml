@@ -1,0 +1,7 @@
+auth_token:
+  access_token: 11-22-good-access-token
+  expires_in: 86400
+client_id: thisisclientid
+email: boo@yaa.com
+last_update_check: sometime-o-clock
+org: my-fancy-org

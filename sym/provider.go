@@ -5,10 +5,10 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
 	"github.com/symopsio/terraform-provider-sym/sym/client"
 	"github.com/symopsio/terraform-provider-sym/sym/data_sources"
 	"github.com/symopsio/terraform-provider-sym/sym/resources"
-	"github.com/symopsio/terraform-provider-sym/sym/service"
 	"github.com/symopsio/terraform-provider-sym/sym/utils"
 )
 
@@ -51,15 +51,25 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}
 	var diags diag.Diagnostics
 	terraformOrg := d.Get("org").(string)
 
-	validationService := service.NewValidationService()
-	if validationService.ShouldValidate() {
-		err := validationService.EnsureLoggedInToOrg(terraformOrg)
-		if err != nil {
-			diags = append(diags, utils.DiagFromError(err, "Validation failed"))
-			return nil, diags
-		}
+	// Make sure Symflow is present
+	err := utils.EnsureSymflow()
+	if err != nil {
+		diags = append(diags, utils.DiagFromError(err, "Symflow CLI missing"))
+		return nil, diags
 	}
 
-	c := client.New()
+	cfg, err := utils.GetDefaultConfig()
+	if err != nil {
+		diags = append(diags, utils.DiagFromError(err, "Validation failed"))
+		return nil, diags
+	}
+
+	err = cfg.ValidateOrg(terraformOrg)
+	if err != nil {
+		diags = append(diags, utils.DiagFromError(err, "Validation failed"))
+		return nil, diags
+	}
+
+	c := client.New(cfg.AuthToken.AccessToken)
 	return c, diags
 }

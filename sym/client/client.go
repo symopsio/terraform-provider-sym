@@ -1,6 +1,8 @@
 package client
 
-import "os"
+import (
+	"os"
+)
 
 // ApiClient interact with the Sym API
 type ApiClient struct {
@@ -17,8 +19,9 @@ type ApiClient struct {
 }
 
 // New creates a new symflow client
-func New() *ApiClient {
-	httpClient := NewSymHttpClient(getApiUrl())
+func New(authToken string) *ApiClient {
+	httpClient := NewSymHttpClient(getApiUrl(), authToken)
+
 	return &ApiClient{
 		Integration:    NewIntegrationClient(httpClient),
 		Secret:         NewSecretClient(httpClient),
