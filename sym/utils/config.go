@@ -12,12 +12,23 @@ const (
 	SkipValidationEnvVar = "SYM_TF_SKIP_VALIDATION"
 )
 
+type tokenSource int
+
+const (
+	envVarToken tokenSource = iota
+	configFileToken
+)
+
+// Config is the deserialized form of the sym config.yml file.
+// Note: Keep this in sync with the file structure in symflow CLI.
 type Config struct {
 	AuthToken       *AuthToken `yaml:"auth_token"`
 	ClientID        string     `yaml:"client_id"`
 	Email           string     `yaml:"email"`
 	Org             string     `yaml:"org"`
 	LastUpdateCheck string     `yaml:"last_update_check"`
+
+	tokenSource tokenSource
 }
 
 type AuthToken struct {
@@ -25,12 +36,9 @@ type AuthToken struct {
 }
 
 func (c *Config) ValidateOrg(tfOrg string) error {
-	jwt := os.Getenv(JWTEnvVar)
-	doValidate := os.Getenv(SkipValidationEnvVar) != "1"
-	if jwt == "" && doValidate {
-		if c.Org != tfOrg {
-			return ErrSymflowWrongOrg(c.Org, tfOrg)
-		}
+	doValidate := os.Getenv(SkipValidationEnvVar) == "" && c.tokenSource == configFileToken
+	if doValidate && c.Org != tfOrg {
+		return ErrSymflowWrongOrg(c.Org, tfOrg)
 	}
 	return nil
 }
@@ -46,6 +54,7 @@ func GetConfig(path string) (*Config, error) {
 		cfg.AuthToken = &AuthToken{
 			AccessToken: jwt,
 		}
+		cfg.tokenSource = envVarToken
 		return &cfg, nil
 	}
 
@@ -64,6 +73,7 @@ func GetConfig(path string) (*Config, error) {
 	if cfg.AuthToken == nil || cfg.AuthToken.AccessToken == "" {
 		return nil, ErrSymflowNoOrgConfigured
 	}
+	cfg.tokenSource = configFileToken
 
 	return &cfg, nil
 }
