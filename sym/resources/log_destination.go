@@ -2,12 +2,13 @@ package resources
 
 import (
 	"context"
-
-	"github.com/symopsio/terraform-provider-sym/sym/utils"
+	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
 	"github.com/symopsio/terraform-provider-sym/sym/client"
+	"github.com/symopsio/terraform-provider-sym/sym/utils"
 )
 
 func LogDestination() *schema.Resource {
@@ -28,7 +29,7 @@ func LogDestinationSchema() map[string]*schema.Schema {
 	}
 }
 
-func createLogDestination(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func createLogDestination(_ context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 	c := meta.(*client.ApiClient)
 
@@ -47,13 +48,18 @@ func createLogDestination(ctx context.Context, data *schema.ResourceData, meta i
 	return diags
 }
 
-func readLogDestination(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func readLogDestination(_ context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 	c := meta.(*client.ApiClient)
 	id := data.Id()
 
 	destination, err := c.LogDestination.Read(id)
 	if err != nil {
+		if isNotFoundError(err) {
+			log.Println(notFoundWarning("LogDestination", id))
+			data.SetId("")
+			return nil
+		}
 		diags = append(diags, utils.DiagFromError(err, "Unable to read LogDestination"))
 		return diags
 	}
@@ -65,7 +71,7 @@ func readLogDestination(ctx context.Context, data *schema.ResourceData, meta int
 	return diags
 }
 
-func updateLogDestination(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func updateLogDestination(_ context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 	c := meta.(*client.ApiClient)
 
@@ -82,7 +88,7 @@ func updateLogDestination(ctx context.Context, data *schema.ResourceData, meta i
 	return diags
 }
 
-func deleteLogDestination(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func deleteLogDestination(_ context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 	c := meta.(*client.ApiClient)
 	id := data.Id()

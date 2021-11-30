@@ -2,12 +2,13 @@ package resources
 
 import (
 	"context"
-
-	"github.com/symopsio/terraform-provider-sym/sym/utils"
+	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
 	"github.com/symopsio/terraform-provider-sym/sym/client"
+	"github.com/symopsio/terraform-provider-sym/sym/utils"
 )
 
 func Runtime() *schema.Resource {
@@ -28,7 +29,7 @@ func runtimeSchema() map[string]*schema.Schema {
 	}
 }
 
-func createRuntime(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func createRuntime(_ context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	c := meta.(*client.ApiClient)
 	runtime := client.Runtime{
 		Name:      data.Get("name").(string),
@@ -45,13 +46,18 @@ func createRuntime(ctx context.Context, data *schema.ResourceData, meta interfac
 	return nil
 }
 
-func readRuntime(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func readRuntime(_ context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 	c := meta.(*client.ApiClient)
 	id := data.Id()
 
 	runtime, err := c.Runtime.Read(id)
 	if err != nil {
+		if isNotFoundError(err) {
+			log.Println(notFoundWarning("Runtime", id))
+			data.SetId("")
+			return nil
+		}
 		diags = append(diags, utils.DiagFromError(err, "Unable to read Runtime"))
 		return diags
 	}
@@ -63,7 +69,7 @@ func readRuntime(ctx context.Context, data *schema.ResourceData, meta interface{
 	return diags
 }
 
-func updateRuntime(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func updateRuntime(_ context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 	c := meta.(*client.ApiClient)
 
@@ -81,7 +87,7 @@ func updateRuntime(ctx context.Context, data *schema.ResourceData, meta interfac
 	return diags
 }
 
-func deleteRuntime(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func deleteRuntime(_ context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 	c := meta.(*client.ApiClient)
 	id := data.Id()

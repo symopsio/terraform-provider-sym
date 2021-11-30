@@ -2,12 +2,13 @@ package resources
 
 import (
 	"context"
-
-	"github.com/symopsio/terraform-provider-sym/sym/utils"
+	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
 	"github.com/symopsio/terraform-provider-sym/sym/client"
+	"github.com/symopsio/terraform-provider-sym/sym/utils"
 )
 
 func Integration() *schema.Resource {
@@ -30,7 +31,7 @@ func IntegrationSchema() map[string]*schema.Schema {
 	}
 }
 
-func createIntegration(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func createIntegration(_ context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 	c := meta.(*client.ApiClient)
 
@@ -51,13 +52,18 @@ func createIntegration(ctx context.Context, data *schema.ResourceData, meta inte
 	return diags
 }
 
-func readIntegration(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func readIntegration(_ context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 	c := meta.(*client.ApiClient)
 	id := data.Id()
 
 	integration, err := c.Integration.Read(id)
 	if err != nil {
+		if isNotFoundError(err) {
+			log.Println(notFoundWarning("Integration", id))
+			data.SetId("")
+			return nil
+		}
 		diags = append(diags, utils.DiagFromError(err, "Unable to read Integration"))
 		return diags
 	}
@@ -71,7 +77,7 @@ func readIntegration(ctx context.Context, data *schema.ResourceData, meta interf
 	return diags
 }
 
-func updateIntegration(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func updateIntegration(_ context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 	c := meta.(*client.ApiClient)
 
@@ -90,7 +96,7 @@ func updateIntegration(ctx context.Context, data *schema.ResourceData, meta inte
 	return diags
 }
 
-func deleteIntegration(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func deleteIntegration(_ context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 	c := meta.(*client.ApiClient)
 	id := data.Id()

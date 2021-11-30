@@ -2,8 +2,10 @@ package data_sources
 
 import (
 	"context"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
 	"github.com/symopsio/terraform-provider-sym/sym/client"
 	"github.com/symopsio/terraform-provider-sym/sym/utils"
 )
@@ -26,7 +28,7 @@ func runtimeSchema() map[string]*schema.Schema {
 	}
 }
 
-func dataSourceRuntimeRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceRuntimeRead(_ context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 	c := meta.(*client.ApiClient)
 	name := data.Get("name").(string)

@@ -6,9 +6,11 @@ package resources
 
 import (
 	"context"
+	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
 	"github.com/symopsio/terraform-provider-sym/sym/client"
 	"github.com/symopsio/terraform-provider-sym/sym/utils"
 )
@@ -37,7 +39,7 @@ func EnvironmentSchema() map[string]*schema.Schema {
 // CRUD Functions ///////////////////////////////
 
 // Create an environment using the HTTP client
-func createEnvironment(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func createEnvironment(_ context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 	c := meta.(*client.ApiClient)
 
@@ -64,13 +66,18 @@ func createEnvironment(ctx context.Context, data *schema.ResourceData, meta inte
 }
 
 // Read an environment using the HTTP client
-func readEnvironment(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func readEnvironment(_ context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 	c := meta.(*client.ApiClient)
 	id := data.Id()
 
 	environment, err := c.Environment.Read(id)
 	if err != nil {
+		if isNotFoundError(err) {
+			log.Println(notFoundWarning("Environment", id))
+			data.SetId("")
+			return nil
+		}
 		diags = append(diags, utils.DiagFromError(err, "Unable to read Environment"))
 		return diags
 	}
@@ -86,7 +93,7 @@ func readEnvironment(ctx context.Context, data *schema.ResourceData, meta interf
 }
 
 // Update an existing environment using the HTTP client
-func updateEnvironment(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func updateEnvironment(_ context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 	c := meta.(*client.ApiClient)
 
@@ -112,7 +119,7 @@ func updateEnvironment(ctx context.Context, data *schema.ResourceData, meta inte
 }
 
 // Delete an environment using the HTTP client
-func deleteEnvironment(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func deleteEnvironment(_ context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 	c := meta.(*client.ApiClient)
 	id := data.Id()
