@@ -1,7 +1,11 @@
 package resources
 
 import (
+	"fmt"
+	"strings"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
 	"github.com/symopsio/terraform-provider-sym/sym/client"
 )
 
@@ -18,4 +22,12 @@ func getSettingsMap(data *schema.ResourceData, key string) client.Settings {
 		settings[k] = v.(string)
 	}
 	return settings
+}
+
+func isNotFoundError(err error) bool {
+	return strings.Contains(err.Error(), "\nStatus Code: 404\n")
+}
+
+func notFoundWarning(resource, id string) string {
+	return fmt.Sprintf("[WARN] Sym %s (%s) not found, removing from state", resource, id)
 }

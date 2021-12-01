@@ -2,9 +2,11 @@ package resources
 
 import (
 	"context"
+	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
 	"github.com/symopsio/terraform-provider-sym/sym/client"
 	"github.com/symopsio/terraform-provider-sym/sym/utils"
 )
@@ -26,7 +28,7 @@ func errorLoggerSchema() map[string]*schema.Schema {
 	}
 }
 
-func createErrorLogger(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func createErrorLogger(_ context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	c := meta.(*client.ApiClient)
 
 	errorLogger := client.ErrorLogger{
@@ -43,13 +45,18 @@ func createErrorLogger(ctx context.Context, data *schema.ResourceData, meta inte
 	return nil
 }
 
-func readErrorLogger(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func readErrorLogger(_ context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 	c := meta.(*client.ApiClient)
 	id := data.Id()
 
 	errorLogger, err := c.ErrorLogger.Read(id)
 	if err != nil {
+		if isNotFoundError(err) {
+			log.Println(notFoundWarning("ErrorLogger", id))
+			data.SetId("")
+			return nil
+		}
 		diags = append(diags, utils.DiagFromError(err, "Unable to read ErrorLogger"))
 		return diags
 	}
@@ -60,7 +67,7 @@ func readErrorLogger(ctx context.Context, data *schema.ResourceData, meta interf
 	return diags
 }
 
-func updateErrorLogger(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func updateErrorLogger(_ context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 	c := meta.(*client.ApiClient)
 
@@ -76,7 +83,7 @@ func updateErrorLogger(ctx context.Context, data *schema.ResourceData, meta inte
 	return diags
 }
 
-func deleteErrorLogger(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func deleteErrorLogger(_ context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 	c := meta.(*client.ApiClient)
 	id := data.Id()

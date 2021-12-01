@@ -2,9 +2,11 @@ package resources
 
 import (
 	"context"
+	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
 	"github.com/symopsio/terraform-provider-sym/sym/client"
 	"github.com/symopsio/terraform-provider-sym/sym/utils"
 )
@@ -28,7 +30,7 @@ func SecretsSchema() map[string]*schema.Schema {
 	}
 }
 
-func createSecrets(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func createSecrets(_ context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	c := meta.(*client.ApiClient)
 
 	secrets := client.Secrets{
@@ -47,13 +49,18 @@ func createSecrets(ctx context.Context, data *schema.ResourceData, meta interfac
 	return nil
 }
 
-func readSecrets(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func readSecrets(_ context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 	c := meta.(*client.ApiClient)
 	id := data.Id()
 
 	secrets, err := c.Secrets.Read(id)
 	if err != nil {
+		if isNotFoundError(err) {
+			log.Println(notFoundWarning("Secrets", id))
+			data.SetId("")
+			return nil
+		}
 		diags = append(diags, utils.DiagFromError(err, "Unable to read Secrets"))
 		return diags
 	}
@@ -66,7 +73,7 @@ func readSecrets(ctx context.Context, data *schema.ResourceData, meta interface{
 	return diags
 }
 
-func updateSecrets(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func updateSecrets(_ context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 	c := meta.(*client.ApiClient)
 
@@ -84,7 +91,7 @@ func updateSecrets(ctx context.Context, data *schema.ResourceData, meta interfac
 	return diags
 }
 
-func deleteSecrets(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func deleteSecrets(_ context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 	c := meta.(*client.ApiClient)
 	id := data.Id()

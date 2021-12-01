@@ -7,10 +7,12 @@ import (
 	"context"
 	"encoding/base64"
 	"io/ioutil"
+	"log"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
 	"github.com/symopsio/terraform-provider-sym/sym/client"
 	"github.com/symopsio/terraform-provider-sym/sym/templates"
 	"github.com/symopsio/terraform-provider-sym/sym/utils"
@@ -105,7 +107,7 @@ func buildHCLParamsfromAPIParams(data *schema.ResourceData, flowParam client.API
 
 // CRUD operations //////////////////////////////
 
-func createFlow(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func createFlow(_ context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 	c := meta.(*client.ApiClient)
 
@@ -142,13 +144,18 @@ func createFlow(ctx context.Context, data *schema.ResourceData, meta interface{}
 	return diags
 }
 
-func readFlow(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func readFlow(_ context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 	c := meta.(*client.ApiClient)
 	id := data.Id()
 
 	flow, err := c.Flow.Read(id)
 	if err != nil {
+		if isNotFoundError(err) {
+			log.Println(notFoundWarning("Flow", id))
+			data.SetId("")
+			return nil
+		}
 		diags = append(diags, utils.DiagFromError(err, "Unable to read Flow"))
 		return diags
 	}
@@ -171,7 +178,7 @@ func readFlow(ctx context.Context, data *schema.ResourceData, meta interface{}) 
 	return diags
 }
 
-func updateFlow(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func updateFlow(_ context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 	c := meta.(*client.ApiClient)
 
@@ -218,7 +225,7 @@ func updateFlow(ctx context.Context, data *schema.ResourceData, meta interface{}
 	return diags
 }
 
-func deleteFlow(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func deleteFlow(_ context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 	c := meta.(*client.ApiClient)
 	id := data.Id()

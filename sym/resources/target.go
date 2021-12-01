@@ -2,9 +2,11 @@ package resources
 
 import (
 	"context"
+	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
 	"github.com/symopsio/terraform-provider-sym/sym/client"
 	"github.com/symopsio/terraform-provider-sym/sym/utils"
 )
@@ -28,7 +30,7 @@ func targetSchema() map[string]*schema.Schema {
 	}
 }
 
-func createTarget(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func createTarget(_ context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	c := meta.(*client.ApiClient)
 	target := client.Target{
 		Type:     data.Get("type").(string),
@@ -46,13 +48,18 @@ func createTarget(ctx context.Context, data *schema.ResourceData, meta interface
 	return nil
 }
 
-func readTarget(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func readTarget(_ context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 	c := meta.(*client.ApiClient)
 	id := data.Id()
 
 	target, err := c.Target.Read(id)
 	if err != nil {
+		if isNotFoundError(err) {
+			log.Println(notFoundWarning("Target", id))
+			data.SetId("")
+			return nil
+		}
 		diags = append(diags, utils.DiagFromError(err, "Unable to read Target"))
 		return diags
 	}
@@ -65,7 +72,7 @@ func readTarget(ctx context.Context, data *schema.ResourceData, meta interface{}
 	return diags
 }
 
-func updateTarget(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func updateTarget(_ context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 	c := meta.(*client.ApiClient)
 
@@ -83,7 +90,7 @@ func updateTarget(ctx context.Context, data *schema.ResourceData, meta interface
 	return diags
 }
 
-func deleteTarget(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func deleteTarget(_ context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 	c := meta.(*client.ApiClient)
 	id := data.Id()

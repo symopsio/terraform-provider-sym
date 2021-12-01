@@ -3,12 +3,13 @@ package resources
 import (
 	"context"
 	"fmt"
-
-	"github.com/symopsio/terraform-provider-sym/sym/utils"
+	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
 	"github.com/symopsio/terraform-provider-sym/sym/client"
+	"github.com/symopsio/terraform-provider-sym/sym/utils"
 )
 
 func Strategy() *schema.Resource {
@@ -48,7 +49,7 @@ func validateStrategy(diags diag.Diagnostics, strategy *client.Strategy) diag.Di
 	return diags
 }
 
-func createStrategy(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func createStrategy(_ context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 	c := meta.(*client.ApiClient)
 
@@ -77,13 +78,18 @@ func createStrategy(ctx context.Context, data *schema.ResourceData, meta interfa
 	return diags
 }
 
-func readStrategy(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func readStrategy(_ context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 	c := meta.(*client.ApiClient)
 	id := data.Id()
 
 	strategy, err := c.Strategy.Read(id)
 	if err != nil {
+		if isNotFoundError(err) {
+			log.Println(notFoundWarning("Strategy", id))
+			data.SetId("")
+			return nil
+		}
 		diags = append(diags, utils.DiagFromError(err, "Unable to read Strategy"))
 		return diags
 	}
@@ -98,7 +104,7 @@ func readStrategy(ctx context.Context, data *schema.ResourceData, meta interface
 	return diags
 }
 
-func updateStrategy(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func updateStrategy(_ context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 	c := meta.(*client.ApiClient)
 
@@ -126,7 +132,7 @@ func updateStrategy(ctx context.Context, data *schema.ResourceData, meta interfa
 	return diags
 }
 
-func deleteStrategy(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func deleteStrategy(_ context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 	c := meta.(*client.ApiClient)
 	id := data.Id()
