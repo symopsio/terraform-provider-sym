@@ -50,6 +50,10 @@ resource "sym_secret" "username" {
   label = "Username"
   path = "/sym/tf-tests/username"
   source_id = sym_secrets.aws_test.id
+
+  settings = {
+    json_key = "myUsername"
+  }
 }
 
 resource "sym_secret" "password" {

@@ -10,6 +10,7 @@ type Secret struct {
 	Path     string `json:"path"`
 	SourceId string `json:"source_id"`
 	Label    string `json:"label,omitempty"`
+	Settings Settings `json:"settings"`
 }
 
 type SecretClient interface {
