@@ -21,11 +21,11 @@ func Target() *schema.Resource {
 
 func targetSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-		"type":         utils.Required(schema.TypeString),
-		"name":         utils.Required(schema.TypeString),
-		"label":        utils.Optional(schema.TypeString),
-		"bound_fields": utils.StringList(false),
-		"settings":     utils.SettingsMap(),
+		"type":           utils.Required(schema.TypeString),
+		"name":           utils.Required(schema.TypeString),
+		"label":          utils.Optional(schema.TypeString),
+		"field_bindings": utils.StringList(false),
+		"settings":       utils.SettingsMap(),
 	}
 }
 
@@ -38,9 +38,9 @@ func createTarget(ctx context.Context, data *schema.ResourceData, meta interface
 		Settings: getSettings(data),
 	}
 
-	bound_fields := data.Get("bound_fields").([]interface{})
-	for i := range bound_fields {
-		target.BoundFields = append(target.BoundFields, bound_fields[i].(string))
+	field_bindings := data.Get("field_bindings").([]interface{})
+	for i := range field_bindings {
+		target.FieldBindings = append(target.FieldBindings, field_bindings[i].(string))
 	}
 
 	id, err := c.Target.Create(target)
@@ -66,7 +66,7 @@ func readTarget(ctx context.Context, data *schema.ResourceData, meta interface{}
 	diags = utils.DiagsCheckError(diags, data.Set("type", target.Type), "Unable to read Target type")
 	diags = utils.DiagsCheckError(diags, data.Set("name", target.Name), "Unable to read Target name")
 	diags = utils.DiagsCheckError(diags, data.Set("label", target.Label), "Unable to read Target label")
-	diags = utils.DiagsCheckError(diags, data.Set("bound_fields", target.BoundFields), "Unable to read Target bound_fields")
+	diags = utils.DiagsCheckError(diags, data.Set("field_bindings", target.FieldBindings), "Unable to read Target field_bindings")
 	diags = utils.DiagsCheckError(diags, data.Set("settings", target.Settings), "Unable to read Target settings")
 
 	return diags
@@ -83,9 +83,9 @@ func updateTarget(ctx context.Context, data *schema.ResourceData, meta interface
 		Label:    data.Get("label").(string),
 		Settings: getSettings(data),
 	}
-	bound_fields := data.Get("bound_fields").([]interface{})
-	for i := range bound_fields {
-		target.BoundFields = append(target.BoundFields, bound_fields[i].(string))
+	field_bindings := data.Get("field_bindings").([]interface{})
+	for i := range field_bindings {
+		target.FieldBindings = append(target.FieldBindings, field_bindings[i].(string))
 	}
 
 	if _, err := c.Target.Update(target); err != nil {
