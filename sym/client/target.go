@@ -6,20 +6,22 @@ import (
 )
 
 type Target struct {
-	Id       string   `json:"id,omitempty"`
-	Type     string   `json:"type"`
-	Name     string   `json:"slug"`
-	Label    string   `json:"label,omitempty"`
-	Settings Settings `json:"settings"`
+	Id            string   `json:"id,omitempty"`
+	Type          string   `json:"type"`
+	Name          string   `json:"slug"`
+	Label         string   `json:"label,omitempty"`
+	FieldBindings []string `json:"field_bindings,omitempty"`
+	Settings      Settings `json:"settings"`
 }
 
 func (s Target) String() string {
 	return fmt.Sprintf(
-		"{id=%s, type=%s, name=%s, label=%s, settings=%v",
+		"{id=%s, type=%s, name=%s, label=%s, field_bindings=%v, settings=%v",
 		s.Id,
 		s.Type,
 		s.Name,
 		s.Label,
+		s.FieldBindings,
 		s.Settings,
 	)
 }
