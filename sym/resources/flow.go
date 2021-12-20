@@ -95,12 +95,12 @@ func buildAPIParamsFromResourceData(data *schema.ResourceData) (client.APIParams
 	}
 }
 
-// buildHCLParamsfromAPIParams turns the internal FlowParam struct into a map that can be set
+// buildHCLParamsFromAPIParams turns the internal FlowParam struct into a map that can be set
 // on terraform's ResourceData so that the version from the API can be compared to the
 // version terraform pulls from the local files during diffs.
 //
 // API -> Terraform
-func buildHCLParamsfromAPIParams(data *schema.ResourceData, flowParam client.APIParams) (*templates.HCLParamMap, error) {
+func buildHCLParamsFromAPIParams(data *schema.ResourceData, flowParam client.APIParams) (*templates.HCLParamMap, error) {
 	template := getTemplateFromTemplateID(data.Get("template").(string))
 	return template.APIToTerraform(flowParam)
 }
@@ -168,7 +168,7 @@ func readFlow(_ context.Context, data *schema.ResourceData, meta interface{}) di
 	// Base64 -> Text
 	diags = utils.DiagsCheckError(diags, data.Set("implementation", utils.ParseRemoteImpl(flow.Implementation)), "Unable to read Flow implementation")
 
-	flowParamsMap, err := buildHCLParamsfromAPIParams(data, flow.Params)
+	flowParamsMap, err := buildHCLParamsFromAPIParams(data, flow.Params)
 	if flowParamsMap != nil {
 		err = data.Set("params", flowParamsMap.Params)
 	}
@@ -207,6 +207,7 @@ func updateFlow(_ context.Context, data *schema.ResourceData, meta interface{}) 
 		// Normal case where the diff has not been suppressed, read our local file and send it.
 		if b, err := ioutil.ReadFile(implementation); err != nil {
 			diags = append(diags, utils.DiagFromError(err, "Unable to read implementation file"))
+			return diags
 		} else {
 			flow.Implementation = base64.StdEncoding.EncodeToString(b)
 		}
@@ -214,6 +215,7 @@ func updateFlow(_ context.Context, data *schema.ResourceData, meta interface{}) 
 
 	if flowParams, d := buildAPIParamsFromResourceData(data); d.HasError() {
 		diags = append(diags, d...)
+		return diags
 	} else {
 		flow.Params = flowParams
 	}
