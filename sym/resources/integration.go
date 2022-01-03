@@ -18,6 +18,9 @@ func Integration() *schema.Resource {
 		ReadContext:   readIntegration,
 		UpdateContext: updateIntegration,
 		DeleteContext: deleteIntegration,
+		Importer: &schema.ResourceImporter{
+			StateContext: schema.ImportStatePassthroughContext,
+		},
 	}
 }
 

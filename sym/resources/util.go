@@ -9,7 +9,7 @@ import (
 	"github.com/symopsio/terraform-provider-sym/sym/client"
 )
 
-var NullPlaceholer = "<null>"
+var NullPlaceholder = "<null>"
 
 func getSettings(data *schema.ResourceData) client.Settings {
 	return getSettingsMap(data, "settings")

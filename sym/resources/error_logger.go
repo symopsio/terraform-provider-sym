@@ -18,6 +18,9 @@ func ErrorLogger() *schema.Resource {
 		ReadContext:   readErrorLogger,
 		UpdateContext: updateErrorLogger,
 		DeleteContext: deleteErrorLogger,
+		Importer: &schema.ResourceImporter{
+			StateContext: schema.ImportStatePassthroughContext,
+		},
 	}
 }
 

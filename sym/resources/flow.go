@@ -28,6 +28,9 @@ func Flow() *schema.Resource {
 		ReadContext:   readFlow,
 		UpdateContext: updateFlow,
 		DeleteContext: deleteFlow,
+		Importer: &schema.ResourceImporter{
+			StateContext: schema.ImportStatePassthroughContext,
+		},
 	}
 }
 
