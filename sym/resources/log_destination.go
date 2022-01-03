@@ -18,6 +18,9 @@ func LogDestination() *schema.Resource {
 		ReadContext:   readLogDestination,
 		UpdateContext: updateLogDestination,
 		DeleteContext: deleteLogDestination,
+		Importer: &schema.ResourceImporter{
+			StateContext: schema.ImportStatePassthroughContext,
+		},
 	}
 }
 

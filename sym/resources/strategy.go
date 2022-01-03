@@ -19,6 +19,9 @@ func Strategy() *schema.Resource {
 		ReadContext:   readStrategy,
 		UpdateContext: updateStrategy,
 		DeleteContext: deleteStrategy,
+		Importer: &schema.ResourceImporter{
+			StateContext: schema.ImportStatePassthroughContext,
+		},
 	}
 }
 
@@ -36,7 +39,7 @@ func strategySchema() map[string]*schema.Schema {
 func validateStrategy(diags diag.Diagnostics, strategy *client.Strategy) diag.Diagnostics {
 	if strategy.IntegrationId == "" {
 		if strategy.Type == "http" {
-			strategy.IntegrationId = NullPlaceholer
+			strategy.IntegrationId = NullPlaceholder
 		} else {
 			diags = append(diags, diag.Diagnostic{
 				Severity: diag.Error,

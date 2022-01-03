@@ -22,6 +22,9 @@ func Environment() *schema.Resource {
 		ReadContext:   readEnvironment,
 		UpdateContext: updateEnvironment,
 		DeleteContext: deleteEnvironment,
+		Importer: &schema.ResourceImporter{
+			StateContext: schema.ImportStatePassthroughContext,
+		},
 	}
 }
 

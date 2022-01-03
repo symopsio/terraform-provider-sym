@@ -18,6 +18,9 @@ func Secret() *schema.Resource {
 		ReadContext:   readSecret,
 		UpdateContext: updateSecret,
 		DeleteContext: deleteSecret,
+		Importer: &schema.ResourceImporter{
+			StateContext: schema.ImportStatePassthroughContext,
+		},
 	}
 }
 
@@ -26,7 +29,7 @@ func secretSchema() map[string]*schema.Schema {
 		"path":      utils.Required(schema.TypeString),
 		"source_id": utils.Required(schema.TypeString),
 		"label":     utils.Optional(schema.TypeString),
-		"settings":    utils.SettingsMap(),
+		"settings":  utils.SettingsMap(),
 	}
 }
 
@@ -82,7 +85,7 @@ func updateSecret(_ context.Context, data *schema.ResourceData, meta interface{}
 		Path:     data.Get("path").(string),
 		SourceId: data.Get("source_id").(string),
 		Label:    data.Get("label").(string),
-		Settings:   getSettings(data),
+		Settings: getSettings(data),
 	}
 	if _, err := c.Secret.Update(secret); err != nil {
 		diags = append(diags, utils.DiagFromError(err, "Unable to update Secret"))

@@ -18,6 +18,9 @@ func Runtime() *schema.Resource {
 		ReadContext:   readRuntime,
 		UpdateContext: updateRuntime,
 		DeleteContext: deleteRuntime,
+		Importer: &schema.ResourceImporter{
+			StateContext: schema.ImportStatePassthroughContext,
+		},
 	}
 }
 

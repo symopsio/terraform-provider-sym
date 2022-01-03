@@ -18,6 +18,9 @@ func Target() *schema.Resource {
 		ReadContext:   readTarget,
 		UpdateContext: updateTarget,
 		DeleteContext: deleteTarget,
+		Importer: &schema.ResourceImporter{
+			StateContext: schema.ImportStatePassthroughContext,
+		},
 	}
 }
 

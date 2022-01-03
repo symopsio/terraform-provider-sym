@@ -18,6 +18,9 @@ func Secrets() *schema.Resource {
 		ReadContext:   readSecrets,
 		UpdateContext: updateSecrets,
 		DeleteContext: deleteSecrets,
+		Importer: &schema.ResourceImporter{
+			StateContext: schema.ImportStatePassthroughContext,
+		},
 	}
 }
 
