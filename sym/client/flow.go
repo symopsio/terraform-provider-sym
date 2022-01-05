@@ -47,8 +47,8 @@ func ParamFieldFromMap(inputMap map[string]interface{}) *ParamField {
 		Required: inputMap["required"].(bool),
 	}
 
-	if _, ok := inputMap["label"]; ok {
-		paramField.Label = inputMap["label"].(string)
+	if label, ok := inputMap["label"]; ok && label != nil {
+		paramField.Label = label.(string)
 	}
 
 	if allowedValues, ok := inputMap["allowed_values"]; ok {
