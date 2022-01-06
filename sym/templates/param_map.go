@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+
 	"github.com/symopsio/terraform-provider-sym/sym/client"
 	"github.com/symopsio/terraform-provider-sym/sym/utils"
 )
@@ -23,7 +24,7 @@ func (pm *HCLParamMap) ToAPIParams(t Template) (client.APIParams, error) {
 	pm.validateAgainstResource(t, config)
 
 	if pm.Diags.HasError() {
-		return nil, errors.New("validation errors occured")
+		return nil, errors.New("validation errors occurred")
 	}
 
 	configReader := schema.ConfigFieldReader{
@@ -35,7 +36,7 @@ func (pm *HCLParamMap) ToAPIParams(t Template) (client.APIParams, error) {
 	for k := range configReader.Config.Config {
 		if r, err := configReader.ReadField([]string{k}); err == nil {
 			if r.Exists {
-				apiParams[k] = r.Value
+				apiParams[k] = config.Config[k]
 			}
 		} else {
 			return nil, fmt.Errorf("Error parsing %s: %s", k, err.Error())
