@@ -2,6 +2,7 @@ package resources
 
 import (
 	"context"
+	"fmt"
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -27,9 +28,25 @@ func LogDestination() *schema.Resource {
 func LogDestinationSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"type":           utils.Required(schema.TypeString),
-		"integration_id": utils.Required(schema.TypeString),
+		"integration_id": utils.Optional(schema.TypeString),
 		"settings":       utils.SettingsMap(),
 	}
+}
+
+func validateLogDestination(diags diag.Diagnostics, ld *client.LogDestination) diag.Diagnostics {
+	if ld.IntegrationId == "" {
+		if ld.Type == "http" {
+			ld.IntegrationId = NullPlaceholder
+		} else {
+			diags = append(diags, diag.Diagnostic{
+				Severity: diag.Error,
+				Summary:  "LogDestination requires an Integration",
+				Detail:   fmt.Sprintf("Please check the docs for %s LogDestinations and specify an `integration_id` in your config.", ld.Type),
+			})
+		}
+	}
+
+	return diags
 }
 
 func createLogDestination(_ context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -40,6 +57,10 @@ func createLogDestination(_ context.Context, data *schema.ResourceData, meta int
 		Type:          data.Get("type").(string),
 		IntegrationId: data.Get("integration_id").(string),
 		Settings:      getSettings(data),
+	}
+
+	if diags = validateLogDestination(diags, &destination); diags.HasError() {
+		return diags
 	}
 
 	id, err := c.LogDestination.Create(destination)
@@ -84,6 +105,11 @@ func updateLogDestination(_ context.Context, data *schema.ResourceData, meta int
 		IntegrationId: data.Get("integration_id").(string),
 		Settings:      getSettings(data),
 	}
+
+	if diags = validateLogDestination(diags, &destination); diags.HasError() {
+		return diags
+	}
+
 	if _, err := c.LogDestination.Update(destination); err != nil {
 		diags = append(diags, utils.DiagFromError(err, "Unable to update LogDestination"))
 	}
