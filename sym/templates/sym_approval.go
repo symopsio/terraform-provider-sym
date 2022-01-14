@@ -19,6 +19,7 @@ func fieldResource() *schema.Resource {
 			"type":           utils.Required(schema.TypeString),
 			"required":       utils.OptionalWithDefault(schema.TypeBool, true),
 			"label":          utils.Optional(schema.TypeString),
+			"default":        utils.Optional(schema.TypeString),
 			"allowed_values": utils.StringList(false),
 		},
 	}
