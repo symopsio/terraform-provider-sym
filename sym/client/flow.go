@@ -12,6 +12,7 @@ type ParamField struct {
 	Type          string        `json:"type"`
 	Required      bool          `json:"required"`
 	Label         string        `json:"label,omitempty"`
+	Default       string        `json:"default,omitempty"`
 	AllowedValues []interface{} `json:"allowed_values,omitempty"`
 }
 
@@ -30,10 +31,11 @@ type Flow struct {
 
 func (p ParamField) String() string {
 	return fmt.Sprintf(
-		"{name=%s, type=%s, label=%s, required=%t, allowed_values=%v}",
+		"{name=%s, type=%s, label=%s, default=%s, required=%t, allowed_values=%v}",
 		p.Name,
 		p.Type,
 		p.Label,
+		p.Default,
 		p.Required,
 		p.AllowedValues,
 	)
@@ -49,6 +51,10 @@ func ParamFieldFromMap(inputMap map[string]interface{}) *ParamField {
 
 	if label, ok := inputMap["label"]; ok && label != nil {
 		paramField.Label = label.(string)
+	}
+
+	if default_, ok := inputMap["default"]; ok && default_ != nil {
+		paramField.Default = default_.(string)
 	}
 
 	if allowedValues, ok := inputMap["allowed_values"]; ok {
