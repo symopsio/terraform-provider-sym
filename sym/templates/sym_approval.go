@@ -3,6 +3,7 @@ package templates
 import (
 	"encoding/json"
 	"fmt"
+	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
@@ -65,6 +66,14 @@ func (t *SymApprovalTemplate) terraformToAPI(params *HCLParamMap) client.APIPara
 		)
 	}
 
+	if field := params.checkKey("allow_revoke"); field != nil {
+		allow_revoke, err := strconv.ParseBool(field.Value())
+        if err != nil {
+            params.checkError("allow_revoke", "allow_revoke must be a boolean value", err)
+        }
+		raw["allow_revoke"] = allow_revoke
+	}
+
 	return raw
 }
 
@@ -97,9 +106,11 @@ func apiParamsToTFParams(apiParams client.APIParams) (*HCLParamMap, error) {
 		return nil, fmt.Errorf("%s: API Response did not contain required field: `strategy_id`", errMsg)
 	}
 
-	strategyID := apiParamsStrategyID
+	allowRevoke, _ := apiParams["allow_revoke"].(bool)
+
 	params := map[string]string{
-		"strategy_id":        strategyID,
+		"strategy_id":        apiParamsStrategyID,
+		"allow_revoke":		  strconv.FormatBool(allowRevoke),
 		"prompt_fields_json": string(fieldsJSON),
 	}
 	return &HCLParamMap{Params: params}, nil
