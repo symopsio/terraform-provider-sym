@@ -6,10 +6,10 @@ import (
 )
 
 type Secret struct {
-	Id       string `json:"id,omitempty"`
-	Path     string `json:"path"`
-	SourceId string `json:"source_id"`
-	Label    string `json:"label,omitempty"`
+	Id       string   `json:"id,omitempty"`
+	Path     string   `json:"path"`
+	SourceId string   `json:"source_id"`
+	Label    string   `json:"label,omitempty"`
 	Settings Settings `json:"settings"`
 }
 

@@ -36,6 +36,15 @@ func SuppressEquivalentJsonDiffs(k string, old string, new string, d *schema.Res
 	return JsonBytesEqual(ob.Bytes(), nb.Bytes())
 }
 
+func SuppressFlowDiffs(k string, old string, new string, d *schema.ResourceData) bool {
+	suppressJsonDiffs := SuppressEquivalentJsonDiffs(k, old, new, d)
+
+	// allow_revoke defaults to true, so don't show a diff if allow_revoke is not specified
+	suppressAllowRevokeDiffs := (k == "params.allow_revoke" && old == "true" && new == "")
+
+	return suppressJsonDiffs || suppressAllowRevokeDiffs
+}
+
 // SuppressNullSettingsDiffs is a DiffSuppressFunc that can be passed into
 // a schema to account for differences in settings maps received from the API
 // and stored in the Terraform state.

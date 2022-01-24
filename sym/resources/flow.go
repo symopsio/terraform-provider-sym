@@ -53,7 +53,7 @@ func flowSchema() map[string]*schema.Schema {
 		"params": {
 			Type:             schema.TypeMap,
 			Required:         true,
-			DiffSuppressFunc: utils.SuppressEquivalentJsonDiffs,
+			DiffSuppressFunc: utils.SuppressFlowDiffs,
 		},
 	}
 }
@@ -143,6 +143,14 @@ func createFlow(_ context.Context, data *schema.ResourceData, meta interface{}) 
 		diags = append(diags, utils.DiagFromError(err, "Unable to create Flow"))
 	} else {
 		data.SetId(id)
+
+		// Setting params manually to save defaulted values like `allow_revoke` into the state
+		flowParamsMap, err := buildHCLParamsFromAPIParams(data, flow.Params)
+		if flowParamsMap != nil {
+			err = data.Set("params", flowParamsMap.Params)
+		}
+
+		diags = utils.DiagsCheckError(diags, err, "Unable to read Flow params")
 	}
 	return diags
 }
