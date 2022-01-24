@@ -69,9 +69,9 @@ func (t *SymApprovalTemplate) terraformToAPI(params *HCLParamMap) client.APIPara
 	if field := params.checkKey("allow_revoke"); field != nil {
 		// If allow_revoke is set, validate that it is a boolean and add it to params
 		allow_revoke, err := strconv.ParseBool(field.Value())
-        if err != nil {
-            params.checkError("allow_revoke", "allow_revoke must be a boolean value", err)
-        }
+		if err != nil {
+			params.checkError("allow_revoke", "allow_revoke must be a boolean value", err)
+		}
 		raw["allow_revoke"] = allow_revoke
 	} else {
 		// Default allow_revoke to true
@@ -114,7 +114,7 @@ func apiParamsToTFParams(apiParams client.APIParams) (*HCLParamMap, error) {
 
 	params := map[string]string{
 		"strategy_id":        apiParamsStrategyID,
-		"allow_revoke":		  strconv.FormatBool(allowRevoke),
+		"allow_revoke":       strconv.FormatBool(allowRevoke),
 		"prompt_fields_json": string(fieldsJSON),
 	}
 	return &HCLParamMap{Params: params}, nil
