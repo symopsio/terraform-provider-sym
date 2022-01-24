@@ -84,10 +84,3 @@ func (pm *HCLParamMap) addDiagWithDetail(key string, summary string, detail stri
 func (pm *HCLParamMap) addDiag(key string, summary string) {
 	pm.addDiagWithDetail(key, summary, "")
 }
-
-func (pm *HCLParamMap) checkError(key string, summary string, err error) error {
-	if err != nil {
-		pm.addDiagWithDetail(key, summary, err.Error())
-	}
-	return err
-}
