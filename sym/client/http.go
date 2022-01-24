@@ -64,7 +64,10 @@ func (c *symHttpClient) Do(method string, path string, payload interface{}) (str
 	body, err := ioutil.ReadAll(resp.Body)
 	if resp.StatusCode == 400 {
 		errorBody := utils.ErrorResponse{}
-		json.Unmarshal(body, &errorBody)
+		err = json.Unmarshal(body, &errorBody)
+		if err != nil {
+			return "", err
+		}
 		return "", utils.ErrAPIBadRequest(errorBody.Errors)
 	} else if resp.StatusCode == 401 {
 		return "", utils.ErrConfigFileNoJWT

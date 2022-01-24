@@ -45,17 +45,3 @@ func TranslateDiagPaths(diags diag.Diagnostics, keyMap map[string]string) {
 		}
 	}
 }
-
-func translateAttrToIndexPaths(path cty.Path) cty.Path {
-	newPath := make(cty.Path, 0, len(path))
-
-	for _, item := range path {
-		if val, ok := item.(cty.GetAttrStep); ok {
-			newPath = append(newPath, cty.IndexStep{Key: cty.StringVal(val.Name)})
-		} else {
-			newPath = append(newPath, item)
-		}
-	}
-
-	return newPath
-}

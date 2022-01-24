@@ -42,10 +42,10 @@ func (t *SymApprovalTemplate) terraformToAPI(params *HCLParamMap) client.APIPara
 
 	if field := params.checkKey("prompt_fields_json"); field != nil {
 		var fields interface{}
-		field.checkError(
-			"Error decoding prompt_fields_json",
-			json.Unmarshal([]byte(field.Value()), &fields),
-		)
+		err := json.Unmarshal([]byte(field.Value()), &fields)
+		if err != nil {
+			params.addDiag("prompt_fields_json", "Error decoding prompt_fields_json")
+		}
 		raw["prompt_fields"] = fields
 	} else {
 		params.addWarning(

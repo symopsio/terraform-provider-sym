@@ -39,7 +39,7 @@ func (pm *HCLParamMap) ToAPIParams(t Template) (client.APIParams, error) {
 				apiParams[k] = config.Config[k]
 			}
 		} else {
-			return nil, fmt.Errorf("Error parsing %s: %s", k, err.Error())
+			return nil, fmt.Errorf("error parsing %s: %s", k, err.Error())
 		}
 	}
 
@@ -54,23 +54,6 @@ func (pm *HCLParamMap) validateAgainstResource(t Template, c *terraform.Resource
 	utils.PrefixDiagPaths(diags, cty.GetAttrPath("params"))
 
 	pm.Diags = append(pm.Diags, diags...)
-}
-
-func (pm *HCLParamMap) checkRequiredKeys(keys []string) {
-	for _, key := range keys {
-		if _, ok := pm.Params[key]; !ok {
-			pm.addDiag(key, fmt.Sprintf("Missing required key %s", key))
-		}
-	}
-}
-
-func (pm *HCLParamMap) requireKey(key string) *ParamMapKey {
-	if checked := pm.checkKey(key); checked != nil {
-		return checked
-	} else {
-		pm.addDiag(key, fmt.Sprintf("Missing required key %s", key))
-		return nil
-	}
 }
 
 func (pm *HCLParamMap) checkKey(key string) *ParamMapKey {
