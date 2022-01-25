@@ -40,7 +40,7 @@ func SuppressFlowDiffs(k string, old string, new string, d *schema.ResourceData)
 	suppressJsonDiffs := SuppressEquivalentJsonDiffs(k, old, new, d)
 
 	// allow_revoke defaults to true, so don't show a diff if allow_revoke is not specified
-	suppressAllowRevokeDiffs := (k == "params.allow_revoke" && old == "true" && new == "")
+	suppressAllowRevokeDiffs := k == "params.allow_revoke" && old == "true" && new == ""
 
 	return suppressJsonDiffs || suppressAllowRevokeDiffs
 }
