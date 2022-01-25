@@ -254,13 +254,20 @@ func deleteFlow(_ context.Context, data *schema.ResourceData, meta interface{}) 
 	return diags
 }
 
-func validateParams(input interface{}, _ cty.Path) diag.Diagnostics {
+func validateParams(input interface{}, path cty.Path) diag.Diagnostics {
 	if params, ok := input.(map[string]interface{}); ok {
 		if allowRevoke, ok := params["allow_revoke"]; ok {
 			if allowRevoke, ok := allowRevoke.(string); ok {
 				_, err := strconv.ParseBool(allowRevoke)
 				if err != nil {
-					return utils.DiagsFromError(fmt.Errorf("failed to parse %q to bool", allowRevoke), "allow_revoke must be a boolean value")
+					return diag.Diagnostics{
+						diag.Diagnostic{
+							Severity:      diag.Error,
+							Summary:       "allow_revoke must be a boolean value",
+							Detail:        fmt.Sprintf("failed to parse %q to bool", allowRevoke),
+							AttributePath: append(path, cty.IndexStep{Key: cty.StringVal("allow_revoke")}),
+						},
+					}
 				}
 			}
 		}
