@@ -6,10 +6,13 @@ package resources
 import (
 	"context"
 	"encoding/base64"
+	"fmt"
 	"io/ioutil"
 	"log"
+	"strconv"
 	"strings"
 
+	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
@@ -54,6 +57,7 @@ func flowSchema() map[string]*schema.Schema {
 			Type:             schema.TypeMap,
 			Required:         true,
 			DiffSuppressFunc: utils.SuppressFlowDiffs,
+			ValidateDiagFunc: validateParams,
 		},
 	}
 }
@@ -248,4 +252,25 @@ func deleteFlow(_ context.Context, data *schema.ResourceData, meta interface{}) 
 	}
 
 	return diags
+}
+
+func validateParams(input interface{}, path cty.Path) diag.Diagnostics {
+	if params, ok := input.(map[string]interface{}); ok {
+		if allowRevoke, ok := params["allow_revoke"]; ok {
+			if allowRevoke, ok := allowRevoke.(string); ok {
+				_, err := strconv.ParseBool(allowRevoke)
+				if err != nil {
+					return diag.Diagnostics{
+						diag.Diagnostic{
+							Severity:      diag.Error,
+							Summary:       "allow_revoke must be a boolean value",
+							Detail:        fmt.Sprintf("failed to parse %q to bool", allowRevoke),
+							AttributePath: append(path, cty.IndexStep{Key: cty.StringVal("allow_revoke")}),
+						},
+					}
+				}
+			}
+		}
+	}
+	return nil
 }
