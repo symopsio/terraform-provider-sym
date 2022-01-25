@@ -57,7 +57,7 @@ func Test_Config(t *testing.T) {
 				tfOrg: "bad-wrong-org",
 			},
 			func() {
-				os.Setenv(SkipValidationEnvVar, "1")
+				_ = os.Setenv(SkipValidationEnvVar, "1")
 			},
 			&Config{
 				AuthToken:       &AuthToken{AccessToken: "11-22-good-access-token"},
@@ -74,7 +74,7 @@ func Test_Config(t *testing.T) {
 				path:  "./bad-path.fake",
 				tfOrg: "my-fancy-org",
 			},
-			func() { os.Setenv(JWTEnvVar, "something") },
+			func() { _ = os.Setenv(JWTEnvVar, "something") },
 			&Config{
 				AuthToken: &AuthToken{AccessToken: "something"},
 			},
@@ -106,7 +106,7 @@ func Test_Config(t *testing.T) {
 				path:  "./testdata/good-config.yml",
 				tfOrg: "bad-wrong-org", // org is not validated if SYM_JWT is set
 			},
-			func() { os.Setenv(JWTEnvVar, "something") },
+			func() { _ = os.Setenv(JWTEnvVar, "something") },
 			&Config{
 				AuthToken: &AuthToken{AccessToken: "something"},
 			},
@@ -114,16 +114,12 @@ func Test_Config(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		os.Unsetenv(SkipValidationEnvVar)
-		os.Unsetenv(JWTEnvVar)
+		_ = os.Unsetenv(SkipValidationEnvVar)
+		_ = os.Unsetenv(JWTEnvVar)
 		if tt.precondition != nil {
 			tt.precondition()
 		}
 		t.Run(tt.name, func(t *testing.T) {
-			tfOrg := tt.args.tfOrg
-			if tfOrg == "" {
-				tfOrg = "my-fancy-org"
-			}
 			got, err := GetConfig(tt.args.path)
 			if err != nil && !strings.Contains(err.Error(), tt.expectedError.Error()) {
 				t.Errorf("GetConfig() error = %v, wantErr %q", err, tt.expectedError)

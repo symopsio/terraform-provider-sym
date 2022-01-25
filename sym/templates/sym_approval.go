@@ -42,10 +42,10 @@ func (t *SymApprovalTemplate) terraformToAPI(params *HCLParamMap) client.APIPara
 
 	if field := params.checkKey("prompt_fields_json"); field != nil {
 		var fields interface{}
-		field.checkError(
-			"Error decoding prompt_fields_json",
-			json.Unmarshal([]byte(field.Value()), &fields),
-		)
+		err := json.Unmarshal([]byte(field.Value()), &fields)
+		if err != nil {
+			params.addDiag("prompt_fields_json", "Error decoding prompt_fields_json")
+		}
 		raw["prompt_fields"] = fields
 	} else {
 		params.addWarning(
@@ -69,11 +69,11 @@ func (t *SymApprovalTemplate) terraformToAPI(params *HCLParamMap) client.APIPara
 
 	if field := params.checkKey("allow_revoke"); field != nil {
 		// If allow_revoke is set, validate that it is a boolean and add it to params
-		allow_revoke, err := strconv.ParseBool(field.Value())
+		allowRevoke, err := strconv.ParseBool(field.Value())
 		if err != nil {
-			params.checkError("allow_revoke", "allow_revoke must be a boolean value", err)
+			_ = params.checkError("allow_revoke", "allow_revoke must be a boolean value", err)
 		}
-		raw["allow_revoke"] = allow_revoke
+		raw["allow_revoke"] = allowRevoke
 	} else {
 		// Default allow_revoke to true
 		raw["allow_revoke"] = true

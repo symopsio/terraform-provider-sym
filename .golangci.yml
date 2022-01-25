@@ -1,0 +1,6 @@
+run:
+  timeout: 10m
+linters:
+  # See https://golangci-lint.run/usage/linters/ for more information
+  enable:
+    - gofmt

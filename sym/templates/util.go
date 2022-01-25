@@ -11,7 +11,7 @@ import (
 )
 
 // The AttributePaths that come from validating a Resource use GetAttrSteps,
-// since Resources are blocks. However, in our case, we're actuall validating
+// since Resources are blocks. However, in our case, we're actually validating
 // a map, so we need to translate each GetAttrStep to an IndexStep.
 func translateResourceDiags(diags diag.Diagnostics) {
 	for i, d := range diags {
@@ -37,7 +37,7 @@ func pathString(path cty.Path) string {
 				components = append(components, val.Key.AsString())
 			} else if val.Key.Type() == cty.Number {
 				var number int
-				gocty.FromCtyValue(val.Key, &number)
+				_ = gocty.FromCtyValue(val.Key, &number)
 				components = append(components, strconv.Itoa(number))
 			}
 		}

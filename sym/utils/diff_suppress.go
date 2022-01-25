@@ -20,7 +20,7 @@ import (
 //
 //  {"template": "sym:approval", "name": "access"}
 //  {"name": "access", "template": "sym:approval"}
-func SuppressEquivalentJsonDiffs(k string, old string, new string, d *schema.ResourceData) bool {
+func SuppressEquivalentJsonDiffs(k string, old string, new string, _ *schema.ResourceData) bool {
 	ob := bytes.NewBufferString("")
 	if err := json.Compact(ob, []byte(old)); err != nil {
 		log.Printf("Error decoding json %v for value %v", old, k)
@@ -114,7 +114,7 @@ func SuppressNullSettingsDiffs(k string, old string, new string, d *schema.Resou
 // NOTE: if true is returned, the diff is suppressed and the field whose diff is being suppressed
 // will have a value matching the OLD input. This means that if the diff is suppressed, we need to account
 // for already having a base64 encoded string as the field's value vs. a file path.
-func SuppressEquivalentFileContentDiffs(k string, old string, new string, d *schema.ResourceData) bool {
+func SuppressEquivalentFileContentDiffs(k string, old string, new string, _ *schema.ResourceData) bool {
 	if old == "" {
 		return false
 	}
@@ -131,5 +131,5 @@ func SuppressEquivalentFileContentDiffs(k string, old string, new string, d *sch
 		return false
 	}
 
-	return bytes.Compare(newBytes, oldBytes) == 0
+	return bytes.Equal(newBytes, oldBytes)
 }
