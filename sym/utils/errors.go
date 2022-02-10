@@ -12,7 +12,7 @@ type Error struct {
 type ErrorResponse struct {
 	Error       bool    `json:"error"`
 	Errors      []Error `json:"errors"`
-	Code        int     `json:"code"`
+	Code        string  `json:"code"`
 	StatusCode  int     `json:"status_code"`
 	IsRetryable bool    `json:"is_retryable"`
 }
