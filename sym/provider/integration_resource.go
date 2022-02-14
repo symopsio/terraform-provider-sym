@@ -1,4 +1,4 @@
-package resources
+package provider
 
 import (
 	"context"
@@ -13,7 +13,6 @@ import (
 
 func Integration() *schema.Resource {
 	return &schema.Resource{
-		Schema:        IntegrationSchema(),
 		CreateContext: createIntegration,
 		ReadContext:   readIntegration,
 		UpdateContext: updateIntegration,
@@ -21,16 +20,13 @@ func Integration() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-	}
-}
-
-func IntegrationSchema() map[string]*schema.Schema {
-	return map[string]*schema.Schema{
-		"type":        utils.Required(schema.TypeString),
-		"settings":    utils.SettingsMap(),
-		"name":        utils.Required(schema.TypeString),
-		"external_id": utils.Required(schema.TypeString),
-		"label":       utils.Optional(schema.TypeString),
+		Schema: map[string]*schema.Schema{
+			"type":        utils.Required(schema.TypeString),
+			"settings":    utils.SettingsMap(),
+			"name":        utils.Required(schema.TypeString),
+			"external_id": utils.Required(schema.TypeString),
+			"label":       utils.Optional(schema.TypeString),
+		},
 	}
 }
 

@@ -1,7 +1,7 @@
 // Each resource must implement a Resource interface provided by Hashicorp.
 //
 // This file contains the implementation of the Flow Resource
-package resources
+package provider
 
 import (
 	"context"
@@ -21,9 +21,7 @@ import (
 	"github.com/symopsio/terraform-provider-sym/sym/utils"
 )
 
-// Flow Resource ////////////////////////////////
-
-// Return an implementation of the Resource interface
+// Flow represents a Sym Flow
 func Flow() *schema.Resource {
 	return &schema.Resource{
 		Schema:        flowSchema(),

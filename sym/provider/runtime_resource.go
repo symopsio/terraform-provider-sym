@@ -1,4 +1,4 @@
-package resources
+package provider
 
 import (
 	"context"
@@ -13,7 +13,6 @@ import (
 
 func Runtime() *schema.Resource {
 	return &schema.Resource{
-		Schema:        runtimeSchema(),
 		CreateContext: createRuntime,
 		ReadContext:   readRuntime,
 		UpdateContext: updateRuntime,
@@ -21,14 +20,11 @@ func Runtime() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-	}
-}
-
-func runtimeSchema() map[string]*schema.Schema {
-	return map[string]*schema.Schema{
-		"name":       utils.Required(schema.TypeString),
-		"label":      utils.Optional(schema.TypeString),
-		"context_id": utils.Required(schema.TypeString),
+		Schema: map[string]*schema.Schema{
+			"name":       utils.Required(schema.TypeString),
+			"label":      utils.Optional(schema.TypeString),
+			"context_id": utils.Required(schema.TypeString),
+		},
 	}
 }
 

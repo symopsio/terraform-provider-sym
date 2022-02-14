@@ -1,8 +1,4 @@
-// Environment Resource
-//
-// This resource allows customers to specify the details of
-// the Sym environment in which their flows will run.
-package resources
+package provider
 
 import (
 	"context"
@@ -15,9 +11,12 @@ import (
 	"github.com/symopsio/terraform-provider-sym/sym/utils"
 )
 
+// Environment Resource
+//
+// This resource allows customers to specify the details of
+// the Sym environment in which their flows will run.
 func Environment() *schema.Resource {
 	return &schema.Resource{
-		Schema:        EnvironmentSchema(),
 		CreateContext: createEnvironment,
 		ReadContext:   readEnvironment,
 		UpdateContext: updateEnvironment,
@@ -25,17 +24,14 @@ func Environment() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-	}
-}
-
-func EnvironmentSchema() map[string]*schema.Schema {
-	return map[string]*schema.Schema{
-		"name":                utils.Required(schema.TypeString),
-		"label":               utils.Optional(schema.TypeString),
-		"runtime_id":          utils.Required(schema.TypeString),
-		"integrations":        utils.SettingsMap(),
-		"error_logger_id":     utils.Optional(schema.TypeString),
-		"log_destination_ids": utils.StringList(false),
+		Schema: map[string]*schema.Schema{
+			"name":                utils.Required(schema.TypeString),
+			"label":               utils.Optional(schema.TypeString),
+			"runtime_id":          utils.Required(schema.TypeString),
+			"integrations":        utils.SettingsMap(),
+			"error_logger_id":     utils.Optional(schema.TypeString),
+			"log_destination_ids": utils.StringList(false),
+		},
 	}
 }
 

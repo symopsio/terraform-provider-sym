@@ -1,4 +1,4 @@
-package data_sources
+package provider
 
 import (
 	"context"
@@ -10,22 +10,16 @@ import (
 	"github.com/symopsio/terraform-provider-sym/sym/utils"
 )
 
-// Similar to the IntegrationSchema in resources/integration.go
-// The difference is that external_id is not required here.
-func IntegrationSchema() map[string]*schema.Schema {
-	return map[string]*schema.Schema{
-		"type":        utils.Required(schema.TypeString),
-		"settings":    utils.SettingsMap(),
-		"name":        utils.Required(schema.TypeString),
-		"external_id": utils.Optional(schema.TypeString),
-		"label":       utils.Optional(schema.TypeString),
-	}
-}
-
 func DataSourceIntegration() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: dataSourceIntegrationRead,
-		Schema:      IntegrationSchema(),
+		Schema: map[string]*schema.Schema{
+			"type":        utils.Required(schema.TypeString),
+			"settings":    utils.SettingsMap(),
+			"name":        utils.Required(schema.TypeString),
+			"external_id": utils.Optional(schema.TypeString),
+			"label":       utils.Optional(schema.TypeString),
+		},
 	}
 }
 

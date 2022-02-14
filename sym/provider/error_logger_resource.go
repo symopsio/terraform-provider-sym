@@ -1,4 +1,4 @@
-package resources
+package provider
 
 import (
 	"context"
@@ -13,7 +13,6 @@ import (
 
 func ErrorLogger() *schema.Resource {
 	return &schema.Resource{
-		Schema:        errorLoggerSchema(),
 		CreateContext: createErrorLogger,
 		ReadContext:   readErrorLogger,
 		UpdateContext: updateErrorLogger,
@@ -21,13 +20,10 @@ func ErrorLogger() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-	}
-}
-
-func errorLoggerSchema() map[string]*schema.Schema {
-	return map[string]*schema.Schema{
-		"integration_id": utils.Required(schema.TypeString),
-		"destination":    utils.Required(schema.TypeString),
+		Schema: map[string]*schema.Schema{
+			"integration_id": utils.Required(schema.TypeString),
+			"destination":    utils.Required(schema.TypeString),
+		},
 	}
 }
 
