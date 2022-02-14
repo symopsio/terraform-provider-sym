@@ -1,4 +1,4 @@
-package sym
+package provider
 
 import (
 	"context"
