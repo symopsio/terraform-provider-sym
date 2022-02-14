@@ -32,7 +32,7 @@ provider "sym" {
 resource "sym_integration" "slack" {
 	type = "slack"
 	name = "test-integration-slack"
-	external_id = "T1234567"
+	external_id = "T12345678"
 }
 `
 }
