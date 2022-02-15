@@ -31,6 +31,7 @@ func dataSourceSecretsRead(_ context.Context, data *schema.ResourceData, meta in
 
 	diags = utils.DiagsCheckError(diags, data.Set("type", secrets.Type), "Unable to read Secrets type")
 	diags = utils.DiagsCheckError(diags, data.Set("name", secrets.Name), "Unable to read Secrets name")
+	diags = utils.DiagsCheckError(diags, data.Set("label", secrets.Label), "Unable to read Secrets label")
 	diags = utils.DiagsCheckError(diags, data.Set("settings", secrets.Settings), "Unable to read Secrets settings")
 
 	data.SetId(secrets.Id)
