@@ -46,12 +46,35 @@ resource "sym_integration" "data_stream" {
   }
 }
 
+resource "sym_integration" "firehose" {
+  type = "permission_context"
+  name = "tftest-log-firehose"
+  label = "Kinesis Firehose"
+  external_id = "999999999999"
+
+  settings = {
+    cloud       = "aws"
+    external_id = "1478F2AD-6091-CCCC-CCCC-766CA2F173CB"
+    region      = "us-east-1"
+    role_arn    = "arn:aws:iam::999999999999:role/sym/RuntimeConnectorRole"
+  }
+}
+
 resource "sym_log_destination" "data_stream" {
   type    = "kinesis_data_stream"
 
   integration_id = sym_integration.data_stream.id
   settings = {
     stream_name = "tftest-log-data-stream"
+  }
+}
+
+resource "sym_log_destination" "firehose" {
+  type    = "kinesis_firehose"
+
+  integration_id = sym_integration.firehose.id
+  settings = {
+    stream_name = "tftest-log-firehose"
   }
 }
 `, data.OrgSlug)
