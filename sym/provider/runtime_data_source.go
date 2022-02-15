@@ -1,4 +1,4 @@
-package data_sources
+package provider
 
 import (
 	"context"
@@ -13,18 +13,11 @@ import (
 func DataSourceRuntime() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: dataSourceRuntimeRead,
-		Schema:      runtimeSchema(),
-	}
-}
-
-// runtimeSchema is defined specifically for the data source (vs. using the
-// already defined version from the resource) because the context_id should not
-// be required to retrieve data, only name.
-func runtimeSchema() map[string]*schema.Schema {
-	return map[string]*schema.Schema{
-		"name":       utils.Required(schema.TypeString),
-		"label":      utils.Optional(schema.TypeString),
-		"context_id": utils.Optional(schema.TypeString),
+		Schema: map[string]*schema.Schema{
+			"name":       utils.Required(schema.TypeString),
+			"label":      utils.Optional(schema.TypeString),
+			"context_id": utils.Optional(schema.TypeString),
+		},
 	}
 }
 

@@ -1,4 +1,4 @@
-package data_sources
+package provider
 
 import (
 	"context"
@@ -7,14 +7,13 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/symopsio/terraform-provider-sym/sym/client"
-	"github.com/symopsio/terraform-provider-sym/sym/resources"
 	"github.com/symopsio/terraform-provider-sym/sym/utils"
 )
 
 func DataSourceSecrets() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: dataSourceSecretsRead,
-		Schema:      resources.SecretsSchema(),
+		Schema:      SecretsSchema(),
 	}
 }
 

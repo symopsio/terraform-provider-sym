@@ -1,4 +1,4 @@
-package sym
+package provider
 
 import (
 	"context"
@@ -7,8 +7,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/symopsio/terraform-provider-sym/sym/client"
-	"github.com/symopsio/terraform-provider-sym/sym/data_sources"
-	"github.com/symopsio/terraform-provider-sym/sym/resources"
 	"github.com/symopsio/terraform-provider-sym/sym/utils"
 )
 
@@ -26,28 +24,28 @@ func Provider() *schema.Provider {
 			},
 		},
 		ResourcesMap: map[string]*schema.Resource{
-			"sym_flow":            resources.Flow(),
-			"sym_strategy":        resources.Strategy(),
-			"sym_target":          resources.Target(),
-			"sym_secret":          resources.Secret(),
-			"sym_secrets":         resources.Secrets(),
-			"sym_integration":     resources.Integration(),
-			"sym_runtime":         resources.Runtime(),
-			"sym_environment":     resources.Environment(),
-			"sym_error_logger":    resources.ErrorLogger(),
-			"sym_log_destination": resources.LogDestination(),
+			"sym_flow":            Flow(),
+			"sym_strategy":        Strategy(),
+			"sym_target":          Target(),
+			"sym_secret":          Secret(),
+			"sym_secrets":         Secrets(),
+			"sym_integration":     Integration(),
+			"sym_runtime":         Runtime(),
+			"sym_environment":     Environment(),
+			"sym_error_logger":    ErrorLogger(),
+			"sym_log_destination": LogDestination(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
-			"sym_integration": data_sources.DataSourceIntegration(),
-			"sym_runtime":     data_sources.DataSourceRuntime(),
-			"sym_environment": data_sources.DataSourceEnvironment(),
-			"sym_secrets":     data_sources.DataSourceSecrets(),
+			"sym_integration": DataSourceIntegration(),
+			"sym_runtime":     DataSourceRuntime(),
+			"sym_environment": DataSourceEnvironment(),
+			"sym_secrets":     DataSourceSecrets(),
 		},
 		ConfigureContextFunc: providerConfigure,
 	}
 }
 
-func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
+func providerConfigure(_ context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
 	var diags diag.Diagnostics
 	terraformOrg := d.Get("org").(string)
 

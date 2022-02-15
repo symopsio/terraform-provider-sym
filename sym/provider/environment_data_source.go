@@ -1,4 +1,4 @@
-package data_sources
+package provider
 
 import (
 	"context"
@@ -10,24 +10,18 @@ import (
 	"github.com/symopsio/terraform-provider-sym/sym/utils"
 )
 
-// Similar to the EnvironmentSchema in resources/environment.go
-// The difference is that runtime_id is not required here.
-func EnvironmentDataSourceSchema() map[string]*schema.Schema {
-	return map[string]*schema.Schema{
-		"name":  utils.Required(schema.TypeString),
-		"label": utils.Optional(schema.TypeString),
-		"runtime_id": {
-			Type:     schema.TypeString,
-			Optional: true,
-		},
-		"integrations": utils.SettingsMap(),
-	}
-}
-
 func DataSourceEnvironment() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: dataSourceEnvironmentRead,
-		Schema:      EnvironmentDataSourceSchema(),
+		Schema: map[string]*schema.Schema{
+			"name":  utils.Required(schema.TypeString),
+			"label": utils.Optional(schema.TypeString),
+			"runtime_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"integrations": utils.SettingsMap(),
+		},
 	}
 }
 
