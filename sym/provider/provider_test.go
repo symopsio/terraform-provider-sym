@@ -22,7 +22,7 @@ func init() {
 // environment is configured for each acceptance test.
 func testAccPreCheck(t *testing.T) {
 	if os.Getenv("SYM_JWT") == "" {
-		t.Fatalf("SYM_JWT must be set for acceptance tests")
+		t.Fatal("SYM_JWT must be set for acceptance tests")
 	}
 
 	// TODO: If we want to do tests against production we'll need to
