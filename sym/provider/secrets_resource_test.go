@@ -66,5 +66,5 @@ resource "sym_secrets" "aws" {
 		context_id = sym_integration.context.id
 	}
 }
-`, t.OrgSlug, t.ResourcePrefix + "-secrets-context", t.ResourceName, label)
+`, t.OrgSlug, t.ResourcePrefix+"-secrets-context", t.ResourceName, label)
 }
