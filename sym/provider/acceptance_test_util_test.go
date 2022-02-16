@@ -229,8 +229,8 @@ func Test_secretSourceResource_String(t *testing.T) {
 			"slack",
 			secretSourceResource{
 				terraformName: "test",
-				name: "secrets-manager",
-				type_: "aws_secrets_manager",
+				name:          "secrets-manager",
+				type_:         "aws_secrets_manager",
 				label:         "Secret Place",
 				settings: map[string]string{
 					"context_id": "12345",

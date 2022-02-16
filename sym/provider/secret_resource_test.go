@@ -45,7 +45,7 @@ func awsSecretsManagerSecretConfig(t TestData, label string, jsonKey string) str
 	sb.WriteString(secretResource{
 		terraformName: "secret",
 		label:         label,
-		path: t.ResourceName+"/secret/path",
+		path:          t.ResourceName + "/secret/path",
 		sourceId:      "sym_secrets.aws.id",
 		settings: map[string]string{
 			"json_key": jsonKey,

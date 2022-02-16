@@ -30,8 +30,8 @@ func TestAccSymDataSourceSecretSource_awsSecretsManager(t *testing.T) {
 
 type secretSourceDataSource struct {
 	terraformName string
-	type_ string
-	name string
+	type_         string
+	name          string
 }
 
 func (r secretSourceDataSource) String() string {
@@ -50,8 +50,8 @@ func awsSecretsManagerDataSourceSecretSource(t TestData) string {
 
 	sb.WriteString(secretSourceDataSource{
 		terraformName: "data_aws",
-		type_: "aws_secrets_manager",
-		name: "sym_secrets.aws.name",
+		type_:         "aws_secrets_manager",
+		name:          "sym_secrets.aws.name",
 	}.String())
 
 	return sb.String()

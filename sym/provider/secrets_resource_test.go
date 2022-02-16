@@ -37,7 +37,6 @@ func TestAccSymSecretSource_awsSecretsManager(t *testing.T) {
 	})
 }
 
-
 func awsSecretsManagerSourceConfig(t TestData, label string) string {
 	var sb strings.Builder
 
@@ -45,23 +44,23 @@ func awsSecretsManagerSourceConfig(t TestData, label string) string {
 
 	sb.WriteString(integrationResource{
 		terraformName: "context",
-		type_: "permission_context",
-		name: t.ResourcePrefix+"-secrets-context",
-		label: "Permission Context",
-		externalId: "55555",
+		type_:         "permission_context",
+		name:          t.ResourcePrefix + "-secrets-context",
+		label:         "Permission Context",
+		externalId:    "55555",
 		settings: map[string]string{
-			"cloud": "aws",
+			"cloud":       "aws",
 			"external_id": "1478F2AD-6091-41E6-B3D2-766CA2F173CB",
-			"region": "us-east-1",
-			"role_arn": roleArnPrefix+"/foo",
+			"region":      "us-east-1",
+			"role_arn":    roleArnPrefix + "/foo",
 		},
 	}.String())
 
 	sb.WriteString(secretSourceResource{
 		terraformName: "aws",
-		name: t.ResourceName,
-		type_: "aws_secrets_manager",
-		label: label,
+		name:          t.ResourceName,
+		type_:         "aws_secrets_manager",
+		label:         label,
 		settings: map[string]string{
 			"context_id": "sym_integration.context.id",
 		},

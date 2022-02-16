@@ -131,7 +131,7 @@ type secretResource struct {
 	label         string
 	path          string
 	sourceId      string
-	settings map[string]string
+	settings      map[string]string
 }
 
 func (r secretResource) String() string {
@@ -166,10 +166,10 @@ resource "sym_secret" %[1]q {
 
 type secretSourceResource struct {
 	terraformName string
-	name string
-	type_ string
-	label string
-	settings map[string]string
+	name          string
+	type_         string
+	label         string
+	settings      map[string]string
 }
 
 func (r secretSourceResource) String() string {
