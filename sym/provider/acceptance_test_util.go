@@ -5,6 +5,7 @@ import (
 	"math/rand"
 	"sort"
 	"strings"
+	"time"
 )
 
 type TestData struct {
@@ -22,6 +23,7 @@ type TestData struct {
 
 // BuildTestData generates test data for an acceptance test
 func BuildTestData(resourceName string) TestData {
+	rand.Seed(time.Now().UnixNano())
 	testData := TestData{
 		// Since the acceptance tests use SYM_JWT to authenticate, the Org will not
 		// actually be validated, so this is a placeholder.
