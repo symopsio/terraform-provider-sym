@@ -37,7 +37,7 @@ func TestAccSymSecret_basic(t *testing.T) {
 	})
 }
 
-func awsSecretsManagerSecretConfig(t TestData, label string, jsonKey string) string {
+func awsSecretsManagerSecretConfig(t TestData, label, jsonKey string) string {
 	var sb strings.Builder
 
 	sb.WriteString(awsSecretsManagerSourceConfig(t, "Secrets Manager"))
