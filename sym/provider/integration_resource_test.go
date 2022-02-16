@@ -1,11 +1,13 @@
 package provider
 
 import (
-	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
+
+const roleArnPrefix = "arn:aws:iam::123456789012:role/sym"
 
 func TestAccSymIntegration_slack(t *testing.T) {
 	createData := BuildTestData("slack-integration")
@@ -16,7 +18,7 @@ func TestAccSymIntegration_slack(t *testing.T) {
 		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: slackIntegration(createData, "T12345"),
+				Config: slackIntegrationConfig(createData, "Slack Integration", "T12345"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("sym_integration.slack", "type", "slack"),
 					resource.TestCheckResourceAttr("sym_integration.slack", "name", createData.ResourceName),
@@ -24,7 +26,7 @@ func TestAccSymIntegration_slack(t *testing.T) {
 				),
 			},
 			{
-				Config: slackIntegration(updateData, "T00000"),
+				Config: slackIntegrationConfig(updateData, "Updated Slack Integration", "T00000"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("sym_integration.slack", "type", "slack"),
 					resource.TestCheckResourceAttr("sym_integration.slack", "name", updateData.ResourceName),
@@ -44,59 +46,64 @@ func TestAccSymIntegration_permissionContext(t *testing.T) {
 		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: permissionContextIntegration(createData, "Runtime Context", "5555555", "us-east-1"),
+				Config: permissionContextIntegrationConfig(createData, "Runtime Context", "5555555", "123", "us-east-1", "foo"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("sym_integration.context", "type", "permission_context"),
 					resource.TestCheckResourceAttr("sym_integration.context", "name", createData.ResourceName),
 					resource.TestCheckResourceAttr("sym_integration.context", "external_id", "5555555"),
+					resource.TestCheckResourceAttr("sym_integration.context", "settings.external_id", "123"),
 					resource.TestCheckResourceAttr("sym_integration.context", "settings.region", "us-east-1"),
+					resource.TestCheckResourceAttr("sym_integration.context", "settings.role_arn", roleArnPrefix+"/foo"),
 				),
 			},
 			{
-				Config: permissionContextIntegration(updateData, "Better Runtime Context", "11", "us-west-2"),
+				Config: permissionContextIntegrationConfig(updateData, "Better Runtime Context", "11", "456", "us-west-2", "bar"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("sym_integration.context", "type", "permission_context"),
 					resource.TestCheckResourceAttr("sym_integration.context", "name", updateData.ResourceName),
 					resource.TestCheckResourceAttr("sym_integration.context", "external_id", "11"),
+					resource.TestCheckResourceAttr("sym_integration.context", "settings.external_id", "456"),
 					resource.TestCheckResourceAttr("sym_integration.context", "settings.region", "us-west-2"),
+					resource.TestCheckResourceAttr("sym_integration.context", "settings.role_arn", roleArnPrefix+"/bar"),
 				),
 			},
 		},
 	})
 }
 
-func slackIntegration(data TestData, externalId string) string {
-	return fmt.Sprintf(`
-provider "sym" {
-	org = "%[1]s"
+func slackIntegrationConfig(data TestData, label string, externalId string) string {
+	var sb strings.Builder
+
+	sb.WriteString(providerResource{org: data.OrgSlug}.String())
+	sb.WriteString(integrationResource{
+		terraformName: "slack",
+		type_:         "slack",
+		name:          data.ResourceName,
+		label:         label,
+		externalId:    externalId,
+		settings:      map[string]string{},
+	}.String())
+
+	return sb.String()
 }
 
-resource "sym_integration" "slack" {
-	type = "slack"
-	name = "%[2]s"
-	external_id = "%[3]s"
-}
-`, data.OrgSlug, data.ResourceName, externalId)
-}
+func permissionContextIntegrationConfig(data TestData, label string, externalId string, awsExternalId string, awsRegion string, awsArnSuffix string) string {
+	var sb strings.Builder
 
-func permissionContextIntegration(data TestData, label string, externalId string, region string) string {
-	return fmt.Sprintf(`
-provider "sym" {
-	org = "%[1]s"
-}
+	sb.WriteString(providerResource{org: data.OrgSlug}.String())
+	sb.WriteString(integrationResource{
+		terraformName: "context",
+		type_:         "permission_context",
+		name:          data.ResourceName,
+		label:         label,
+		externalId:    externalId,
+		settings: map[string]string{
+			"cloud":       "aws",
+			"external_id": awsExternalId,
+			"region":      awsRegion,
+			"role_arn":    roleArnPrefix + "/" + awsArnSuffix,
+		},
+	}.String())
 
-resource "sym_integration" "context" {
-	type = "permission_context"
-	name = "%[2]s"
-	label = "%[3]s"
-	external_id = "%[4]s"
-
-	settings = {
-		cloud = "aws"
-		external_id = "1478F2AD-6091-41E6-B3D2-766CA2F173CB"
-		region = "%[5]s"
-		role_arn = "arn:aws:iam::123456789012:role/sym/RuntimeConnectorRole"
-	}
-}
-`, data.OrgSlug, data.ResourceName, label, externalId, region)
+	return sb.String()
 }
