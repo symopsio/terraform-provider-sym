@@ -184,3 +184,5 @@ resource "sym_secrets" %[1]q {
 }
 `, r.terraformName, r.type_, r.name, r.label, r.settings["context_id"])
 }
+`, r.terraformName, r.type_, r.name, r.label, r.settings["context_id"])
+}
