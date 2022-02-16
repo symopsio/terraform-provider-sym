@@ -123,3 +123,20 @@ resource "sym_log_destination" %q {
 }
 `, r.terraformName, r.type_, r.integrationId, r.streamName)
 }
+
+type secretResource struct {
+	terraformName string
+	label         string
+	path          string
+	sourceId      string
+}
+
+func (r secretResource) String() string {
+	return fmt.Sprintf(`
+resource "sym_secret" %[1]q {
+	label = %[2]q
+	path = %[3]q
+	source_id = %[4]s
+}
+`, r.terraformName, r.label, r.path, r.sourceId)
+}

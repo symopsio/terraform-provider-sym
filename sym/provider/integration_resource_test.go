@@ -1,6 +1,7 @@
 package provider
 
 import (
+	"fmt"
 	"strings"
 	"testing"
 
@@ -71,6 +72,72 @@ func TestAccSymIntegration_permissionContext(t *testing.T) {
 	})
 }
 
+func TestAccSymIntegration_pagerDuty(t *testing.T) {
+	createData := BuildTestData(t, "pagerduty-integration")
+	updateData := BuildTestData(t, "updated-pagerduty-integration")
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: pagerDutyIntegrationConfig(createData, "PagerDuty", "pd-account"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("sym_integration.pagerduty", "type", "pagerduty"),
+					resource.TestCheckResourceAttr("sym_integration.pagerduty", "name", createData.ResourceName),
+					resource.TestCheckResourceAttr("sym_integration.pagerduty", "label", "PagerDuty"),
+					resource.TestCheckResourceAttr("sym_integration.pagerduty", "external_id", "pd-account"),
+					resource.TestCheckResourceAttrPair("sym_integration.pagerduty", "settings.api_token_secret", "sym_secret.pagerduty", "id"),
+				),
+			},
+			{
+				Config: pagerDutyIntegrationConfig(updateData, "Updated PagerDuty", "other-pd-account"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("sym_integration.pagerduty", "type", "pagerduty"),
+					resource.TestCheckResourceAttr("sym_integration.pagerduty", "name", updateData.ResourceName),
+					resource.TestCheckResourceAttr("sym_integration.pagerduty", "label", "Updated PagerDuty"),
+					resource.TestCheckResourceAttr("sym_integration.pagerduty", "external_id", "other-pd-account"),
+					resource.TestCheckResourceAttrPair("sym_integration.pagerduty", "settings.api_token_secret", "sym_secret.pagerduty", "id"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccSymIntegration_aptible(t *testing.T) {
+	createData := BuildTestData(t, "aptible-integration")
+	updateData := BuildTestData(t, "updated-aptible-integration")
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: aptibleIntegrationConfig(createData, "Aptible", "aptible-account"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("sym_integration.aptible", "type", "aptible"),
+					resource.TestCheckResourceAttr("sym_integration.aptible", "name", createData.ResourceName),
+					resource.TestCheckResourceAttr("sym_integration.aptible", "label", "Aptible"),
+					resource.TestCheckResourceAttr("sym_integration.aptible", "external_id", "aptible-account"),
+					resource.TestCheckResourceAttrPair("sym_integration.aptible", "settings.username_secret", "sym_secret.username", "id"),
+					resource.TestCheckResourceAttrPair("sym_integration.aptible", "settings.password_secret", "sym_secret.password", "id"),
+				),
+			},
+			{
+				Config: aptibleIntegrationConfig(updateData, "Updated Aptible", "other-aptible-account"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("sym_integration.aptible", "type", "aptible"),
+					resource.TestCheckResourceAttr("sym_integration.aptible", "name", updateData.ResourceName),
+					resource.TestCheckResourceAttr("sym_integration.aptible", "label", "Updated Aptible"),
+					resource.TestCheckResourceAttr("sym_integration.aptible", "external_id", "other-aptible-account"),
+					resource.TestCheckResourceAttrPair("sym_integration.aptible", "settings.username_secret", "sym_secret.username", "id"),
+					resource.TestCheckResourceAttrPair("sym_integration.aptible", "settings.password_secret", "sym_secret.password", "id"),
+				),
+			},
+		},
+	})
+}
+
 func slackIntegrationConfig(data TestData, label string, externalId string) string {
 	var sb strings.Builder
 
@@ -102,6 +169,96 @@ func permissionContextIntegrationConfig(data TestData, label string, externalId 
 			"external_id": awsExternalId,
 			"region":      awsRegion,
 			"role_arn":    roleArnPrefix + "/" + awsArnSuffix,
+		},
+	}.String())
+
+	return sb.String()
+}
+
+// integrationSecretConfig generates HCL for the required resources to test
+// an integration which references a secret.
+func integrationSecretConfig(data TestData) string {
+	var sb strings.Builder
+
+	sb.WriteString(integrationResource{
+		terraformName: "context",
+		type_:         "permission_context",
+		name:          data.ResourcePrefix + "context",
+		label:         "Context",
+		externalId:    "11111",
+		settings: map[string]string{
+			"cloud":       "aws",
+			"external_id": "123-456",
+			"region":      "us-east-1",
+			"role_arn":    roleArnPrefix + "/foo",
+		},
+	}.String())
+
+	sb.WriteString(fmt.Sprintf(`
+resource "sym_secrets" "test" {
+	name = "%[1]s-secrets-source"
+	type = "aws_secrets_manager"
+	label = "Secrets Manager"
+	settings = {
+		context_id = sym_integration.context.id
+	}
+}
+`, data.ResourcePrefix))
+
+	return sb.String()
+}
+
+func pagerDutyIntegrationConfig(data TestData, label string, externalId string) string {
+	var sb strings.Builder
+
+	sb.WriteString(providerResource{org: data.OrgSlug}.String())
+	sb.WriteString(integrationSecretConfig(data))
+	sb.WriteString(secretResource{
+		terraformName: "pagerduty",
+		label:         "PagerDuty Secret",
+		path:          data.ResourcePrefix + "/pagerduty-secret",
+		sourceId:      "sym_secrets.test.id",
+	}.String())
+	sb.WriteString(integrationResource{
+		terraformName: "pagerduty",
+		type_:         "pagerduty",
+		name:          data.ResourceName,
+		label:         label,
+		externalId:    externalId,
+		settings: map[string]string{
+			"api_token_secret": "${sym_secret.pagerduty.id}",
+		},
+	}.String())
+
+	return sb.String()
+}
+
+func aptibleIntegrationConfig(data TestData, label string, externalId string) string {
+	var sb strings.Builder
+
+	sb.WriteString(providerResource{org: data.OrgSlug}.String())
+	sb.WriteString(integrationSecretConfig(data))
+	sb.WriteString(secretResource{
+		terraformName: "username",
+		label:         "Username Secret",
+		path:          data.ResourcePrefix + "/username-secret",
+		sourceId:      "sym_secrets.test.id",
+	}.String())
+	sb.WriteString(secretResource{
+		terraformName: "password",
+		label:         "Password Secret",
+		path:          data.ResourcePrefix + "/password-secret",
+		sourceId:      "sym_secrets.test.id",
+	}.String())
+	sb.WriteString(integrationResource{
+		terraformName: "aptible",
+		type_:         "aptible",
+		name:          data.ResourceName,
+		label:         label,
+		externalId:    externalId,
+		settings: map[string]string{
+			"username_secret": "${sym_secret.username.id}",
+			"password_secret": "${sym_secret.password.id}",
 		},
 	}.String())
 
