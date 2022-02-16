@@ -2,9 +2,9 @@ package provider
 
 import (
 	"fmt"
+	"math/rand"
 	"sort"
 	"strings"
-	"testing"
 )
 
 type TestData struct {
@@ -21,12 +21,12 @@ type TestData struct {
 }
 
 // BuildTestData generates test data for an acceptance test
-func BuildTestData(t *testing.T, resourceName string) TestData {
+func BuildTestData(resourceName string) TestData {
 	testData := TestData{
 		// Since the acceptance tests use SYM_JWT to authenticate, the Org will not
 		// actually be validated, so this is a placeholder.
 		OrgSlug:        "e2e-testing",
-		ResourcePrefix: "testacc",
+		ResourcePrefix: fmt.Sprintf("testacc-%d", rand.Intn(1000000)),
 	}
 
 	testData.ResourceName = fmt.Sprintf("%[1]s-%[2]s", testData.ResourcePrefix, resourceName)

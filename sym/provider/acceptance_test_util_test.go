@@ -1,6 +1,12 @@
 package provider
 
-import "testing"
+import (
+	"fmt"
+	"regexp"
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+)
 
 func Test_providerResource_String(t *testing.T) {
 	tests := []struct {
@@ -156,6 +162,22 @@ resource "sym_log_destination" "firehose" {
 			if got := tt.input.String(); got != tt.want {
 				t.Errorf("String() = %v, want %v", got, tt.want)
 			}
+		})
+	}
+}
+
+func TestBuildTestData(t *testing.T) {
+	tests := []struct {
+		name         string
+		resourceName string
+		want         string
+	}{
+		{"test", "blah", "blah"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := BuildTestData(tt.resourceName)
+			assert.Regexp(t, regexp.MustCompile(fmt.Sprintf(`testacc-\d*-%s`, tt.want)), got.ResourceName)
 		})
 	}
 }
