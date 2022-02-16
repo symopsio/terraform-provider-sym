@@ -8,8 +8,8 @@ import (
 )
 
 func TestAccSymIntegration_slack(t *testing.T) {
-	createData := BuildTestData(t, "slack-integration")
-	updateData := BuildTestData(t, "updated-slack-integration")
+	createData := BuildTestData("slack-integration")
+	updateData := BuildTestData("updated-slack-integration")
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
