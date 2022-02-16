@@ -135,9 +135,9 @@ func Test_logDestinationResource_String(t *testing.T) {
 			"kinesis_firehose",
 			logDestinationResource{
 				terraformName: "firehose",
-				type_: "kinesis_firehose",
+				type_:         "kinesis_firehose",
 				integrationId: "111-2222",
-				streamName: "stream",
+				streamName:    "stream",
 			},
 			`
 resource "sym_log_destination" "firehose" {

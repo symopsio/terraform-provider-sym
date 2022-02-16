@@ -48,11 +48,11 @@ provider "sym" {
 
 type integrationResource struct {
 	terraformName string
-	type_      string
-	name       string
-	label      string
-	externalId string
-	settings   map[string]string
+	type_         string
+	name          string
+	label         string
+	externalId    string
+	settings      map[string]string
 }
 
 func (r integrationResource) String() string {
@@ -88,12 +88,11 @@ resource "sym_integration" %[1]q {
 	return sb.String()
 }
 
-
 type runtimeResource struct {
 	terraformName string
-	name      string
-	label     string
-	contextId string
+	name          string
+	label         string
+	contextId     string
 }
 
 func (r runtimeResource) String() string {
@@ -124,4 +123,3 @@ resource "sym_log_destination" %q {
 }
 `, r.terraformName, r.type_, r.integrationId, r.streamName)
 }
-
