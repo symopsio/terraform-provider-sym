@@ -90,6 +90,7 @@ resource "sym_integration" %[1]q {
 
 
 type runtimeResource struct {
+	terraformName string
 	name      string
 	label     string
 	contextId string
@@ -98,15 +99,15 @@ type runtimeResource struct {
 func (r runtimeResource) String() string {
 	return fmt.Sprintf(`
 resource "sym_runtime" %[1]q {
-	name = %[1]q
-	label = %[2]q
-	context_id = %[3]s
+	name = %[2]q
+	label = %[3]q
+	context_id = %[4]s
 }
-`, r.name, r.label, r.contextId)
+`, r.terraformName, r.name, r.label, r.contextId)
 }
 
 type logDestinationResource struct {
-	name          string
+	terraformName string
 	type_         string
 	integrationId string
 	streamName    string
@@ -121,6 +122,6 @@ resource "sym_log_destination" %q {
 		stream_name = %q
 	}
 }
-`, r.name, r.type_, r.integrationId, r.streamName)
+`, r.terraformName, r.type_, r.integrationId, r.streamName)
 }
 

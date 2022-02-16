@@ -2,6 +2,34 @@ package provider
 
 import "testing"
 
+func Test_providerResource_String(t *testing.T) {
+	tests := []struct {
+		name  string
+		input providerResource
+		want  string
+	}{
+		{
+			"provider",
+			providerResource{
+				org: "test-org",
+			},
+			`
+provider "sym" {
+	org = "test-org"
+}
+`,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := tt.input.String(); got != tt.want {
+				t.Errorf("String() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
 func Test_integrationResource_String(t *testing.T) {
 	tests := []struct {
 		name  string
@@ -12,9 +40,9 @@ func Test_integrationResource_String(t *testing.T) {
 			"slack",
 			integrationResource{
 				terraformName: "test",
-				type_:      "slack",
-				name:       "slack-integration",
-				externalId: "12345",
+				type_:         "slack",
+				name:          "slack-integration",
+				externalId:    "12345",
 			},
 			`
 resource "sym_integration" "test" {
@@ -28,10 +56,10 @@ resource "sym_integration" "test" {
 			"permission_context",
 			integrationResource{
 				terraformName: "test_context",
-				type_:      "permission_context",
-				name:       "runtime-test-context",
-				label:      "Runtime Context",
-				externalId: "123456789012",
+				type_:         "permission_context",
+				name:          "runtime-test-context",
+				label:         "Runtime Context",
+				externalId:    "123456789012",
 				settings: map[string]string{
 					"cloud":       "aws",
 					"external_id": "1478F2AD-6091-41E6-B3D2-766CA2F173CB",
@@ -55,6 +83,74 @@ resource "sym_integration" "test_context" {
 `,
 		},
 	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := tt.input.String(); got != tt.want {
+				t.Errorf("String() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_runtimeResource_String(t *testing.T) {
+	tests := []struct {
+		name  string
+		input runtimeResource
+		want  string
+	}{
+		{
+			"runtime",
+			runtimeResource{
+				terraformName: "test",
+				name:          "test-runtime",
+				label:         "Test Runtime",
+				contextId:     "123-456-7890",
+			},
+			`
+resource "sym_runtime" "test" {
+	name = "test-runtime"
+	label = "Test Runtime"
+	context_id = 123-456-7890
+}
+`,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := tt.input.String(); got != tt.want {
+				t.Errorf("String() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_logDestinationResource_String(t *testing.T) {
+	tests := []struct {
+		name  string
+		input logDestinationResource
+		want  string
+	}{
+		{
+			"kinesis_firehose",
+			logDestinationResource{
+				terraformName: "firehose",
+				type_: "kinesis_firehose",
+				integrationId: "111-2222",
+				streamName: "stream",
+			},
+			`
+resource "sym_log_destination" "firehose" {
+	type = "kinesis_firehose"
+	integration_id = 111-2222
+	settings = {
+		stream_name = "stream"
+	}
+}
+`,
+		},
+	}
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := tt.input.String(); got != tt.want {
