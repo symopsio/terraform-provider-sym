@@ -8,7 +8,7 @@ import (
 )
 
 func TestAccSymDataSourceSecretSource_awsSecretsManager(t *testing.T) {
-	data := BuildTestData(t, "secrets-manager")
+	data := BuildTestData("secrets-manager")
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },

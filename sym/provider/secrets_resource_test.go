@@ -8,8 +8,8 @@ import (
 )
 
 func TestAccSymSecretSource_awsSecretsManager(t *testing.T) {
-	createData := BuildTestData(t, "secrets-manager")
-	updateData := BuildTestData(t, "updated-secrets-manager")
+	createData := BuildTestData("secrets-manager")
+	updateData := BuildTestData("updated-secrets-manager")
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },

@@ -8,8 +8,8 @@ import (
 )
 
 func TestAccSymSecret_basic(t *testing.T) {
-	createData := BuildTestData(t, "secret")
-	updateData := BuildTestData(t, "more-secret")
+	createData := BuildTestData("secret")
+	updateData := BuildTestData("more-secret")
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
