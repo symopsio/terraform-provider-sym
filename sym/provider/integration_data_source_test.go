@@ -8,7 +8,7 @@ import (
 )
 
 func TestAccSymDataSourceIntegration_slack(t *testing.T) {
-	data := BuildTestData(t, "slack-integration")
+	data := BuildTestData("slack-integration")
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
@@ -27,7 +27,7 @@ func TestAccSymDataSourceIntegration_slack(t *testing.T) {
 }
 
 func TestAccSymDataSourceIntegration_permissionContext(t *testing.T) {
-	data := BuildTestData(t, "runtime-context")
+	data := BuildTestData("runtime-context")
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },

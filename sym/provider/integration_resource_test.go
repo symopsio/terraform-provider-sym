@@ -39,8 +39,8 @@ func TestAccSymIntegration_slack(t *testing.T) {
 }
 
 func TestAccSymIntegration_permissionContext(t *testing.T) {
-	createData := BuildTestData(t, "runtime-context")
-	updateData := BuildTestData(t, "updated-runtime-context")
+	createData := BuildTestData("runtime-context")
+	updateData := BuildTestData("updated-runtime-context")
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
@@ -73,8 +73,8 @@ func TestAccSymIntegration_permissionContext(t *testing.T) {
 }
 
 func TestAccSymIntegration_pagerDuty(t *testing.T) {
-	createData := BuildTestData(t, "pagerduty-integration")
-	updateData := BuildTestData(t, "updated-pagerduty-integration")
+	createData := BuildTestData("pagerduty-integration")
+	updateData := BuildTestData("updated-pagerduty-integration")
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
@@ -105,8 +105,8 @@ func TestAccSymIntegration_pagerDuty(t *testing.T) {
 }
 
 func TestAccSymIntegration_aptible(t *testing.T) {
-	createData := BuildTestData(t, "aptible-integration")
-	updateData := BuildTestData(t, "updated-aptible-integration")
+	createData := BuildTestData("aptible-integration")
+	updateData := BuildTestData("updated-aptible-integration")
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
