@@ -1,14 +1,18 @@
 package provider
 
 import (
-	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccSymLogDestination_basic(t *testing.T) {
-	data := BuildTestData(t, "basic-log-destination")
+	data := BuildTestData("basic_log_destination")
+	dataStreamIntegration := "sym_integration." + data.ResourceName + "_data_stream"
+	dataStreamLogDest := "sym_log_destination." + data.ResourceName + "_data_stream"
+	firehoseIntegration := "sym_integration." + data.ResourceName + "_firehose"
+	firehoseLogDest := "sym_log_destination." + data.ResourceName + "_firehose"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
@@ -17,9 +21,12 @@ func TestAccSymLogDestination_basic(t *testing.T) {
 			{
 				Config: logDestinationConfig(data),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("sym_integration.data_stream", "type", "permission_context"),
-					resource.TestCheckResourceAttr("sym_log_destination.data_stream", "type", "kinesis_data_stream"),
-					resource.TestCheckResourceAttrSet("sym_log_destination.data_stream", "integration_id"),
+					resource.TestCheckResourceAttr(dataStreamIntegration, "type", "permission_context"),
+					resource.TestCheckResourceAttr(dataStreamLogDest, "type", "kinesis_data_stream"),
+					resource.TestCheckResourceAttrPair(dataStreamLogDest, "integration_id", dataStreamIntegration, "id"),
+					resource.TestCheckResourceAttr(firehoseIntegration, "type", "permission_context"),
+					resource.TestCheckResourceAttr(firehoseLogDest, "type", "kinesis_firehose"),
+					resource.TestCheckResourceAttrPair(firehoseLogDest, "integration_id", firehoseIntegration, "id"),
 				),
 			},
 		},
@@ -27,55 +34,45 @@ func TestAccSymLogDestination_basic(t *testing.T) {
 }
 
 func logDestinationConfig(data TestData) string {
-	return fmt.Sprintf(`
-provider "sym" {
-	org = %[1]q
-}
+	var sb strings.Builder
 
-resource "sym_integration" "data_stream" {
-  type = "permission_context"
-  name = "tftest-log-data-stream"
-  label = "Kinesis Data Stream"
-  external_id = "123456789012"
+	sb.WriteString(providerResource{org: data.OrgSlug}.String())
+	sb.WriteString(integrationResource{
+		type_:      "permission_context",
+		name:       data.ResourceName + "_data_stream",
+		label:      "Kinesis Data Stream",
+		externalId: "123456789012",
+		settings: map[string]string{
+			"cloud":       "aws",
+			"external_id": "1478F2AD-6091-41E6-B3D2-766CA2F173CB",
+			"region":      "us-east-1",
+			"role_arn":    "arn:aws:iam::123456789012:role/sym/RuntimeConnectorRole",
+		},
+	}.String())
+	sb.WriteString(integrationResource{
+		type_:      "permission_context",
+		name:       data.ResourceName + "_firehose",
+		label:      "Kinesis Firehose",
+		externalId: "999999999999",
+		settings: map[string]string{
+			"cloud":       "aws",
+			"external_id": "1478F2AD-6091-41E6-B3D2-766CA2F173CB",
+			"region":      "us-east-1",
+			"role_arn":    "arn:aws:iam::999999999999:role/sym/RuntimeConnectorRole",
+		},
+	}.String())
+	sb.WriteString(logDestinationResource{
+		name:          data.ResourceName + "_data_stream",
+		type_:         "kinesis_data_stream",
+		integrationId: "sym_integration." + data.ResourceName + "_data_stream.id",
+		streamName:    "tftest-log-data-stream",
+	}.String())
+	sb.WriteString(logDestinationResource{
+		name:          data.ResourceName + "_firehose",
+		type_:         "kinesis_firehose",
+		integrationId: "sym_integration." + data.ResourceName + "_firehose.id",
+		streamName:    "tftest-log-firehose",
+	}.String())
 
-  settings = {
-    cloud       = "aws"
-    external_id = "1478F2AD-6091-41E6-B3D2-766CA2F173CB"
-    region      = "us-east-1"
-    role_arn    = "arn:aws:iam::123456789012:role/sym/RuntimeConnectorRole"
-  }
-}
-
-resource "sym_integration" "firehose" {
-  type = "permission_context"
-  name = "tftest-log-firehose"
-  label = "Kinesis Firehose"
-  external_id = "999999999999"
-
-  settings = {
-    cloud       = "aws"
-    external_id = "1478F2AD-6091-CCCC-CCCC-766CA2F173CB"
-    region      = "us-east-1"
-    role_arn    = "arn:aws:iam::999999999999:role/sym/RuntimeConnectorRole"
-  }
-}
-
-resource "sym_log_destination" "data_stream" {
-  type    = "kinesis_data_stream"
-
-  integration_id = sym_integration.data_stream.id
-  settings = {
-    stream_name = "tftest-log-data-stream"
-  }
-}
-
-resource "sym_log_destination" "firehose" {
-  type    = "kinesis_firehose"
-
-  integration_id = sym_integration.firehose.id
-  settings = {
-    stream_name = "tftest-log-firehose"
-  }
-}
-`, data.OrgSlug)
+	return sb.String()
 }

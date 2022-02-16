@@ -8,7 +8,7 @@ import (
 )
 
 func TestAccSymFlow_basic(t *testing.T) {
-	data := BuildTestData(t, "basic-environment")
+	data := BuildTestData("basic-environment")
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
