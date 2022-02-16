@@ -144,7 +144,7 @@ func TestAccSymIntegration_aptible(t *testing.T) {
 	})
 }
 
-func slackIntegrationConfig(data TestData, label string, externalId string) string {
+func slackIntegrationConfig(data TestData, label, externalId string) string {
 	var sb strings.Builder
 
 	sb.WriteString(providerResource{org: data.OrgSlug}.String())
@@ -160,7 +160,7 @@ func slackIntegrationConfig(data TestData, label string, externalId string) stri
 	return sb.String()
 }
 
-func permissionContextIntegrationConfig(data TestData, label string, externalId string, awsExternalId string, awsRegion string, awsArnSuffix string) string {
+func permissionContextIntegrationConfig(data TestData, label, externalId, awsExternalId, awsRegion, awsArnSuffix string) string {
 	var sb strings.Builder
 
 	sb.WriteString(providerResource{org: data.OrgSlug}.String())
@@ -214,7 +214,7 @@ resource "sym_secrets" "test" {
 	return sb.String()
 }
 
-func pagerDutyIntegrationConfig(data TestData, label string, externalId string) string {
+func pagerDutyIntegrationConfig(data TestData, label, externalId string) string {
 	var sb strings.Builder
 
 	sb.WriteString(providerResource{org: data.OrgSlug}.String())
@@ -239,7 +239,7 @@ func pagerDutyIntegrationConfig(data TestData, label string, externalId string) 
 	return sb.String()
 }
 
-func aptibleIntegrationConfig(data TestData, label string, externalId string) string {
+func aptibleIntegrationConfig(data TestData, label, externalId string) string {
 	var sb strings.Builder
 
 	sb.WriteString(providerResource{org: data.OrgSlug}.String())
