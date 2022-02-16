@@ -8,11 +8,11 @@ import (
 )
 
 func TestAccSymLogDestination_basic(t *testing.T) {
-	data := BuildTestData("basic_log_destination")
-	dataStreamIntegration := "sym_integration." + data.ResourceName + "_data_stream"
-	dataStreamLogDest := "sym_log_destination." + data.ResourceName + "_data_stream"
-	firehoseIntegration := "sym_integration." + data.ResourceName + "_firehose"
-	firehoseLogDest := "sym_log_destination." + data.ResourceName + "_firehose"
+	data := BuildTestData("basic-log-destination")
+	dataStreamIntegration := "sym_integration.data_stream"
+	dataStreamLogDest := "sym_log_destination.data_stream"
+	firehoseIntegration := "sym_integration.firehose"
+	firehoseLogDest := "sym_log_destination.firehose"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
@@ -38,10 +38,11 @@ func logDestinationConfig(data TestData) string {
 
 	sb.WriteString(providerResource{org: data.OrgSlug}.String())
 	sb.WriteString(integrationResource{
-		type_:      "permission_context",
-		name:       data.ResourceName + "_data_stream",
-		label:      "Kinesis Data Stream",
-		externalId: "123456789012",
+		terraformName: "data_stream",
+		type_:         "permission_context",
+		name:          data.ResourceName + "-data-stream",
+		label:         "Kinesis Data Stream",
+		externalId:    "123456789012",
 		settings: map[string]string{
 			"cloud":       "aws",
 			"external_id": "1478F2AD-6091-41E6-B3D2-766CA2F173CB",
@@ -50,10 +51,11 @@ func logDestinationConfig(data TestData) string {
 		},
 	}.String())
 	sb.WriteString(integrationResource{
-		type_:      "permission_context",
-		name:       data.ResourceName + "_firehose",
-		label:      "Kinesis Firehose",
-		externalId: "999999999999",
+		terraformName: "firehose",
+		type_:         "permission_context",
+		name:          data.ResourceName + "-firehose",
+		label:         "Kinesis Firehose",
+		externalId:    "999999999999",
 		settings: map[string]string{
 			"cloud":       "aws",
 			"external_id": "1478F2AD-6091-41E6-B3D2-766CA2F173CB",
@@ -62,16 +64,16 @@ func logDestinationConfig(data TestData) string {
 		},
 	}.String())
 	sb.WriteString(logDestinationResource{
-		name:          data.ResourceName + "_data_stream",
+		terraformName: "data_stream",
 		type_:         "kinesis_data_stream",
-		integrationId: "sym_integration." + data.ResourceName + "_data_stream.id",
-		streamName:    "tftest-log-data-stream",
+		integrationId: "sym_integration.data_stream.id",
+		streamName:    data.ResourcePrefix + "-tftest-log-data-stream",
 	}.String())
 	sb.WriteString(logDestinationResource{
-		name:          data.ResourceName + "_firehose",
+		terraformName: "firehose",
 		type_:         "kinesis_firehose",
-		integrationId: "sym_integration." + data.ResourceName + "_firehose.id",
-		streamName:    "tftest-log-firehose",
+		integrationId: "sym_integration.firehose.id",
+		streamName:    data.ResourcePrefix + "-tftest-log-firehose",
 	}.String())
 
 	return sb.String()
