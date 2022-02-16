@@ -23,6 +23,7 @@ func TestAccSymIntegration_slack(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("sym_integration.slack", "type", "slack"),
 					resource.TestCheckResourceAttr("sym_integration.slack", "name", createData.ResourceName),
+					resource.TestCheckResourceAttr("sym_integration.slack", "label", "Slack Integration"),
 					resource.TestCheckResourceAttr("sym_integration.slack", "external_id", "T12345"),
 				),
 			},
@@ -31,6 +32,7 @@ func TestAccSymIntegration_slack(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("sym_integration.slack", "type", "slack"),
 					resource.TestCheckResourceAttr("sym_integration.slack", "name", updateData.ResourceName),
+					resource.TestCheckResourceAttr("sym_integration.slack", "label", "Updated Slack Integration"),
 					resource.TestCheckResourceAttr("sym_integration.slack", "external_id", "T00000"),
 				),
 			},
@@ -51,7 +53,9 @@ func TestAccSymIntegration_permissionContext(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("sym_integration.context", "type", "permission_context"),
 					resource.TestCheckResourceAttr("sym_integration.context", "name", createData.ResourceName),
+					resource.TestCheckResourceAttr("sym_integration.context", "label", "Runtime Context"),
 					resource.TestCheckResourceAttr("sym_integration.context", "external_id", "5555555"),
+					resource.TestCheckResourceAttr("sym_integration.context", "settings.cloud", "aws"),
 					resource.TestCheckResourceAttr("sym_integration.context", "settings.external_id", "123"),
 					resource.TestCheckResourceAttr("sym_integration.context", "settings.region", "us-east-1"),
 					resource.TestCheckResourceAttr("sym_integration.context", "settings.role_arn", roleArnPrefix+"/foo"),
@@ -62,7 +66,9 @@ func TestAccSymIntegration_permissionContext(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("sym_integration.context", "type", "permission_context"),
 					resource.TestCheckResourceAttr("sym_integration.context", "name", updateData.ResourceName),
+					resource.TestCheckResourceAttr("sym_integration.context", "label", "Better Runtime Context"),
 					resource.TestCheckResourceAttr("sym_integration.context", "external_id", "11"),
+					resource.TestCheckResourceAttr("sym_integration.context", "settings.cloud", "aws"),
 					resource.TestCheckResourceAttr("sym_integration.context", "settings.external_id", "456"),
 					resource.TestCheckResourceAttr("sym_integration.context", "settings.region", "us-west-2"),
 					resource.TestCheckResourceAttr("sym_integration.context", "settings.role_arn", roleArnPrefix+"/bar"),
@@ -196,7 +202,7 @@ func integrationSecretConfig(data TestData) string {
 
 	sb.WriteString(fmt.Sprintf(`
 resource "sym_secrets" "test" {
-	name = "%[1]s-secrets-source"
+	name = "%s-secrets-source"
 	type = "aws_secrets_manager"
 	label = "Secrets Manager"
 	settings = {
