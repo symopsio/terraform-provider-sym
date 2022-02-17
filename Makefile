@@ -31,6 +31,9 @@ test:
 testacc:
 	TF_ACC=1 richgo test $(TEST) -v $(TESTARGS) -timeout 120m
 
+testacc-ci:
+	TF_ACC=1 go test $(TEST) -v $(TESTARGS) -timeout 120m
+
 # example:	 make tf-test-8
 tf-test-%:
 	cd samples/$** \
@@ -39,4 +42,4 @@ tf-test-%:
 		&& terraform apply -auto-approve \
 		&& terraform destroy -auto-approve
 
-.PHONY: install clean build local test testacc
+.PHONY: install clean build local test testacc testacc-ci
