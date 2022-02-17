@@ -184,3 +184,41 @@ resource "sym_secrets" %[1]q {
 }
 `, r.terraformName, r.type_, r.name, r.label, r.settings["context_id"])
 }
+
+type targetResource struct {
+	terraformName string
+	type_         string
+	name          string
+	label         string
+	settings      map[string]string
+}
+
+func (r targetResource) String() string {
+	var sb strings.Builder
+
+	sb.WriteString(fmt.Sprintf(`
+resource "sym_target" %[1]q {
+	type = %[2]q
+	name = %[3]q
+	label = %[4]q
+`, r.terraformName, r.type_, r.name, r.label))
+
+	if len(r.settings) > 0 {
+		keys := make([]string, len(r.settings))
+		i := 0
+		for k := range r.settings {
+			keys[i] = k
+			i++
+		}
+		sort.Strings(keys)
+		sb.WriteString("	settings = {\n")
+		for _, k := range keys {
+			sb.WriteString(fmt.Sprintf("		%s = %q\n", k, r.settings[k]))
+		}
+		sb.WriteString("	}\n")
+	}
+
+	sb.WriteString("}\n")
+
+	return sb.String()
+}
