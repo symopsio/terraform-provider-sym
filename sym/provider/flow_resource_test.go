@@ -14,7 +14,7 @@ func TestAccSymFlow_basic(t *testing.T) {
 		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: flowConfig(data),
+				Config: createFlowConfig(data),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("sym_flow.this", "name", data.ResourceName),
 					resource.TestCheckResourceAttr("sym_flow.this", "label", "SSO Access2"),
@@ -23,13 +23,26 @@ func TestAccSymFlow_basic(t *testing.T) {
 					resource.TestCheckResourceAttrPair("sym_flow.this", "environment_id", "sym_environment.this", "id"),
 					resource.TestCheckResourceAttrPair("sym_flow.this", "params.strategy_id", "sym_strategy.sso_main", "id"),
 					resource.TestCheckResourceAttr("sym_flow.this", "params.allow_revoke", "false"),
+					resource.TestCheckResourceAttr("sym_flow.this", "params.prompt_fields_json", `[{"name":"reason","type":"string","required":true,"label":"Reason"},{"name":"urgency","type":"list","required":true,"allowed_values":["Low","Medium","High"]}]`),
+				),
+			},
+			{
+				Config: updateFlowConfig(data),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("sym_flow.this", "name", data.ResourceName),
+					resource.TestCheckResourceAttr("sym_flow.this", "label", "SSO Access2"),
+					resource.TestCheckResourceAttr("sym_flow.this", "template", "sym:template:approval:1.0.0"),
+					resource.TestCheckResourceAttrSet("sym_flow.this", "implementation"),
+					resource.TestCheckResourceAttrPair("sym_flow.this", "environment_id", "sym_environment.this", "id"),
+					resource.TestCheckResourceAttrPair("sym_flow.this", "params.strategy_id", "sym_strategy.sso_main", "id"),
+					resource.TestCheckResourceAttr("sym_flow.this", "params.allow_revoke", "true"),
 				),
 			},
 		},
 	})
 }
 
-func flowConfig(data TestData) string {
+func flowConfig(data TestData, implPath string, allowRevoke bool) string {
 	return makeTerraformConfig(
 		providerResource{org: data.OrgSlug},
 		integrationResource{
@@ -109,11 +122,11 @@ func flowConfig(data TestData) string {
 			name:           data.ResourceName,
 			label:          "SSO Access2",
 			template:       "sym:template:approval:1.0.0",
-			implementation: "internal/testdata/impl.py",
+			implementation: implPath,
 			environmentId:  "sym_environment.this.id",
 			params: params{
 				strategyId:  "sym_strategy.sso_main.id",
-				allowRevoke: false,
+				allowRevoke: allowRevoke,
 				promptFields: []field{
 					{
 						name:     "reason",
@@ -131,4 +144,12 @@ func flowConfig(data TestData) string {
 			},
 		},
 	)
+}
+
+func createFlowConfig(data TestData) string {
+	return flowConfig(data, "internal/testdata/before_impl.py", false)
+}
+
+func updateFlowConfig(data TestData) string {
+	return flowConfig(data, "internal/testdata/after_impl.py", true)
 }
