@@ -54,6 +54,8 @@ workflows:
   build_and_release:
     jobs:
       - unit_and_acceptance_test:
+          context:
+            - slack-secrets
           filters:
             tags:
               only: /v.*/
@@ -75,4 +77,6 @@ workflows:
               only:
                 - main
     jobs:
-      - unit_and_acceptance_test
+      - unit_and_acceptance_test:
+          context:
+            - slack-secrets
