@@ -1,7 +1,7 @@
 package provider
 
 import (
-	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -10,8 +10,8 @@ import (
 const instanceArnPrefix = "arn:aws:::instance/ssoinst-"
 
 func TestAccSymStrategy_awsSso(t *testing.T) {
-	createData := BuildTestData(t, "strategy")
-	updateData := BuildTestData(t, "updated-strategy")
+	createData := BuildTestData("strategy")
+	updateData := BuildTestData("updated-strategy")
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
@@ -46,47 +46,46 @@ func TestAccSymStrategy_awsSso(t *testing.T) {
 }
 
 func awsSsoStrategy(t TestData, label string, arnSuffix string) string {
-	return fmt.Sprintf(`
-provider "sym" {
-	org = "%[1]s"
-}
+	var sb strings.Builder
 
-resource "sym_integration" "sso" {
-	type = "permission_context"
-	name = "%[2]s-sso-context"
-	label = "Runtime Context"
-	external_id = "55555"
+	sb.WriteString(providerResource{org: t.OrgSlug}.String())
 
-	settings = {
-		cloud = "aws"
-		external_id = "1478F2AD-6091-41E6-B3D2-766CA2F173CB"
-		region = "us-east-1"
-		role_arn = "arn:aws:iam::123456789012:role/sym/RuntimeConnectorRole"
-	}
-}
+	sb.WriteString(integrationResource{
+		terraformName: "sso",
+		type_:         "permission_context",
+		name:          t.ResourcePrefix + "-sso-context",
+		label:         "Runtime Context",
+		externalId:    "55555",
+		settings: map[string]string{
+			"cloud":       "aws",
+			"external_id": "1478F2AD-6091-41E6-B3D2-766CA2F173CB",
+			"region":      "us-east-1",
+			"role_arn":    roleArnPrefix + "/runtime",
+		},
+	}.String())
 
-resource "sym_target" "sso" {
-	type = "aws_sso_permission_set"
-	name = "%[2]s-sso-target"
-	label = "SSO Target"
+	sb.WriteString(targetResource{
+		terraformName: "sso",
+		type_:         "aws_sso_permission_set",
+		name:          t.ResourcePrefix + "-sso-target",
+		label:         "SSO Target",
+		settings: map[string]string{
+			"permission_set_arn": arnPrefix + "foo",
+			"account_id":         "012345678910",
+		},
+	}.String())
 
-	settings = {
-		permission_set_arn = "arn:aws:sso:::permissionSet/ins-abcdefghijklmnop/ps-2"
-		account_id = "012345678910"
-	}
-}
+	sb.WriteString(strategyResource{
+		terraformName: "sso",
+		name:          t.ResourceName,
+		type_:         "aws_sso",
+		label:         label,
+		integrationId: "sym_integration.sso.id",
+		targetIds:     []string{"sym_target.sso.id"},
+		settings: map[string]string{
+			"instance_arn": instanceArnPrefix + arnSuffix,
+		},
+	}.String())
 
-resource "sym_strategy" "sso" {
-	type = "aws_sso"
-	name = "%[3]s"
-	label = "%[4]s"
-
-	integration_id = sym_integration.sso.id
-	targets = [ sym_target.sso.id ]
-
-	settings = {
-		instance_arn = "%[5]s%[6]s"
-	}
-}
-`, t.OrgSlug, t.ResourcePrefix, t.ResourceName, label, instanceArnPrefix, arnSuffix)
+	return sb.String()
 }
