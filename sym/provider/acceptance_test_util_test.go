@@ -255,3 +255,42 @@ resource "sym_secrets" "test" {
 		}
 	}
 }
+
+func Test_targetResource_String(t *testing.T) {
+	tests := []struct {
+		name  string
+		input targetResource
+		want  string
+	}{
+		{
+			"sso",
+			targetResource{
+				terraformName: "test",
+				name:          "test-target",
+				type_:         "aws_sso_permission_set",
+				label:         "SSO Target",
+				settings: map[string]string{
+					"permission_set_arn": "thing:foo:arn/bar",
+					"account_id":         "1234",
+				},
+			},
+			`
+resource "sym_target" "test" {
+	type = "aws_sso_permission_set"
+	name = "test-target"
+	label = "SSO Target"
+	settings = {
+		account_id = "1234"
+		permission_set_arn = "thing:foo:arn/bar"
+	}
+}
+`,
+		},
+	}
+
+	for _, tt := range tests {
+		if got := tt.input.String(); got != tt.want {
+			t.Errorf("String() = %v, want %v", got, tt.want)
+		}
+	}
+}
