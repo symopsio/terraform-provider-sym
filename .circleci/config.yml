@@ -25,6 +25,12 @@ jobs:
     steps:
       - setup
       - run: make testacc-ci
+      - slack/notify:
+          channel: eng-alerts-staging
+          event: fail
+          template: basic_fail_1
+          # when:
+          #   - equal: [ main, << pipeline.git.branch >> ]
   release:
     docker:
       - image: circleci/golang:1.16
