@@ -294,3 +294,44 @@ resource "sym_target" "test" {
 		}
 	}
 }
+
+func Test_strategyResource_String(t *testing.T) {
+	tests := []struct {
+		name  string
+		input strategyResource
+		want  string
+	}{
+		{
+			"sso",
+			strategyResource{
+				terraformName: "test",
+				name:          "test-strategy",
+				type_:         "aws_sso",
+				label:         "SSO Strategy",
+				integrationId: "sym_integration.sso.id",
+				targetIds:     []string{"\"888-7777\"", "\"111-222\""},
+				settings: map[string]string{
+					"instance_arn": "thing:foo:arn/bar",
+				},
+			},
+			`
+resource "sym_strategy" "test" {
+	type = "aws_sso"
+	name = "test-strategy"
+	label = "SSO Strategy"
+	integration_id = sym_integration.sso.id
+	targets = [ "888-7777", "111-222" ]
+	settings = {
+		instance_arn = "thing:foo:arn/bar"
+	}
+}
+`,
+		},
+	}
+
+	for _, tt := range tests {
+		if got := tt.input.String(); got != tt.want {
+			t.Errorf("String() = %v, want %v", got, tt.want)
+		}
+	}
+}
