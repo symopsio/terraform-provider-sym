@@ -41,6 +41,36 @@ func TestAccSymTarget_awsSso(t *testing.T) {
 	})
 }
 
+func TestAccSymTarget_awsIam(t *testing.T) {
+	createData := BuildTestData("target")
+	updateData := BuildTestData("updated-target")
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: awsIamTarget(createData, "My Target", "test-iam-group"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("sym_target.iam", "type", "aws_iam_group"),
+					resource.TestCheckResourceAttr("sym_target.iam", "name", createData.ResourceName),
+					resource.TestCheckResourceAttr("sym_target.iam", "label", "My Target"),
+					resource.TestCheckResourceAttr("sym_target.iam", "settings.iam_group", "test-iam-group"),
+				),
+			},
+			{
+				Config: awsIamTarget(updateData, "Other Target", "another-iam-group"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("sym_target.iam", "type", "aws_iam_group"),
+					resource.TestCheckResourceAttr("sym_target.iam", "name", updateData.ResourceName),
+					resource.TestCheckResourceAttr("sym_target.iam", "label", "Other Target"),
+					resource.TestCheckResourceAttr("sym_target.iam", "settings.iam_group", "another-iam-group"),
+				),
+			},
+		},
+	})
+}
+
 func awsSsoTarget(t TestData, label, arnSuffix, accountId string) string {
 	var sb strings.Builder
 
@@ -53,6 +83,23 @@ func awsSsoTarget(t TestData, label, arnSuffix, accountId string) string {
 		settings: map[string]string{
 			"permission_set_arn": arnPrefix + arnSuffix,
 			"account_id":         accountId,
+		},
+	}.String())
+
+	return sb.String()
+}
+
+func awsIamTarget(t TestData, label, iamGroup string) string {
+	var sb strings.Builder
+
+	sb.WriteString(providerResource{org: t.OrgSlug}.String())
+	sb.WriteString(targetResource{
+		terraformName: "iam",
+		name:          t.ResourceName,
+		type_:         "aws_iam_group",
+		label:         label,
+		settings: map[string]string{
+			"iam_group": iamGroup,
 		},
 	}.String())
 
