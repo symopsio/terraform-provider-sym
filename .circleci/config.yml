@@ -2,6 +2,7 @@ version: 2.1
 
 orbs:
   aws-cli: circleci/aws-cli@1.3.0
+  slack: circleci/slack@4.8.2
 
 commands:
   restore_pkg_cache:
@@ -25,6 +26,14 @@ jobs:
     steps:
       - setup
       - run: make testacc-ci
+      - when:
+          condition:
+            equal: [ main, << pipeline.git.branch >> ]
+          steps:
+            - slack/notify:
+                channel: eng-alerts-staging
+                event: fail
+                template: basic_fail_1
   release:
     docker:
       - image: circleci/golang:1.16
@@ -47,6 +56,8 @@ workflows:
   build_and_release:
     jobs:
       - unit_and_acceptance_test:
+          context:
+            - slack-secrets
           filters:
             tags:
               only: /v.*/
@@ -68,4 +79,6 @@ workflows:
               only:
                 - main
     jobs:
-      - unit_and_acceptance_test
+      - unit_and_acceptance_test:
+          context:
+            - slack-secrets
