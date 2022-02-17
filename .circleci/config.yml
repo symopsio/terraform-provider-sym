@@ -30,7 +30,7 @@ jobs:
       - image: circleci/golang:1.16
     steps:
       - setup
-      - run: make testacc
+      - run: make testacc-ci
   release:
     docker:
       - image: circleci/golang:1.16
