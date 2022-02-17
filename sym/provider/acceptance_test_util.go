@@ -36,6 +36,10 @@ func BuildTestData(resourceName string) TestData {
 	return testData
 }
 
+type resourceTemplate interface {
+	String() string
+}
+
 type providerResource struct {
 	org string
 }
@@ -271,6 +275,7 @@ type environmentResource struct {
 	name              string
 	label             string
 	runtimeId         string
+	errorLoggerId     string
 	logDestinationIds []string
 	integrations      map[string]string
 }
@@ -278,7 +283,7 @@ type environmentResource struct {
 func (r environmentResource) String() string {
 	var integrations strings.Builder
 	if len(r.integrations) > 0 {
-		integrations.WriteString("integrations = {\n")
+		integrations.WriteString("	integrations = {\n")
 		keys := make([]string, len(r.integrations))
 		i := 0
 		for k := range r.integrations {
@@ -289,17 +294,114 @@ func (r environmentResource) String() string {
 		for _, k := range keys {
 			integrations.WriteString(fmt.Sprintf("		%s = %s\n", k, r.integrations[k]))
 		}
-		integrations.WriteString("	}")
+		integrations.WriteString("	}\n")
 	}
 
-	return fmt.Sprintf(`
+	var sb strings.Builder
+	sb.WriteString(fmt.Sprintf(`
 resource "sym_environment" %[1]q {
 	name = %[2]q
 	label = %[3]q
 	runtime_id = %[4]s
-	log_destination_ids = [%[5]s]
+`, r.terraformName, r.name, r.label, r.runtimeId))
+	if r.errorLoggerId != "" {
+		sb.WriteString(fmt.Sprintf("	error_logger_id = %s\n", r.errorLoggerId))
+	}
+	if r.logDestinationIds != nil && len(r.logDestinationIds) > 0 {
+		sb.WriteString(fmt.Sprintf("	log_destination_ids = [%s]\n", strings.Join(r.logDestinationIds, ", ")))
+	}
+	sb.WriteString(integrations.String())
+	sb.WriteString("}\n")
 
-	%[6]s
+	return sb.String()
 }
-`, r.terraformName, r.name, r.label, r.runtimeId, strings.Join(r.logDestinationIds, ", "), integrations.String())
+
+type errorLoggerResource struct {
+	terraformName string
+	integrationId string
+	destination   string
+}
+
+func (r errorLoggerResource) String() string {
+	return fmt.Sprintf(`
+resource "sym_error_logger" %q {
+	integration_id = %s
+	destination = %q
+}
+`, r.terraformName, r.integrationId, r.destination)
+}
+
+type flowResource struct {
+	terraformName  string
+	name           string
+	label          string
+	template       string
+	implementation string
+	environmentId  string
+	params         params
+}
+
+func (r flowResource) String() string {
+	var p strings.Builder
+	p.WriteString("params = {\n")
+	p.WriteString(fmt.Sprintf("		strategy_id = %s\n", r.params.strategyId))
+	if r.params.allowRevoke {
+		p.WriteString(fmt.Sprintf("		allow_revoke = %v\n", r.params.allowRevoke))
+	}
+	p.WriteString("		prompt_fields_json = jsonencode([\n")
+	for _, f := range r.params.promptFields {
+		p.WriteString("			{\n")
+		p.WriteString(fmt.Sprintf("			name = %q\n", f.name))
+		p.WriteString(fmt.Sprintf("			type = %q\n", f.type_))
+		if f.label != "" {
+			p.WriteString(fmt.Sprintf("			label = %q\n", f.label))
+		}
+		p.WriteString(fmt.Sprintf("			required = %v\n", f.required))
+		if len(f.allowedValues) > 0 {
+			p.WriteString("			allowed_values = [")
+			for i, av := range f.allowedValues {
+				p.WriteString(fmt.Sprintf("%q", av))
+				if i != len(f.allowedValues)-1 {
+					p.WriteString(", ")
+				}
+			}
+			p.WriteString("]\n")
+		}
+		p.WriteString("			},\n")
+	}
+	p.WriteString("	])\n")
+	p.WriteString("	}")
+	return fmt.Sprintf(`
+resource "sym_flow" %[1]q {
+	name = %[2]q
+	label = %[3]q
+	template = %[4]q
+	implementation = %[5]q
+	environment_id = %[6]s
+
+	%[7]s
+}
+`, r.terraformName, r.name, r.label, r.template, r.implementation, r.environmentId, p.String())
+}
+
+type params struct {
+	strategyId   string
+	allowRevoke  bool
+	promptFields []field
+}
+
+type field struct {
+	name          string
+	type_         string
+	label         string
+	required      bool
+	allowedValues []string
+}
+
+func makeTerraformConfig(resources ...resourceTemplate) string {
+	var sb strings.Builder
+	for _, r := range resources {
+		sb.WriteString(r.String())
+	}
+	return sb.String()
 }

@@ -1,7 +1,6 @@
 package provider
 
 import (
-	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -34,47 +33,45 @@ func TestAccSymLogDestination_basic(t *testing.T) {
 }
 
 func logDestinationConfig(data TestData) string {
-	var sb strings.Builder
-
-	sb.WriteString(providerResource{org: data.OrgSlug}.String())
-	sb.WriteString(integrationResource{
-		terraformName: "data_stream",
-		type_:         "permission_context",
-		name:          data.ResourceName + "-data-stream",
-		label:         "Kinesis Data Stream",
-		externalId:    "123456789012",
-		settings: map[string]string{
-			"cloud":       "aws",
-			"external_id": "1478F2AD-6091-41E6-B3D2-766CA2F173CB",
-			"region":      "us-east-1",
-			"role_arn":    "arn:aws:iam::123456789012:role/sym/RuntimeConnectorRole",
+	return makeTerraformConfig(
+		providerResource{org: data.OrgSlug},
+		integrationResource{
+			terraformName: "data_stream",
+			type_:         "permission_context",
+			name:          data.ResourceName + "-data-stream",
+			label:         "Kinesis Data Stream",
+			externalId:    "123456789012",
+			settings: map[string]string{
+				"cloud":       "aws",
+				"external_id": "1478F2AD-6091-41E6-B3D2-766CA2F173CB",
+				"region":      "us-east-1",
+				"role_arn":    "arn:aws:iam::123456789012:role/sym/RuntimeConnectorRole",
+			},
 		},
-	}.String())
-	sb.WriteString(integrationResource{
-		terraformName: "firehose",
-		type_:         "permission_context",
-		name:          data.ResourceName + "-firehose",
-		label:         "Kinesis Firehose",
-		externalId:    "999999999999",
-		settings: map[string]string{
-			"cloud":       "aws",
-			"external_id": "1478F2AD-6091-41E6-B3D2-766CA2F173CB",
-			"region":      "us-east-1",
-			"role_arn":    "arn:aws:iam::999999999999:role/sym/RuntimeConnectorRole",
+		integrationResource{
+			terraformName: "firehose",
+			type_:         "permission_context",
+			name:          data.ResourceName + "-firehose",
+			label:         "Kinesis Firehose",
+			externalId:    "999999999999",
+			settings: map[string]string{
+				"cloud":       "aws",
+				"external_id": "1478F2AD-6091-41E6-B3D2-766CA2F173CB",
+				"region":      "us-east-1",
+				"role_arn":    "arn:aws:iam::999999999999:role/sym/RuntimeConnectorRole",
+			},
 		},
-	}.String())
-	sb.WriteString(logDestinationResource{
-		terraformName: "data_stream",
-		type_:         "kinesis_data_stream",
-		integrationId: "sym_integration.data_stream.id",
-		streamName:    data.ResourcePrefix + "-tftest-log-data-stream",
-	}.String())
-	sb.WriteString(logDestinationResource{
-		terraformName: "firehose",
-		type_:         "kinesis_firehose",
-		integrationId: "sym_integration.firehose.id",
-		streamName:    data.ResourcePrefix + "-tftest-log-firehose",
-	}.String())
-
-	return sb.String()
+		logDestinationResource{
+			terraformName: "data_stream",
+			type_:         "kinesis_data_stream",
+			integrationId: "sym_integration.data_stream.id",
+			streamName:    data.ResourcePrefix + "-tftest-log-data-stream",
+		},
+		logDestinationResource{
+			terraformName: "firehose",
+			type_:         "kinesis_firehose",
+			integrationId: "sym_integration.firehose.id",
+			streamName:    data.ResourcePrefix + "-tftest-log-firehose",
+		},
+	)
 }

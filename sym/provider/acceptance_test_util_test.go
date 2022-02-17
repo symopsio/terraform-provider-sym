@@ -349,6 +349,7 @@ func Test_environmentResource_String(t *testing.T) {
 				"my-env",
 				"Sandbox",
 				"sym_runtime.this.id",
+				"",
 				[]string{"sym_log_destination.data_stream.id", "sym_log_destination.firehose.id"},
 				map[string]string{
 					"slack_id": "sym_integration.slack.id",
@@ -360,9 +361,79 @@ resource "sym_environment" "this" {
 	label = "Sandbox"
 	runtime_id = sym_runtime.this.id
 	log_destination_ids = [sym_log_destination.data_stream.id, sym_log_destination.firehose.id]
-
 	integrations = {
 		slack_id = sym_integration.slack.id
+	}
+}
+`,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.Equalf(t, tt.want, tt.input.String(), "String()")
+		})
+	}
+}
+
+func Test_flowResource_String(t *testing.T) {
+	tests := []struct {
+		name  string
+		input flowResource
+		want  string
+	}{
+		{
+			"basic",
+			flowResource{
+				"this",
+				"my-env",
+				"SSO Access2",
+				"sym:template:approval:1.0.0",
+				"internal/testdata/impl.py",
+				"sym_environment.this.id",
+				params{
+					strategyId:  "sym_strategy.sso_main.id",
+					allowRevoke: true,
+					promptFields: []field{
+						{
+							name:     "reason",
+							type_:    "string",
+							required: true,
+							label:    "Reason",
+						},
+						{
+							name:          "urgency",
+							type_:         "list",
+							required:      true,
+							allowedValues: []string{"Low", "Medium", "High"},
+						},
+					},
+				},
+			},
+			`
+resource "sym_flow" "this" {
+	name = "my-env"
+	label = "SSO Access2"
+	template = "sym:template:approval:1.0.0"
+	implementation = "internal/testdata/impl.py"
+	environment_id = sym_environment.this.id
+
+	params = {
+		strategy_id = sym_strategy.sso_main.id
+		allow_revoke = true
+		prompt_fields_json = jsonencode([
+			{
+			name = "reason"
+			type = "string"
+			label = "Reason"
+			required = true
+			},
+			{
+			name = "urgency"
+			type = "list"
+			required = true
+			allowed_values = ["Low", "Medium", "High"]
+			},
+	])
 	}
 }
 `,
