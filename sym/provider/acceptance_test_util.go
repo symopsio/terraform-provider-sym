@@ -131,14 +131,56 @@ type secretResource struct {
 	label         string
 	path          string
 	sourceId      string
+	settings      map[string]string
 }
 
 func (r secretResource) String() string {
-	return fmt.Sprintf(`
+	var sb strings.Builder
+
+	sb.WriteString(fmt.Sprintf(`
 resource "sym_secret" %[1]q {
 	label = %[2]q
 	path = %[3]q
 	source_id = %[4]s
+`, r.terraformName, r.label, r.path, r.sourceId))
+
+	if len(r.settings) > 0 {
+		keys := make([]string, len(r.settings))
+		i := 0
+		for k := range r.settings {
+			keys[i] = k
+			i++
+		}
+		sort.Strings(keys)
+		sb.WriteString("	settings = {\n")
+		for _, k := range keys {
+			sb.WriteString(fmt.Sprintf("		%s = %q\n", k, r.settings[k]))
+		}
+		sb.WriteString("	}\n")
+	}
+
+	sb.WriteString("}\n")
+
+	return sb.String()
 }
-`, r.terraformName, r.label, r.path, r.sourceId)
+
+type secretSourceResource struct {
+	terraformName string
+	name          string
+	type_         string
+	label         string
+	settings      map[string]string
+}
+
+func (r secretSourceResource) String() string {
+	return fmt.Sprintf(`
+resource "sym_secrets" %[1]q {
+	type = %[2]q
+	name = %[3]q
+	label = %[4]q
+	settings = {
+		context_id = %[5]s
+	}
+}
+`, r.terraformName, r.type_, r.name, r.label, r.settings["context_id"])
 }

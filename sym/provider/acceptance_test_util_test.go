@@ -195,12 +195,55 @@ func Test_secretResource_String(t *testing.T) {
 				label:         "Secretive Secret",
 				path:          "/sym/test/my-secret",
 				sourceId:      "1234-56789",
+				settings: map[string]string{
+					"json_key": "myKey",
+				},
 			},
 			`
 resource "sym_secret" "test" {
 	label = "Secretive Secret"
 	path = "/sym/test/my-secret"
 	source_id = 1234-56789
+	settings = {
+		json_key = "myKey"
+	}
+}
+`,
+		},
+	}
+
+	for _, tt := range tests {
+		if got := tt.input.String(); got != tt.want {
+			t.Errorf("String() = %v, want %v", got, tt.want)
+		}
+	}
+}
+
+func Test_secretSourceResource_String(t *testing.T) {
+	tests := []struct {
+		name  string
+		input secretSourceResource
+		want  string
+	}{
+		{
+			"slack",
+			secretSourceResource{
+				terraformName: "test",
+				name:          "secrets-manager",
+				type_:         "aws_secrets_manager",
+				label:         "Secret Place",
+				settings: map[string]string{
+					"context_id": "12345",
+				},
+			},
+			`
+resource "sym_secrets" "test" {
+	type = "aws_secrets_manager"
+	name = "secrets-manager"
+	label = "Secret Place"
+	settings = {
+		context_id = 12345
+	}
 }
 `,
 		},
