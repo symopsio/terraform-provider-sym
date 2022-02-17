@@ -392,7 +392,7 @@ func Test_flowResource_String(t *testing.T) {
 				"sym_environment.this.id",
 				params{
 					strategyId:  "sym_strategy.sso_main.id",
-					allowRevoke: true,
+					allowRevoke: false,
 					promptFields: []field{
 						{
 							name:     "reason",
@@ -419,7 +419,7 @@ resource "sym_flow" "this" {
 
 	params = {
 		strategy_id = sym_strategy.sso_main.id
-		allow_revoke = true
+		allow_revoke = false
 		prompt_fields_json = jsonencode([
 			{
 			name = "reason"

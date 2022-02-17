@@ -189,7 +189,7 @@ func integrationSecretConfig(data TestData) string {
 	sb.WriteString(integrationResource{
 		terraformName: "context",
 		type_:         "permission_context",
-		name:          data.ResourcePrefix + "context",
+		name:          data.ResourcePrefix + "-context",
 		label:         "Context",
 		externalId:    "11111",
 		settings: map[string]string{
