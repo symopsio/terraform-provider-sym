@@ -21,7 +21,7 @@ func TestAccSymIntegration_slack(t *testing.T) {
 			{
 				Config: slackIntegrationConfig(createData, "Slack Integration", "T12345"),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("sym_integration.slack", "type", "slacky"),
+					resource.TestCheckResourceAttr("sym_integration.slack", "type", "slack"),
 					resource.TestCheckResourceAttr("sym_integration.slack", "name", createData.ResourceName),
 					resource.TestCheckResourceAttr("sym_integration.slack", "label", "Slack Integration"),
 					resource.TestCheckResourceAttr("sym_integration.slack", "external_id", "T12345"),
