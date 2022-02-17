@@ -19,12 +19,6 @@ commands:
           paths:
             - "/go/pkg"
 jobs:
-  unit_test:
-    docker:
-      - image: circleci/golang:1.16
-    steps:
-      - setup
-      - run: make test
   unit_and_acceptance_test:
     docker:
       - image: circleci/golang:1.16
@@ -52,17 +46,8 @@ workflows:
   version: 2
   build_and_release:
     jobs:
-      - unit_test:
+      - test:
           filters:
-            tags:
-              # unit_and_acceptance_test will be used on tags instead,
-              # it is a superset of these tests.
-              ignore: /.*/
-      - unit_and_acceptance_test:
-          filters:
-            branches:
-              only:
-                - main
             tags:
               only: /v.*/
       - release:
