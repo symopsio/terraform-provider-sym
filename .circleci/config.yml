@@ -9,19 +9,28 @@ commands:
       - restore_cache:
           keys:
             - &cache_name v1-pkg-cache
-jobs:
-  build_and_test:
-    docker:
-      - image: circleci/golang:1.16
+  setup:
     steps:
       - checkout
       - restore_pkg_cache
       - run: GOPRIVATE="github.com/symopsio" make
-      - run: make test
       - save_cache:
           key: *cache_name
           paths:
             - "/go/pkg"
+jobs:
+  unit_test:
+    docker:
+      - image: circleci/golang:1.16
+    steps:
+      - setup
+      - run: make test
+  unit_and_acceptance_test:
+    docker:
+      - image: circleci/golang:1.16
+    steps:
+      - setup
+      - run: make testacc
   release:
     docker:
       - image: circleci/golang:1.16
@@ -43,13 +52,21 @@ workflows:
   version: 2
   build_and_release:
     jobs:
-      - build_and_test:
+      - unit_test:
           filters:
             tags:
               only: /.*/
+      - unit_and_acceptance_test:
+          filters:
+            branches:
+              only:
+                # - main
+                - ari/testacc-circleci
+            tags:
+              only: /v.*/
       - release:
           requires:
-            - build_and_test
+            - unit_and_acceptance_test
           filters:
             branches:
               ignore: /.*/
