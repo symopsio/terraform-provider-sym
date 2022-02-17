@@ -181,3 +181,34 @@ func TestBuildTestData(t *testing.T) {
 		})
 	}
 }
+
+func Test_secretResource_String(t *testing.T) {
+	tests := []struct {
+		name  string
+		input secretResource
+		want  string
+	}{
+		{
+			"slack",
+			secretResource{
+				terraformName: "test",
+				label:         "Secretive Secret",
+				path:          "/sym/test/my-secret",
+				sourceId:      "1234-56789",
+			},
+			`
+resource "sym_secret" "test" {
+	label = "Secretive Secret"
+	path = "/sym/test/my-secret"
+	source_id = 1234-56789
+}
+`,
+		},
+	}
+
+	for _, tt := range tests {
+		if got := tt.input.String(); got != tt.want {
+			t.Errorf("String() = %v, want %v", got, tt.want)
+		}
+	}
+}
