@@ -58,3 +58,15 @@ workflows:
               ignore: /.*/
             tags:
               only: /v.*/
+  # Run the acceptance tests every night at 00:00
+  nightly:
+    triggers:
+      - schedule:
+          # cron: "0 0 * * *"
+          cron: "1-59 * * * *"
+          filters:
+            branches:
+              only:
+                - main
+    jobs:
+      - unit_and_acceptance_test
