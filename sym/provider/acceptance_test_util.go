@@ -265,3 +265,41 @@ resource "sym_strategy" %[1]q {
 
 	return sb.String()
 }
+
+type environmentResource struct {
+	terraformName     string
+	name              string
+	label             string
+	runtimeId         string
+	logDestinationIds []string
+	integrations      map[string]string
+}
+
+func (r environmentResource) String() string {
+	var integrations strings.Builder
+	if len(r.integrations) > 0 {
+		integrations.WriteString("integrations = {\n")
+		keys := make([]string, len(r.integrations))
+		i := 0
+		for k := range r.integrations {
+			keys[i] = k
+			i++
+		}
+		sort.Strings(keys)
+		for _, k := range keys {
+			integrations.WriteString(fmt.Sprintf("		%s = %s\n", k, r.integrations[k]))
+		}
+		integrations.WriteString("	}")
+	}
+
+	return fmt.Sprintf(`
+resource "sym_environment" %[1]q {
+	name = %[2]q
+	label = %[3]q
+	runtime_id = %[4]s
+	log_destination_ids = [%[5]s]
+
+	%[6]s
+}
+`, r.terraformName, r.name, r.label, r.runtimeId, strings.Join(r.logDestinationIds, ", "), integrations.String())
+}

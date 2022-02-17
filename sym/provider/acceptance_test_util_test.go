@@ -335,3 +335,42 @@ resource "sym_strategy" "test" {
 		}
 	}
 }
+
+func Test_environmentResource_String(t *testing.T) {
+	tests := []struct {
+		name  string
+		input environmentResource
+		want  string
+	}{
+		{
+			"two-log-dests",
+			environmentResource{
+				"this",
+				"my-env",
+				"Sandbox",
+				"sym_runtime.this.id",
+				[]string{"sym_log_destination.data_stream.id", "sym_log_destination.firehose.id"},
+				map[string]string{
+					"slack_id": "sym_integration.slack.id",
+				},
+			},
+			`
+resource "sym_environment" "this" {
+	name = "my-env"
+	label = "Sandbox"
+	runtime_id = sym_runtime.this.id
+	log_destination_ids = [sym_log_destination.data_stream.id, sym_log_destination.firehose.id]
+
+	integrations = {
+		slack_id = sym_integration.slack.id
+	}
+}
+`,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.Equalf(t, tt.want, tt.input.String(), "String()")
+		})
+	}
+}
