@@ -14,13 +14,11 @@ func DataSourceEnvironment() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: dataSourceEnvironmentRead,
 		Schema: map[string]*schema.Schema{
-			"name":  utils.Required(schema.TypeString),
-			"label": utils.Optional(schema.TypeString),
-			"runtime_id": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-			"integrations": utils.SettingsMap(),
+			"name":                utils.Required(schema.TypeString),
+			"label":               utils.Optional(schema.TypeString),
+			"runtime_id":          utils.Optional(schema.TypeString),
+			"log_destination_ids": utils.StringList(false),
+			"integrations":        utils.SettingsMap(),
 		},
 	}
 }
@@ -39,6 +37,7 @@ func dataSourceEnvironmentRead(_ context.Context, data *schema.ResourceData, met
 	diags = utils.DiagsCheckError(diags, data.Set("name", environment.Name), "Unable to read Environment name")
 	diags = utils.DiagsCheckError(diags, data.Set("label", environment.Label), "Unable to read Environment label")
 	diags = utils.DiagsCheckError(diags, data.Set("runtime_id", environment.RuntimeId), "Unable to read Environment runtime_id")
+	diags = utils.DiagsCheckError(diags, data.Set("log_destination_ids", environment.LogDestinationIds), "Unable to read Environment log_destination_ids")
 	diags = utils.DiagsCheckError(diags, data.Set("integrations", environment.Integrations), "Unable to read Environment integrations")
 
 	data.SetId(environment.Id)
