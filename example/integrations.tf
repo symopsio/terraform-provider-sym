@@ -14,7 +14,6 @@ resource "sym_integration" "runtime_context" {
   }
 }
 
-
 resource "sym_integration" "slack" {
   type = "slack"
   name = "tf-flow-test"

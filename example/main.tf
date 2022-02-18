@@ -5,15 +5,15 @@ resource "sym_runtime" "this" {
 }
 
 resource "sym_error_logger" "slack_logger" {
-    integration_id = sym_integration.slack.id
-    destination    = "#sym-iam-flow-errors"
+  integration_id = sym_integration.slack.id
+  destination    = "#sym-iam-flow-errors"
 }
 
 resource "sym_environment" "this" {
   name       = "flow-sandbox"
   label      = "Flow Sandbox"
   runtime_id = sym_runtime.this.id
-  error_logger_id = sym_error_logger.slack_logger.id  
+  error_logger_id = sym_error_logger.slack_logger.id
 
   integrations = {
     slack_id = sym_integration.slack.id
@@ -47,6 +47,6 @@ resource "sym_flow" "this" {
         type           = "string"
         required       = true
         allowed_values = ["Low", "Medium", "High"]
-    }])
+      }])
   }
 }

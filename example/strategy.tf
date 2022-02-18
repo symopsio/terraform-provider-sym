@@ -23,7 +23,6 @@ resource "sym_target" "sandbox_break_glass" {
   }
 }
 
-
 # A strategy uses an integration to grant people access to targets
 resource "sym_strategy" "sso_main" {
   type = "aws_sso"
