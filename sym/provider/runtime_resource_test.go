@@ -8,25 +8,34 @@ import (
 
 func TestAccSymRuntime_basic(t *testing.T) {
 	runtimeData := BuildTestData("basic-runtime")
-	basicRuntimeConfig := runtimeConfig(runtimeData)
+	createRuntimeConfig := runtimeConfig(runtimeData, "Test Runtime")
+	updateRuntimeConfig := runtimeConfig(runtimeData, "Updated Test Runtime")
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
 		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: basicRuntimeConfig,
+				Config: createRuntimeConfig,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("sym_integration.runtime_test_context", "type", "permission_context"),
 					resource.TestCheckResourceAttr("sym_runtime.this", "name", runtimeData.ResourceName),
 					resource.TestCheckResourceAttr("sym_runtime.this", "label", "Test Runtime"),
 				),
 			},
+			{
+				Config: updateRuntimeConfig,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("sym_integration.runtime_test_context", "type", "permission_context"),
+					resource.TestCheckResourceAttr("sym_runtime.this", "name", runtimeData.ResourceName),
+					resource.TestCheckResourceAttr("sym_runtime.this", "label", "Updated Test Runtime"),
+				),
+			},
 		},
 	})
 }
 
-func runtimeConfig(data TestData) string {
+func runtimeConfig(data TestData, label string) string {
 	return makeTerraformConfig(
 		providerResource{org: data.OrgSlug},
 		integrationResource{
@@ -45,7 +54,7 @@ func runtimeConfig(data TestData) string {
 		runtimeResource{
 			terraformName: "this",
 			name:          data.ResourceName,
-			label:         "Test Runtime",
+			label:         label,
 			contextId:     "sym_integration.runtime_test_context.id",
 		},
 	)

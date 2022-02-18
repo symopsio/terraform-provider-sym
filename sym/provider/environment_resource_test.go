@@ -7,36 +7,67 @@ import (
 )
 
 func TestAccSymEnvironment_basic(t *testing.T) {
-	data := BuildTestData("basic-environment")
+	preData := BuildTestData("basic-environment")
+	postData := BuildTestData("basic-environment-updated")
+	preSlack := slackIntegration(preData, "slack", "T12345")
+	postSlack := slackIntegration(postData, "new_slack", "T0011")
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
 		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: environmentConfig(data),
+				Config: environmentConfig(preData, &preSlack, "sym_integration.slack.id"),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("sym_environment.this", "name", data.ResourceName),
+					resource.TestCheckResourceAttr("sym_environment.this", "name", preData.ResourceName),
 					resource.TestCheckResourceAttrPair("sym_environment.this", "runtime_id", "sym_runtime.this", "id"),
 					resource.TestCheckResourceAttr("sym_environment.this", "label", "Sandbox"),
 					resource.TestCheckResourceAttrPair("sym_environment.this", "log_destination_ids.0", "sym_log_destination.data_stream", "id"),
 					resource.TestCheckResourceAttrPair("sym_environment.this", "integrations.slack_id", "sym_integration.slack", "id"),
 				),
 			},
+			{
+				Config: environmentConfig(postData, &postSlack, "sym_integration.new_slack.id"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("sym_environment.this", "name", postData.ResourceName),
+					resource.TestCheckResourceAttrPair("sym_environment.this", "runtime_id", "sym_runtime.this", "id"),
+					resource.TestCheckResourceAttr("sym_environment.this", "label", "Sandbox"),
+					resource.TestCheckResourceAttrPair("sym_environment.this", "log_destination_ids.0", "sym_log_destination.data_stream", "id"),
+					resource.TestCheckResourceAttrPair("sym_environment.this", "integrations.slack_id", "sym_integration.new_slack", "id"),
+				),
+			},
 		},
 	})
 }
 
-func environmentConfig(data TestData) string {
-	return makeTerraformConfig(
-		providerResource{org: data.OrgSlug},
-		integrationResource{
+func slackIntegration(data TestData, terraformName, externalId string) integrationResource {
+	return integrationResource{
+		terraformName: terraformName,
+		type_:         "slack",
+		name:          data.ResourcePrefix + "-tf-env-test",
+		label:         "Slack",
+		externalId:    externalId,
+	}
+}
+
+func environmentConfig(data TestData, slackIntegration *integrationResource, slackId string) string {
+	var slackData integrationResource
+	if slackIntegration == nil {
+		slackData = integrationResource{
 			terraformName: "slack",
 			type_:         "slack",
 			name:          data.ResourcePrefix + "-tf-env-test",
 			label:         "Slack",
-			externalId:    "T1234567",
-		},
+			externalId:    "T12345",
+		}
+		slackId = "sym_integration.slack.id"
+	} else {
+		slackData = *slackIntegration
+	}
+
+	return makeTerraformConfig(
+		providerResource{org: data.OrgSlug},
+		slackData,
 		integrationResource{
 			terraformName: "runtime_context",
 			type_:         "permission_context",
@@ -69,7 +100,7 @@ func environmentConfig(data TestData) string {
 			runtimeId:         "sym_runtime.this.id",
 			logDestinationIds: []string{"sym_log_destination.data_stream.id"},
 			integrations: map[string]string{
-				"slack_id": "sym_integration.slack.id",
+				"slack_id": slackId,
 			},
 		},
 	)

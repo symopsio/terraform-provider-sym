@@ -7,21 +7,33 @@ import (
 )
 
 func TestAccSymLogDestination_basic(t *testing.T) {
-	data := BuildTestData("basic-log-destination")
+	preData := BuildTestData("basic-log-destination-created")
+	postData := BuildTestData("basic-log-destination-updated")
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
 		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: logDestinationConfig(data),
+				Config: logDestinationConfig(preData),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("sym_log_destination.data_stream", "type", "kinesis_data_stream"),
 					resource.TestCheckResourceAttrPair("sym_log_destination.data_stream", "integration_id", "sym_integration.data_stream", "id"),
-					resource.TestCheckResourceAttr("sym_log_destination.data_stream", "settings.stream_name", data.ResourceName+"-data-stream"),
+					resource.TestCheckResourceAttr("sym_log_destination.data_stream", "settings.stream_name", preData.ResourceName+"-data-stream"),
 					resource.TestCheckResourceAttr("sym_log_destination.firehose", "type", "kinesis_firehose"),
 					resource.TestCheckResourceAttrPair("sym_log_destination.firehose", "integration_id", "sym_integration.firehose", "id"),
-					resource.TestCheckResourceAttr("sym_log_destination.firehose", "settings.stream_name", data.ResourceName+"-firehose"),
+					resource.TestCheckResourceAttr("sym_log_destination.firehose", "settings.stream_name", preData.ResourceName+"-firehose"),
+				),
+			},
+			{
+				Config: logDestinationConfig(postData),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("sym_log_destination.data_stream", "type", "kinesis_data_stream"),
+					resource.TestCheckResourceAttrPair("sym_log_destination.data_stream", "integration_id", "sym_integration.data_stream", "id"),
+					resource.TestCheckResourceAttr("sym_log_destination.data_stream", "settings.stream_name", postData.ResourceName+"-data-stream"),
+					resource.TestCheckResourceAttr("sym_log_destination.firehose", "type", "kinesis_firehose"),
+					resource.TestCheckResourceAttrPair("sym_log_destination.firehose", "integration_id", "sym_integration.firehose", "id"),
+					resource.TestCheckResourceAttr("sym_log_destination.firehose", "settings.stream_name", postData.ResourceName+"-firehose"),
 				),
 			},
 		},

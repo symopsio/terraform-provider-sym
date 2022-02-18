@@ -36,5 +36,5 @@ func environmentDataConfig(data TestData) string {
 data "sym_environment" "foo" {
     name = sym_environment.this.name
 }
-`, environmentConfig(data))
+`, environmentConfig(data, nil, ""))
 }
