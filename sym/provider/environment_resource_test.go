@@ -16,9 +16,6 @@ func TestAccSymEnvironment_basic(t *testing.T) {
 			{
 				Config: environmentConfig(data),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("sym_integration.slack", "type", "slack"),
-					resource.TestCheckResourceAttr("sym_integration.slack", "name", data.ResourcePrefix+"-tf-env-test"),
-					resource.TestCheckResourceAttr("sym_integration.runtime_context", "type", "permission_context"),
 					resource.TestCheckResourceAttr("sym_environment.this", "name", data.ResourceName),
 					resource.TestCheckResourceAttrPair("sym_environment.this", "runtime_id", "sym_runtime.this", "id"),
 					resource.TestCheckResourceAttr("sym_environment.this", "label", "Sandbox"),

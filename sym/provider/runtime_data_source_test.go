@@ -17,7 +17,9 @@ func TestAccSymRuntimeData_basic(t *testing.T) {
 			{
 				Config: runtimeDataConfig(runtimeData),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrPair("sym_runtime.this", "id", "data.sym_runtime.test", "id"),
+					resource.TestCheckResourceAttrPair("data.sym_runtime.test", "id", "sym_runtime.this", "id"),
+					resource.TestCheckResourceAttr("data.sym_runtime.test", "label", "Test Runtime"),
+					resource.TestCheckResourceAttrPair("data.sym_runtime.test", "context_id", "sym_integration.runtime_test_context", "id"),
 				),
 			},
 		},
@@ -30,11 +32,6 @@ func runtimeDataConfig(data TestData) string {
 
 data "sym_runtime" "test" {
   name = sym_runtime.this.name
-}
-
-output "test_runtime_id" {
-  description = "ID of the pre-existing test-runtime runtime"
-  value = data.sym_runtime.test.id
 }
 `, runtimeConfig(data))
 }

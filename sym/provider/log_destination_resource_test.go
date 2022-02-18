@@ -8,10 +8,6 @@ import (
 
 func TestAccSymLogDestination_basic(t *testing.T) {
 	data := BuildTestData("basic-log-destination")
-	dataStreamIntegration := "sym_integration.data_stream"
-	dataStreamLogDest := "sym_log_destination.data_stream"
-	firehoseIntegration := "sym_integration.firehose"
-	firehoseLogDest := "sym_log_destination.firehose"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
@@ -20,12 +16,12 @@ func TestAccSymLogDestination_basic(t *testing.T) {
 			{
 				Config: logDestinationConfig(data),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(dataStreamIntegration, "type", "permission_context"),
-					resource.TestCheckResourceAttr(dataStreamLogDest, "type", "kinesis_data_stream"),
-					resource.TestCheckResourceAttrPair(dataStreamLogDest, "integration_id", dataStreamIntegration, "id"),
-					resource.TestCheckResourceAttr(firehoseIntegration, "type", "permission_context"),
-					resource.TestCheckResourceAttr(firehoseLogDest, "type", "kinesis_firehose"),
-					resource.TestCheckResourceAttrPair(firehoseLogDest, "integration_id", firehoseIntegration, "id"),
+					resource.TestCheckResourceAttr("sym_log_destination.data_stream", "type", "kinesis_data_stream"),
+					resource.TestCheckResourceAttrPair("sym_log_destination.data_stream", "integration_id", "sym_integration.data_stream", "id"),
+					resource.TestCheckResourceAttr("sym_log_destination.data_stream", "settings.stream_name", data.ResourceName+"-data-stream"),
+					resource.TestCheckResourceAttr("sym_log_destination.firehose", "type", "kinesis_firehose"),
+					resource.TestCheckResourceAttrPair("sym_log_destination.firehose", "integration_id", "sym_integration.firehose", "id"),
+					resource.TestCheckResourceAttr("sym_log_destination.firehose", "settings.stream_name", data.ResourceName+"-firehose"),
 				),
 			},
 		},
@@ -38,7 +34,7 @@ func logDestinationConfig(data TestData) string {
 		integrationResource{
 			terraformName: "data_stream",
 			type_:         "permission_context",
-			name:          data.ResourceName + "-data-stream",
+			name:          data.ResourcePrefix + "-data-stream",
 			label:         "Kinesis Data Stream",
 			externalId:    "123456789012",
 			settings: map[string]string{
@@ -51,7 +47,7 @@ func logDestinationConfig(data TestData) string {
 		integrationResource{
 			terraformName: "firehose",
 			type_:         "permission_context",
-			name:          data.ResourceName + "-firehose",
+			name:          data.ResourcePrefix + "-firehose",
 			label:         "Kinesis Firehose",
 			externalId:    "999999999999",
 			settings: map[string]string{
@@ -65,13 +61,13 @@ func logDestinationConfig(data TestData) string {
 			terraformName: "data_stream",
 			type_:         "kinesis_data_stream",
 			integrationId: "sym_integration.data_stream.id",
-			streamName:    data.ResourcePrefix + "-tftest-log-data-stream",
+			streamName:    data.ResourceName + "-data-stream",
 		},
 		logDestinationResource{
 			terraformName: "firehose",
 			type_:         "kinesis_firehose",
 			integrationId: "sym_integration.firehose.id",
-			streamName:    data.ResourcePrefix + "-tftest-log-firehose",
+			streamName:    data.ResourceName + "-firehose",
 		},
 	)
 }
