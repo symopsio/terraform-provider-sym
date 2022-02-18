@@ -23,7 +23,7 @@ func TestAccSymFlow_basic(t *testing.T) {
 					resource.TestCheckResourceAttrPair("sym_flow.this", "environment_id", "sym_environment.this", "id"),
 					resource.TestCheckResourceAttrPair("sym_flow.this", "params.strategy_id", "sym_strategy.sso_main", "id"),
 					resource.TestCheckResourceAttr("sym_flow.this", "params.allow_revoke", "false"),
-					resource.TestCheckResourceAttr("sym_flow.this", "params.prompt_fields_json", `[{"name":"reason","type":"string","required":true,"label":"Reason"},{"name":"urgency","type":"list","required":true,"allowed_values":["Low","Medium","High"]}]`),
+					resource.TestCheckResourceAttr("sym_flow.this", "params.prompt_fields_json", `[{"name":"reason","type":"string","required":true,"label":"Reason"},{"name":"urgency","type":"list","required":true,"default":"Low","allowed_values":["Low","Medium","High"]}]`),
 				),
 			},
 			{
@@ -138,6 +138,7 @@ func flowConfig(data TestData, implPath string, allowRevoke bool) string {
 						name:          "urgency",
 						type_:         "list",
 						required:      true,
+						default_:      "Low",
 						allowedValues: []string{"Low", "Medium", "High"},
 					},
 				},

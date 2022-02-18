@@ -406,6 +406,11 @@ func Test_flowResource_String(t *testing.T) {
 							required:      true,
 							allowedValues: []string{"Low", "Medium", "High"},
 						},
+						{
+							name:     "username",
+							type_:    "string",
+							default_: "lolol",
+						},
 					},
 				},
 			},
@@ -432,6 +437,12 @@ resource "sym_flow" "this" {
 			type = "list"
 			required = true
 			allowed_values = ["Low", "Medium", "High"]
+			},
+			{
+			name = "username"
+			type = "string"
+			default = "lolol"
+			required = false
 			},
 	])
 	}

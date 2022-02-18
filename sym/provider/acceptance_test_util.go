@@ -354,6 +354,9 @@ func (r flowResource) String() string {
 		if f.label != "" {
 			p.WriteString(fmt.Sprintf("			label = %q\n", f.label))
 		}
+		if f.default_ != "" {
+			p.WriteString(fmt.Sprintf("			default = %q\n", f.default_))
+		}
 		p.WriteString(fmt.Sprintf("			required = %v\n", f.required))
 		if len(f.allowedValues) > 0 {
 			p.WriteString("			allowed_values = [")
@@ -392,6 +395,7 @@ type field struct {
 	name          string
 	type_         string
 	label         string
+	default_      string
 	required      bool
 	allowedValues []string
 }
