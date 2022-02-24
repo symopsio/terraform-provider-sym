@@ -6,8 +6,7 @@ The sym terraform provider is released with the following steps:
 * The CI build produces artifacts and uploads them via `goreleaser`
 * The CI build syncs the directory to s3
 
-At this point, the registry can be updated with the new release - check out the [repo](https://github.com/symopsio/terraform-registry)
-for more details.
+At this point, the registry will be able to provide the new release - check out the [repo](https://github.com/symopsio/terraform-registry) for more details about how the provider is served to users.
 
 ## Development
 
