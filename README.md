@@ -39,7 +39,8 @@ Note: if a test fails, you may be left with dangling resources. You can find the
 
 Tips:
 - Test a specific test, from the provider dir: `TF_ACC=1 richgo test -run  TestAccSymIntegration_slack -v`
--
+
+
 **When modifying the provider or adding acceptance tests, note that they should:**
 * Exist for all resources and data sources
 * Check that all available fields are available
