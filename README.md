@@ -10,8 +10,9 @@ At this point, the registry will be able to provide the new release - check out 
 
 ## Development
 
-1. Run `asdf install` to install necessary tools from .tool-versions
-2. Run `make local` to create the binary locally
+1. Add the asdf plugins: `asdf plugin add golang richgo`
+2. Run `asdf install` to install necessary tools from .tool-versions
+3. Run `make local` to create the binary locally
 
 ### Using the Example
 
@@ -36,6 +37,9 @@ To run them, ensure you've set the `SYM_API_URL` and `SYM_JWT` environment varia
 
 Note: if a test fails, you may be left with dangling resources. You can find them by looking for `DataHandles` with a `testacc-<randomint>` prefix (e.g. `testacc-62991-slack-integration`).
 
+Tips:
+- Test a specific test, from the provider dir: `TF_ACC=1 richgo test -run  TestAccSymIntegration_slack -v`
+-
 **When modifying the provider or adding acceptance tests, note that they should:**
 * Exist for all resources and data sources
 * Check that all available fields are available

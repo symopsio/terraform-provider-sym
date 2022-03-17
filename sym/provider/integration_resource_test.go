@@ -144,6 +144,38 @@ func TestAccSymIntegration_aptible(t *testing.T) {
 	})
 }
 
+func TestAccSymIntegration_okta(t *testing.T) {
+	createData := BuildTestData("okta-integration")
+	updateData := BuildTestData("updated-okta-integration")
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: oktaIntegrationConfig(createData, "Okta", "okta-account"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("sym_integration.okta", "type", "okta"),
+					resource.TestCheckResourceAttr("sym_integration.okta", "name", createData.ResourceName),
+					resource.TestCheckResourceAttr("sym_integration.okta", "label", "Okta"),
+					resource.TestCheckResourceAttr("sym_integration.okta", "external_id", "okta-account"),
+					resource.TestCheckResourceAttrPair("sym_integration.okta", "settings.api_token_secret", "sym_secret.okta_api_token", "id"),
+				),
+			},
+			{
+				Config: oktaIntegrationConfig(updateData, "Updated Okta", "other-okta-account"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("sym_integration.okta", "type", "okta"),
+					resource.TestCheckResourceAttr("sym_integration.okta", "name", updateData.ResourceName),
+					resource.TestCheckResourceAttr("sym_integration.okta", "label", "Updated Okta"),
+					resource.TestCheckResourceAttr("sym_integration.okta", "external_id", "other-okta-account"),
+					resource.TestCheckResourceAttrPair("sym_integration.okta", "settings.api_token_secret", "sym_secret.okta_api_token", "id"),
+				),
+			},
+		},
+	})
+}
+
 func slackIntegrationConfig(data TestData, label, externalId string) string {
 	var sb strings.Builder
 
@@ -265,6 +297,31 @@ func aptibleIntegrationConfig(data TestData, label, externalId string) string {
 		settings: map[string]string{
 			"username_secret": "${sym_secret.username.id}",
 			"password_secret": "${sym_secret.password.id}",
+		},
+	}.String())
+
+	return sb.String()
+}
+
+func oktaIntegrationConfig(data TestData, label, externalId string) string {
+	var sb strings.Builder
+
+	sb.WriteString(providerResource{org: data.OrgSlug}.String())
+	sb.WriteString(integrationSecretConfig(data))
+	sb.WriteString(secretResource{
+		terraformName: "okta_api_token",
+		label:         "Okta API token",
+		path:          data.ResourcePrefix + "/okta_api_token",
+		sourceId:      "sym_secrets.test.id",
+	}.String())
+	sb.WriteString(integrationResource{
+		terraformName: "okta",
+		type_:         "okta",
+		name:          data.ResourceName,
+		label:         label,
+		externalId:    externalId,
+		settings: map[string]string{
+			"api_token_secret": "${sym_secret.okta_api_token.id}",
 		},
 	}.String())
 
