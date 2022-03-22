@@ -22,7 +22,7 @@ commands:
 jobs:
   unit_and_acceptance_test:
     docker:
-      - image: circleci/golang:1.16
+      - image: cimg/go:1.16
     steps:
       - setup
       - run: make testacc-ci
@@ -36,7 +36,7 @@ jobs:
                 template: basic_fail_1
   release:
     docker:
-      - image: circleci/golang:1.16
+      - image: cimg/go:1.16
     steps:
       - checkout
       - restore_pkg_cache
