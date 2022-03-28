@@ -9,7 +9,7 @@ commands:
     steps:
       - restore_cache:
           keys:
-            - &cache_name v1-pkg-cache
+            - &cache_name v2-pkg-cache
   setup:
     steps:
       - checkout
