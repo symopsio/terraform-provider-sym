@@ -135,7 +135,7 @@ func customStrategy(t TestData, label, implPath string) string {
 		label:         "Custom Secret",
 		path:          t.ResourceName + "/secret/path",
 		sourceId:      "sym_secrets.aws.id",
-		settings: map[string]string{},
+		settings:      map[string]string{},
 	}.String())
 
 	sb.WriteString(integrationResource{
@@ -160,14 +160,14 @@ func customStrategy(t TestData, label, implPath string) string {
 	}.String())
 
 	sb.WriteString(strategyResource{
-		terraformName: "custom",
-		name:          t.ResourceName,
-		type_:         "custom",
-		label:         label,
-		integrationId: "sym_integration.custom.id",
+		terraformName:  "custom",
+		name:           t.ResourceName,
+		type_:          "custom",
+		label:          label,
+		integrationId:  "sym_integration.custom.id",
 		implementation: implPath,
-		targetIds:     []string{"sym_target.custom.id"},
-		settings:      map[string]string{},
+		targetIds:      []string{"sym_target.custom.id"},
+		settings:       map[string]string{},
 	}.String())
 
 	return sb.String()

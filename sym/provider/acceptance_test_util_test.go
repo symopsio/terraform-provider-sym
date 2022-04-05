@@ -354,14 +354,14 @@ resource "sym_strategy" "test" {
 		{
 			"custom",
 			strategyResource{
-				terraformName: "custom",
-				name:          "test-custom-strategy",
-				type_:         "custom",
-				label:         "Custom Strategy",
-				integrationId: "sym_integration.sso.id",
+				terraformName:  "custom",
+				name:           "test-custom-strategy",
+				type_:          "custom",
+				label:          "Custom Strategy",
+				integrationId:  "sym_integration.sso.id",
 				implementation: "path/to/thing.py",
-				targetIds:     []string{"\"888-7777\"", "\"111-222\""},
-				settings: map[string]string{},
+				targetIds:      []string{"\"888-7777\"", "\"111-222\""},
+				settings:       map[string]string{},
 			},
 			`
 resource "sym_strategy" "custom" {

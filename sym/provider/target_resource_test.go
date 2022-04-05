@@ -136,7 +136,6 @@ func awsIamTarget(t TestData, label, iamGroup string) string {
 	return sb.String()
 }
 
-
 func customTarget(t TestData, label, targetId string) string {
 	var sb strings.Builder
 

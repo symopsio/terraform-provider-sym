@@ -17,14 +17,14 @@ func (s StrategyTarget) String() string {
 }
 
 type Strategy struct {
-	Id            string   `json:"id,omitempty"`
-	Type          string   `json:"type"`
-	IntegrationId string   `json:"integration_id"`
-	Targets       []string `json:"targets"`
-	Settings      Settings `json:"settings"`
-	Name          string   `json:"slug"`
-	Label         string   `json:"label,omitempty"`
-	Implementation string `json:"implementation,omitempty"`
+	Id             string   `json:"id,omitempty"`
+	Type           string   `json:"type"`
+	IntegrationId  string   `json:"integration_id"`
+	Targets        []string `json:"targets"`
+	Settings       Settings `json:"settings"`
+	Name           string   `json:"slug"`
+	Label          string   `json:"label,omitempty"`
+	Implementation string   `json:"implementation,omitempty"`
 }
 
 func (s Strategy) String() string {
