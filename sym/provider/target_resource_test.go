@@ -71,6 +71,36 @@ func TestAccSymTarget_awsIam(t *testing.T) {
 	})
 }
 
+func TestAccSymTarget_custom(t *testing.T) {
+	createData := BuildTestData("custom-target")
+	updateData := BuildTestData("custom-updated-target")
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: customTarget(createData, "My Custom Target", "am-target"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("sym_target.custom", "type", "custom"),
+					resource.TestCheckResourceAttr("sym_target.custom", "name", createData.ResourceName),
+					resource.TestCheckResourceAttr("sym_target.custom", "label", "My Custom Target"),
+					resource.TestCheckResourceAttr("sym_target.custom", "settings.target_id", "am-target"),
+				),
+			},
+			{
+				Config: customTarget(updateData, "Other Custom Target", "am-still-target"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("sym_target.custom", "type", "custom"),
+					resource.TestCheckResourceAttr("sym_target.custom", "name", updateData.ResourceName),
+					resource.TestCheckResourceAttr("sym_target.custom", "label", "Other Custom Target"),
+					resource.TestCheckResourceAttr("sym_target.custom", "settings.target_id", "am-still-target"),
+				),
+			},
+		},
+	})
+}
+
 func awsSsoTarget(t TestData, label, arnSuffix, accountId string) string {
 	var sb strings.Builder
 
@@ -100,6 +130,24 @@ func awsIamTarget(t TestData, label, iamGroup string) string {
 		label:         label,
 		settings: map[string]string{
 			"iam_group": iamGroup,
+		},
+	}.String())
+
+	return sb.String()
+}
+
+
+func customTarget(t TestData, label, targetId string) string {
+	var sb strings.Builder
+
+	sb.WriteString(providerResource{org: t.OrgSlug}.String())
+	sb.WriteString(targetResource{
+		terraformName: "custom",
+		name:          t.ResourceName,
+		type_:         "custom",
+		label:         label,
+		settings: map[string]string{
+			"target_id": targetId,
 		},
 	}.String())
 

@@ -88,6 +88,30 @@ resource "sym_integration" "test_context" {
 }
 `,
 		},
+		{
+			"custom",
+			integrationResource{
+				terraformName: "test_custom",
+				type_:         "custom",
+				name:          "test-custom-integration",
+				label:         "Custom Integration",
+				externalId:    "123456789012",
+				settings: map[string]string{
+					"secret_ids_json": "jsonencode([\"111-11-1111\", \"55-5555\"])",
+				},
+			},
+			`
+resource "sym_integration" "test_custom" {
+	type = "custom"
+	name = "test-custom-integration"
+	label = "Custom Integration"
+	external_id = "123456789012"
+	settings = {
+		secret_ids_json = jsonencode(["111-11-1111", "55-5555"])
+	}
+}
+`,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

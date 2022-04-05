@@ -85,7 +85,13 @@ resource "sym_integration" %[1]q {
 		sort.Strings(keys)
 		sb.WriteString("	settings = {\n")
 		for _, k := range keys {
-			sb.WriteString(fmt.Sprintf("		%s = %q\n", k, r.settings[k]))
+			settingValue := r.settings[k]
+			if strings.HasPrefix(settingValue, "jsonencode") {
+				// Any `jsonencode`d settings should not be string-wrapped
+				sb.WriteString(fmt.Sprintf("\t\t%s = %s\n", k, settingValue))
+			} else {
+				sb.WriteString(fmt.Sprintf("		%s = %q\n", k, settingValue))
+			}
 		}
 		sb.WriteString("	}\n")
 	}

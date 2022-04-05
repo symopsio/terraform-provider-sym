@@ -5,18 +5,24 @@ import (
 	"io/ioutil"
 )
 
-// Takes in an impl in base64, text, or filename format,
+// ParseImpl takes in an impl in base64, text, or filename format,
 // and consistently returns the impl in text format, if possible.
 func ParseImpl(impl string) string {
 	return parseImpl(impl, true)
 }
 
-// Takes in an impl in base64 or text format,
+// ParseRemoteImpl takes in an impl in base64 or text format,
 // and consistently returns the impl in text format, if possible.
 func ParseRemoteImpl(impl string) string {
 	return parseImpl(impl, false)
 }
 
+// parseImpl decodes the given implementation and parses it to
+// text format whenever possible.
+//
+// Args:
+//		impl: the string to parse
+//		readFile: whether the impl is a file path or the full contents of the impl
 func parseImpl(impl string, readFile bool) string {
 	contents, err := base64.StdEncoding.DecodeString(impl)
 	if err != nil && readFile {

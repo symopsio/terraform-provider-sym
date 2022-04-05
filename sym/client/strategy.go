@@ -24,6 +24,7 @@ type Strategy struct {
 	Settings      Settings `json:"settings"`
 	Name          string   `json:"slug"`
 	Label         string   `json:"label,omitempty"`
+	Implementation string `json:"implementation,omitempty"`
 }
 
 func (s Strategy) String() string {

@@ -67,7 +67,7 @@ func TestAccSymStrategy_custom(t *testing.T) {
 			{
 				Config: customStrategy(updateData, "Updated Custom Strategy", "internal/testdata/after_strategy_impl.py"),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("sym_strategy.custom", "type", "aws_sso"),
+					resource.TestCheckResourceAttr("sym_strategy.custom", "type", "custom"),
 					resource.TestCheckResourceAttr("sym_strategy.custom", "name", updateData.ResourceName),
 					resource.TestCheckResourceAttr("sym_strategy.custom", "label", "Updated Custom Strategy"),
 					resource.TestCheckResourceAttrPair("sym_strategy.custom", "integration_id", "sym_integration.custom", "id"),
@@ -145,7 +145,7 @@ func customStrategy(t TestData, label, implPath string) string {
 		label:         "Custom Integration",
 		externalId:    "55555",
 		settings: map[string]string{
-			"secret_ids": "[sym_secret.custom.id]",
+			"secret_ids_json": "jsonencode([sym_secret.custom.id])",
 		},
 	}.String())
 
