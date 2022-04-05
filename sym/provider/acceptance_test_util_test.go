@@ -327,6 +327,29 @@ resource "sym_strategy" "test" {
 }
 `,
 		},
+		{
+			"custom",
+			strategyResource{
+				terraformName: "custom",
+				name:          "test-custom-strategy",
+				type_:         "custom",
+				label:         "Custom Strategy",
+				integrationId: "sym_integration.sso.id",
+				implementation: "path/to/thing.py",
+				targetIds:     []string{"\"888-7777\"", "\"111-222\""},
+				settings: map[string]string{},
+			},
+			`
+resource "sym_strategy" "custom" {
+	type = "custom"
+	name = "test-custom-strategy"
+	label = "Custom Strategy"
+	integration_id = sym_integration.sso.id
+	targets = [ "888-7777", "111-222" ]
+	implementation = "path/to/thing.py"
+}
+`,
+		},
 	}
 
 	for _, tt := range tests {
