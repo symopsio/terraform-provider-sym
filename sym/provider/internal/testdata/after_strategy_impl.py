@@ -9,7 +9,7 @@ class CustomAccessStrategy(AccessStrategy):
         return None
 
     def escalate(self, target_id, event):
-       pass
+        pass
 
     def deescalate(self, target_id, event):
-       pass
+        pass

@@ -22,10 +22,10 @@ func ParseRemoteImpl(impl string) string {
 //
 // Args:
 //		impl: the string to parse
-//		readFile: whether the impl is a file path or the full contents of the impl
-func parseImpl(impl string, readFile bool) string {
+//		isFilePath: whether the impl is a file path or the full contents of the impl
+func parseImpl(impl string, isFilePath bool) string {
 	contents, err := base64.StdEncoding.DecodeString(impl)
-	if err != nil && readFile {
+	if err != nil && isFilePath {
 		contents, err = ioutil.ReadFile(impl)
 	}
 

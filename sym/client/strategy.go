@@ -28,7 +28,7 @@ type Strategy struct {
 }
 
 func (s Strategy) String() string {
-	return fmt.Sprintf("{id=%s, type=%s, name=%s, label=%s, integration_id=%s, targets=%v}", s.Id, s.Type, s.Name, s.Label, s.IntegrationId, s.Targets)
+	return fmt.Sprintf("{id=%s, type=%s, name=%s, label=%s, integration_id=%s, targets=%v, implementation=%s}", s.Id, s.Type, s.Name, s.Label, s.IntegrationId, s.Targets, s.Implementation)
 }
 
 type StrategyClient interface {
