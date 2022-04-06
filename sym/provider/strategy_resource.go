@@ -79,10 +79,13 @@ func createStrategy(_ context.Context, data *schema.ResourceData, meta interface
 	}
 
 	implementation := data.Get("implementation").(string)
-	if b, err := ioutil.ReadFile(implementation); err != nil {
-		diags = append(diags, utils.DiagFromError(err, "Unable to read sym_strategy implementation file"))
-	} else {
-		strategy.Implementation = base64.StdEncoding.EncodeToString(b)
+	// implementation is optional, so only set it if we actually have one
+	if implementation != "" {
+		if b, err := ioutil.ReadFile(implementation); err != nil {
+			diags = append(diags, utils.DiagFromError(err, "Unable to read sym_strategy implementation file"))
+		} else {
+			strategy.Implementation = base64.StdEncoding.EncodeToString(b)
+		}
 	}
 
 	if diags = validateStrategy(diags, &strategy); diags.HasError() {
