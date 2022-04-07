@@ -2,7 +2,9 @@ package provider
 
 import (
 	"context"
+	"encoding/base64"
 	"fmt"
+	"io/ioutil"
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -33,6 +35,14 @@ func strategySchema() map[string]*schema.Schema {
 		"targets":        utils.StringList(true),
 		"name":           utils.Required(schema.TypeString),
 		"label":          utils.Optional(schema.TypeString),
+		"implementation": {
+			Type:             schema.TypeString,
+			Optional:         true,
+			DiffSuppressFunc: utils.SuppressEquivalentFileContentDiffs,
+			StateFunc: func(val interface{}) string {
+				return utils.ParseImpl(val.(string))
+			},
+		},
 	}
 }
 
@@ -66,6 +76,16 @@ func createStrategy(_ context.Context, data *schema.ResourceData, meta interface
 	targets := data.Get("targets").([]interface{})
 	for i := range targets {
 		strategy.Targets = append(strategy.Targets, targets[i].(string))
+	}
+
+	implementation := data.Get("implementation").(string)
+	// implementation is optional, so only set it if we actually have one
+	if implementation != "" {
+		if b, err := ioutil.ReadFile(implementation); err != nil {
+			diags = append(diags, utils.DiagFromError(err, "Unable to read sym_strategy implementation file"))
+		} else {
+			strategy.Implementation = base64.StdEncoding.EncodeToString(b)
+		}
 	}
 
 	if diags = validateStrategy(diags, &strategy); diags.HasError() {
@@ -104,6 +124,9 @@ func readStrategy(_ context.Context, data *schema.ResourceData, meta interface{}
 	diags = utils.DiagsCheckError(diags, data.Set("name", strategy.Name), "Unable to read Strategy name")
 	diags = utils.DiagsCheckError(diags, data.Set("label", strategy.Label), "Unable to read Strategy label")
 
+	// Base64 -> Text
+	diags = utils.DiagsCheckError(diags, data.Set("implementation", utils.ParseRemoteImpl(strategy.Implementation)), "Unable to read AccessStrategy implementation")
+
 	return diags
 }
 
@@ -122,6 +145,33 @@ func updateStrategy(_ context.Context, data *schema.ResourceData, meta interface
 	targets := data.Get("targets").([]interface{})
 	for i := range targets {
 		strategy.Targets = append(strategy.Targets, targets[i].(string))
+	}
+
+	implementation := data.Get("implementation").(string)
+
+	// TODO: This block and the one below don't seem to make much sense.
+	// 		 We base64 encode the implementation always, but then do a check
+	//   	 and branch based on a decode failure, which theoretically should
+	//		 never happen. We should investigate / do some thorough testing here.
+
+	// If the diff was suppressed, we'll have a text string here already, as it was decoded by the StateFunc.
+	// Therefore, check if this is a filename or not. If it's not, assume it is the decoded impl.
+	if b, err := ioutil.ReadFile(implementation); err != nil {
+		implementation = base64.StdEncoding.EncodeToString([]byte(implementation))
+	} else {
+		implementation = base64.StdEncoding.EncodeToString(b)
+	}
+
+	if _, err := base64.StdEncoding.DecodeString(implementation); err == nil {
+		strategy.Implementation = implementation
+	} else {
+		// Normal case where the diff has not been suppressed, read our local file and send it.
+		if b, err := ioutil.ReadFile(implementation); err != nil {
+			diags = append(diags, utils.DiagFromError(err, "Unable to read sym_strategy implementation file"))
+			return diags
+		} else {
+			strategy.Implementation = base64.StdEncoding.EncodeToString(b)
+		}
 	}
 
 	if diags = validateStrategy(diags, &strategy); diags.HasError() {

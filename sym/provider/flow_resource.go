@@ -126,7 +126,7 @@ func createFlow(_ context.Context, data *schema.ResourceData, meta interface{}) 
 
 	implementation := data.Get("implementation").(string)
 	if b, err := ioutil.ReadFile(implementation); err != nil {
-		diags = append(diags, utils.DiagFromError(err, "Unable to read implementation file"))
+		diags = append(diags, utils.DiagFromError(err, "Unable to read sym_flow implementation file"))
 	} else {
 		flow.Implementation = base64.StdEncoding.EncodeToString(b)
 	}

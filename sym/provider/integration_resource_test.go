@@ -2,6 +2,7 @@ package provider
 
 import (
 	"fmt"
+	"regexp"
 	"strings"
 	"testing"
 
@@ -176,6 +177,41 @@ func TestAccSymIntegration_okta(t *testing.T) {
 	})
 }
 
+func TestAccSymIntegration_custom(t *testing.T) {
+	createData := BuildTestData("custom-integration")
+	updateData := BuildTestData("updated-custom-integration")
+
+	// This just checks that we have a list of one string UUID. Necessary because secret_ids is `jsonencode`d
+	secretIdsRegexp, _ := regexp.Compile("\\[\"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\"]")
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: customIntegrationConfig(createData, "Custom Integration", "external-id-1"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("sym_integration.custom", "type", "custom"),
+					resource.TestCheckResourceAttr("sym_integration.custom", "name", createData.ResourceName),
+					resource.TestCheckResourceAttr("sym_integration.custom", "label", "Custom Integration"),
+					resource.TestCheckResourceAttr("sym_integration.custom", "external_id", "external-id-1"),
+					resource.TestMatchResourceAttr("sym_integration.custom", "settings.secret_ids_json", secretIdsRegexp),
+				),
+			},
+			{
+				Config: customIntegrationConfig(updateData, "Updated Custom Integration", "external-id-2"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("sym_integration.custom", "type", "custom"),
+					resource.TestCheckResourceAttr("sym_integration.custom", "name", updateData.ResourceName),
+					resource.TestCheckResourceAttr("sym_integration.custom", "label", "Updated Custom Integration"),
+					resource.TestCheckResourceAttr("sym_integration.custom", "external_id", "external-id-2"),
+					resource.TestMatchResourceAttr("sym_integration.custom", "settings.secret_ids_json", secretIdsRegexp),
+				),
+			},
+		},
+	})
+}
+
 func slackIntegrationConfig(data TestData, label, externalId string) string {
 	var sb strings.Builder
 
@@ -322,6 +358,32 @@ func oktaIntegrationConfig(data TestData, label, externalId string) string {
 		externalId:    externalId,
 		settings: map[string]string{
 			"api_token_secret": "${sym_secret.okta_api_token.id}",
+		},
+	}.String())
+
+	return sb.String()
+}
+
+func customIntegrationConfig(data TestData, label, externalId string) string {
+	var sb strings.Builder
+
+	sb.WriteString(providerResource{org: data.OrgSlug}.String())
+	sb.WriteString(integrationSecretConfig(data))
+	sb.WriteString(secretResource{
+		terraformName: "custom",
+		label:         "Custom Secret",
+		path:          data.ResourcePrefix + "/path/to/thing",
+		sourceId:      "sym_secrets.test.id",
+	}.String())
+
+	sb.WriteString(integrationResource{
+		terraformName: "custom",
+		type_:         "custom",
+		name:          data.ResourceName,
+		label:         label,
+		externalId:    externalId,
+		settings: map[string]string{
+			"secret_ids_json": "jsonencode([sym_secret.custom.id])",
 		},
 	}.String())
 

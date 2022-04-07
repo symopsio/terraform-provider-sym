@@ -85,7 +85,13 @@ resource "sym_integration" %[1]q {
 		sort.Strings(keys)
 		sb.WriteString("	settings = {\n")
 		for _, k := range keys {
-			sb.WriteString(fmt.Sprintf("		%s = %q\n", k, r.settings[k]))
+			settingValue := r.settings[k]
+			if strings.HasPrefix(settingValue, "jsonencode") {
+				// Any `jsonencode`d settings should not be string-wrapped
+				sb.WriteString(fmt.Sprintf("\t\t%s = %s\n", k, settingValue))
+			} else {
+				sb.WriteString(fmt.Sprintf("		%s = %q\n", k, settingValue))
+			}
 		}
 		sb.WriteString("	}\n")
 	}
@@ -228,12 +234,13 @@ resource "sym_target" %[1]q {
 }
 
 type strategyResource struct {
-	terraformName string
-	type_         string
-	name          string
-	label         string
-	integrationId string
-	targetIds     []string
+	terraformName  string
+	type_          string
+	name           string
+	label          string
+	integrationId  string
+	targetIds      []string
+	implementation string
 
 	settings map[string]string
 }
@@ -249,6 +256,10 @@ resource "sym_strategy" %[1]q {
 	integration_id = %[5]s
 	targets = [ %[6]s ]
 `, r.terraformName, r.type_, r.name, r.label, r.integrationId, strings.Join(r.targetIds[:], ", ")))
+
+	if r.implementation != "" {
+		sb.WriteString(fmt.Sprintf("\timplementation = %q\n", r.implementation))
+	}
 
 	if len(r.settings) > 0 {
 		keys := make([]string, len(r.settings))

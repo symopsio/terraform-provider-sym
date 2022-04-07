@@ -17,17 +17,18 @@ func (s StrategyTarget) String() string {
 }
 
 type Strategy struct {
-	Id            string   `json:"id,omitempty"`
-	Type          string   `json:"type"`
-	IntegrationId string   `json:"integration_id"`
-	Targets       []string `json:"targets"`
-	Settings      Settings `json:"settings"`
-	Name          string   `json:"slug"`
-	Label         string   `json:"label,omitempty"`
+	Id             string   `json:"id,omitempty"`
+	Type           string   `json:"type"`
+	IntegrationId  string   `json:"integration_id"`
+	Targets        []string `json:"targets"`
+	Settings       Settings `json:"settings"`
+	Name           string   `json:"slug"`
+	Label          string   `json:"label,omitempty"`
+	Implementation string   `json:"implementation,omitempty"`
 }
 
 func (s Strategy) String() string {
-	return fmt.Sprintf("{id=%s, type=%s, name=%s, label=%s, integration_id=%s, targets=%v}", s.Id, s.Type, s.Name, s.Label, s.IntegrationId, s.Targets)
+	return fmt.Sprintf("{id=%s, type=%s, name=%s, label=%s, integration_id=%s, targets=%v, implementation=%s}", s.Id, s.Type, s.Name, s.Label, s.IntegrationId, s.Targets, s.Implementation)
 }
 
 type StrategyClient interface {
