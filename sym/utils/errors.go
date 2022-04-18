@@ -28,6 +28,7 @@ const (
 	DocsSupport        = "https://docs.symops.com/docs/support"
 	DocsSymflowInstall = "https://docs.symops.com/docs/install-sym-flow"
 	DocsSymflowLogin   = "https://docs.symops.com/docs/login-sym-flow"
+	DocsImport 		   = "https://docs.symops.com/docs/?????"
 )
 
 var (
@@ -64,4 +65,9 @@ var ErrAPIUnexpected = func(endpoint string, requestId string, statusCode int) e
 var ErrAPIBadRequest = func(messages []Error) error {
 	errorMessage := fmt.Sprintf("The Sym API returned a bad request error: %v", messages)
 	return GenerateError(errorMessage, DocsSupport)
+}
+
+var ErrInvalidImportTypeSlug = func(resource, identifier string) error {
+	errorMessage := fmt.Sprintf("The provided %s identifier %s could not be parsed. Identifiers must be in the form of `TYPE:SLUG`.", resource, identifier)
+	return GenerateError(errorMessage, DocsImport)
 }

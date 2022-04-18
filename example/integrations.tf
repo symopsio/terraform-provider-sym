@@ -14,9 +14,15 @@ resource "sym_integration" "runtime_context" {
   }
 }
 
+#resource "sym_integration" "slack" {
+#  type = "slack"
+#  name = "tf-flow-test"
+#  label = "Slack"
+#  external_id = "T1234567"
+#}
+
 resource "sym_integration" "slack" {
-  type = "slack"
-  name = "tf-flow-test"
-  label = "Slack"
-  external_id = "T1234567"
+  type        = "slack"
+  name        = "ari-localtf-hooks"
+  external_id = "T01G9SX2Q15"
 }
