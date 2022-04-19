@@ -18,7 +18,7 @@ func Runtime() *schema.Resource {
 		UpdateContext: updateRuntime,
 		DeleteContext: deleteRuntime,
 		Importer: &schema.ResourceImporter{
-			StateContext: importRuntime,
+			StateContext: nameImporter,
 		},
 		Schema: map[string]*schema.Schema{
 			"name":       utils.Required(schema.TypeString),
@@ -27,16 +27,6 @@ func Runtime() *schema.Resource {
 		},
 	}
 }
-
-func importRuntime(_ context.Context, data *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	// ID here is the last argument passed to the `terraform import sym_runtime.RESOURCE_NAME RESOURCE_ID` command
-	if err := data.Set("name", data.Id()); err != nil {
-		return nil, err
-	}
-
-	return []*schema.ResourceData{data}, nil
-}
-
 
 func createRuntime(_ context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	c := meta.(*client.ApiClient)
@@ -57,9 +47,9 @@ func createRuntime(_ context.Context, data *schema.ResourceData, meta interface{
 
 func readRuntime(_ context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	var (
-		diags diag.Diagnostics
+		diags   diag.Diagnostics
 		runtime *client.Runtime
-		err error
+		err     error
 	)
 	c := meta.(*client.ApiClient)
 	id := data.Id()
@@ -68,7 +58,6 @@ func readRuntime(_ context.Context, data *schema.ResourceData, meta interface{})
 		// If the slug is already set, then assume we are coming from a ``terraform import`` command, and look up
 		// the runtime by slug.
 		runtime, err = c.Runtime.Find(slug.(string))
-		data.SetId(runtime.Id)
 	} else {
 		runtime, err = c.Runtime.Read(id)
 	}
@@ -82,6 +71,11 @@ func readRuntime(_ context.Context, data *schema.ResourceData, meta interface{})
 		diags = append(diags, utils.DiagFromError(err, "Unable to read Runtime"))
 		return diags
 	}
+
+	// In the case of a normal read, ID will already be set and this is redundant.
+	// In the case of a `terraform import`, we need to set ID since it was previously TYPE:SLUG.
+	// This must happen below the error checking in case the integration object is nil.
+	data.SetId(runtime.Id)
 
 	diags = utils.DiagsCheckError(diags, data.Set("name", runtime.Name), "Unable to read Runtime name")
 	diags = utils.DiagsCheckError(diags, data.Set("label", runtime.Label), "Unable to read Runtime label")

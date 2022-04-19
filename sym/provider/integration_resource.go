@@ -3,7 +3,6 @@ package provider
 import (
 	"context"
 	"log"
-	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -19,7 +18,7 @@ func Integration() *schema.Resource {
 		UpdateContext: updateIntegration,
 		DeleteContext: deleteIntegration,
 		Importer: &schema.ResourceImporter{
-			StateContext: importIntegration,
+			StateContext: getNameAndTypeImporter("integration"),
 		},
 		Schema: map[string]*schema.Schema{
 			"type":        utils.Required(schema.TypeString),
@@ -29,25 +28,6 @@ func Integration() *schema.Resource {
 			"label":       utils.Optional(schema.TypeString),
 		},
 	}
-}
-
-func importIntegration(_ context.Context, data *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	// ID here is the last argument passed to the `terraform import sym_integration.RESOURCE_NAME RESOURCE_ID` command
-	identifier := data.Id()
-	idParts := strings.Split(identifier, ":")
-	if len(idParts) != 2 {
-		return nil, utils.ErrInvalidImportTypeSlug("integration", identifier)
-	}
-
-	if err := data.Set("type", idParts[0]); err != nil {
-		return nil, err
-	}
-
-	if err := data.Set("name", idParts[1]); err != nil {
-		return nil, err
-	}
-
-	return []*schema.ResourceData{data}, nil
 }
 
 func createIntegration(_ context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -73,10 +53,10 @@ func createIntegration(_ context.Context, data *schema.ResourceData, meta interf
 
 func readIntegration(_ context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	var (
-		diags diag.Diagnostics
-		id    string
+		diags       diag.Diagnostics
+		id          string
 		integration *client.Integration
-		err error
+		err         error
 	)
 	c := meta.(*client.ApiClient)
 
@@ -85,7 +65,6 @@ func readIntegration(_ context.Context, data *schema.ResourceData, meta interfac
 		// the integration by slug and subtype.
 		subtype := data.Get("type").(string)
 		integration, err = c.Integration.Find(slug.(string), subtype)
-		data.SetId(integration.Id)
 	} else {
 		// Otherwise, this is probably a normal read, and we should just look up the integration by ID.
 		id = data.Id()
@@ -101,6 +80,11 @@ func readIntegration(_ context.Context, data *schema.ResourceData, meta interfac
 		diags = append(diags, utils.DiagFromError(err, "Unable to read Integration"))
 		return diags
 	}
+
+	// In the case of a normal read, ID will already be set and this is redundant.
+	// In the case of a `terraform import`, we need to set ID since it was previously TYPE:SLUG.
+	// This must happen below the error checking in case the integration object is nil.
+	data.SetId(integration.Id)
 
 	diags = utils.DiagsCheckError(diags, data.Set("type", integration.Type), "Unable to read Integration type")
 	diags = utils.DiagsCheckError(diags, data.Set("name", integration.Name), "Unable to read Integration name")
