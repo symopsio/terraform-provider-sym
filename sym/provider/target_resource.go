@@ -19,7 +19,7 @@ func Target() *schema.Resource {
 		UpdateContext: updateTarget,
 		DeleteContext: deleteTarget,
 		Importer: &schema.ResourceImporter{
-			StateContext: schema.ImportStatePassthroughContext,
+			StateContext: getNameAndTypeImporter("target"),
 		},
 	}
 }
@@ -58,11 +58,24 @@ func createTarget(_ context.Context, data *schema.ResourceData, meta interface{}
 }
 
 func readTarget(_ context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	var diags diag.Diagnostics
+	var (
+		diags  diag.Diagnostics
+		target *client.Target
+		err    error
+	)
 	c := meta.(*client.ApiClient)
 	id := data.Id()
 
-	target, err := c.Target.Read(id)
+	if slug := data.Get("name"); slug != nil {
+		// If slug is already set, then assume we are coming from a ``terraform import`` command, and look up
+		// the integration by slug and subtype.
+		subtype := data.Get("type").(string)
+		target, err = c.Target.Find(slug.(string), subtype)
+	} else {
+		// Otherwise, this is probably a normal read, and we should just look up the target by ID.
+		target, err = c.Target.Read(id)
+	}
+
 	if err != nil {
 		if isNotFoundError(err) {
 			log.Println(notFoundWarning("Target", id))
@@ -72,6 +85,11 @@ func readTarget(_ context.Context, data *schema.ResourceData, meta interface{}) 
 		diags = append(diags, utils.DiagFromError(err, "Unable to read Target"))
 		return diags
 	}
+
+	// In the case of a normal read, ID will already be set and this is redundant.
+	// In the case of a `terraform import`, we need to set ID since it was previously TYPE:SLUG.
+	// This must happen below the error checking in case the integration object is nil.
+	data.SetId(target.Id)
 
 	diags = utils.DiagsCheckError(diags, data.Set("type", target.Type), "Unable to read Target type")
 	diags = utils.DiagsCheckError(diags, data.Set("name", target.Name), "Unable to read Target name")
