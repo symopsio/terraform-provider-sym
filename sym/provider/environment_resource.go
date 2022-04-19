@@ -22,7 +22,7 @@ func Environment() *schema.Resource {
 		UpdateContext: updateEnvironment,
 		DeleteContext: deleteEnvironment,
 		Importer: &schema.ResourceImporter{
-			StateContext: schema.ImportStatePassthroughContext,
+			StateContext: nameImporter,
 		},
 		Schema: map[string]*schema.Schema{
 			"name":                utils.Required(schema.TypeString),
@@ -66,11 +66,22 @@ func createEnvironment(_ context.Context, data *schema.ResourceData, meta interf
 
 // Read an environment using the HTTP client
 func readEnvironment(_ context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	var diags diag.Diagnostics
+	var (
+		diags diag.Diagnostics
+		environment *client.Environment
+		err error
+	)
 	c := meta.(*client.ApiClient)
 	id := data.Id()
 
-	environment, err := c.Environment.Read(id)
+	if slug := data.Get("name"); slug != nil {
+		// If the slug is already set, then assume we are coming from a ``terraform import`` command, and look up
+		// the environment by slug.
+		environment, err = c.Environment.Find(slug.(string))
+	} else {
+		environment, err = c.Environment.Read(id)
+	}
+
 	if err != nil {
 		if isNotFoundError(err) {
 			log.Println(notFoundWarning("Environment", id))
@@ -80,6 +91,11 @@ func readEnvironment(_ context.Context, data *schema.ResourceData, meta interfac
 		diags = append(diags, utils.DiagFromError(err, "Unable to read Environment"))
 		return diags
 	}
+
+	// In the case of a normal read, ID will already be set and this is redundant.
+	// In the case of a `terraform import`, we need to set ID since it was previously TYPE:SLUG.
+	// This must happen below the error checking in case the integration object is nil.
+	data.SetId(environment.Id)
 
 	diags = utils.DiagsCheckError(diags, data.Set("name", environment.Name), "Unable to read Environment name")
 	diags = utils.DiagsCheckError(diags, data.Set("label", environment.Label), "Unable to read Environment label")
