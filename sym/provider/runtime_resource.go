@@ -18,7 +18,7 @@ func Runtime() *schema.Resource {
 		UpdateContext: updateRuntime,
 		DeleteContext: deleteRuntime,
 		Importer: &schema.ResourceImporter{
-			StateContext: schema.ImportStatePassthroughContext,
+			StateContext: importRuntime,
 		},
 		Schema: map[string]*schema.Schema{
 			"name":       utils.Required(schema.TypeString),
@@ -27,6 +27,16 @@ func Runtime() *schema.Resource {
 		},
 	}
 }
+
+func importRuntime(_ context.Context, data *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	// ID here is the last argument passed to the `terraform import sym_runtime.RESOURCE_NAME RESOURCE_ID` command
+	if err := data.Set("name", data.Id()); err != nil {
+		return nil, err
+	}
+
+	return []*schema.ResourceData{data}, nil
+}
+
 
 func createRuntime(_ context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	c := meta.(*client.ApiClient)
@@ -46,11 +56,23 @@ func createRuntime(_ context.Context, data *schema.ResourceData, meta interface{
 }
 
 func readRuntime(_ context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	var diags diag.Diagnostics
+	var (
+		diags diag.Diagnostics
+		runtime *client.Runtime
+		err error
+	)
 	c := meta.(*client.ApiClient)
 	id := data.Id()
 
-	runtime, err := c.Runtime.Read(id)
+	if slug := data.Get("name"); slug != nil {
+		// If the slug is already set, then assume we are coming from a ``terraform import`` command, and look up
+		// the runtime by slug.
+		runtime, err = c.Runtime.Find(slug.(string))
+		data.SetId(runtime.Id)
+	} else {
+		runtime, err = c.Runtime.Read(id)
+	}
+
 	if err != nil {
 		if isNotFoundError(err) {
 			log.Println(notFoundWarning("Runtime", id))
