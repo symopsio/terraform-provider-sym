@@ -94,7 +94,7 @@ func readEnvironment(_ context.Context, data *schema.ResourceData, meta interfac
 
 	// In the case of a normal read, ID will already be set and this is redundant.
 	// In the case of a `terraform import`, we need to set ID since it was previously TYPE:SLUG.
-	// This must happen below the error checking in case the integration object is nil.
+	// This must happen below the error checking in case the lookup failed.
 	data.SetId(environment.Id)
 
 	diags = utils.DiagsCheckError(diags, data.Set("name", environment.Name), "Unable to read Environment name")

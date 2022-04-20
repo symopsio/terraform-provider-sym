@@ -18,7 +18,7 @@ func ErrorLogger() *schema.Resource {
 		UpdateContext: updateErrorLogger,
 		DeleteContext: deleteErrorLogger,
 		Importer: &schema.ResourceImporter{
-			StateContext: schema.ImportStatePassthroughContext,
+			StateContext: getSlugImporter("destination"),
 		},
 		Schema: map[string]*schema.Schema{
 			"integration_id": utils.Required(schema.TypeString),
@@ -45,11 +45,22 @@ func createErrorLogger(_ context.Context, data *schema.ResourceData, meta interf
 }
 
 func readErrorLogger(_ context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	var diags diag.Diagnostics
+	var (
+		diags diag.Diagnostics
+		errorLogger *client.ErrorLogger
+		err error
+	)
 	c := meta.(*client.ApiClient)
 	id := data.Id()
 
-	errorLogger, err := c.ErrorLogger.Read(id)
+	if slug := data.Get("destination"); slug != nil {
+		// If the destination is already set, then we are in the context of a `terraform import` and must look up
+		// the ErrorLogger by slug.
+		errorLogger, err = c.ErrorLogger.Find(slug.(string))
+	} else {
+		errorLogger, err = c.ErrorLogger.Read(id)
+	}
+
 	if err != nil {
 		if isNotFoundError(err) {
 			log.Println(notFoundWarning("ErrorLogger", id))
@@ -59,6 +70,11 @@ func readErrorLogger(_ context.Context, data *schema.ResourceData, meta interfac
 		diags = append(diags, utils.DiagFromError(err, "Unable to read ErrorLogger"))
 		return diags
 	}
+
+	// In the case of a normal read, ID will already be set and this is redundant.
+	// In the case of a `terraform import`, we need to set ID since it was previously TYPE:SLUG.
+	// This must happen below the error checking in case the lookup failed.
+	data.SetId(errorLogger.Id)
 
 	diags = utils.DiagsCheckError(diags, data.Set("integration_id", errorLogger.IntegrationId), "Unable to read ErrorLogger integration_id")
 	diags = utils.DiagsCheckError(diags, data.Set("destination", errorLogger.Destination), "Unable to read ErrorLogger destination")
