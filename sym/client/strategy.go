@@ -75,11 +75,11 @@ func (c *strategyClient) Read(id string) (*Strategy, error) {
 	return &result, nil
 }
 
-func (i *strategyClient) Find(name, strategyType string) (*Strategy, error) {
+func (c *strategyClient) Find(name, strategyType string) (*Strategy, error) {
 	log.Printf("Getting Sym Strategy by type %s and name %s", strategyType, name)
 	var result []Strategy
 
-	if err := i.HttpClient.Read(fmt.Sprintf("/entities/access-strategies?slug=%s&type=%s", name, strategyType), &result); err != nil {
+	if err := c.HttpClient.Read(fmt.Sprintf("/entities/access-strategies?slug=%s&type=%s", name, strategyType), &result); err != nil {
 		return nil, err
 	}
 
