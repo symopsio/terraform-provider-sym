@@ -103,9 +103,9 @@ func createStrategy(_ context.Context, data *schema.ResourceData, meta interface
 
 func readStrategy(_ context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	var (
-		diags diag.Diagnostics
+		diags    diag.Diagnostics
 		strategy *client.Strategy
-		err error
+		err      error
 	)
 	c := meta.(*client.ApiClient)
 	id := data.Id()

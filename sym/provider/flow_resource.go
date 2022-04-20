@@ -160,8 +160,8 @@ func createFlow(_ context.Context, data *schema.ResourceData, meta interface{}) 
 func readFlow(_ context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	var (
 		diags diag.Diagnostics
-		flow *client.Flow
-		err error
+		flow  *client.Flow
+		err   error
 	)
 	c := meta.(*client.ApiClient)
 	id := data.Id()

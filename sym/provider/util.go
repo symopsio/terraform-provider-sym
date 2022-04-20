@@ -34,7 +34,6 @@ func notFoundWarning(resource, id string) string {
 	return fmt.Sprintf("[WARN] Sym %s (%s) not found, removing from state", resource, id)
 }
 
-
 // getSlugImporter returns a function that may be used as a Terraform ResourceImporter. It should be used for any resource
 // which has a ReadContext method that supports fetching from the API with just a slug. For example, see "sym_flow" or
 // "sym_error_logger".
@@ -51,8 +50,8 @@ func getSlugImporter(slugField string) func(_ context.Context, data *schema.Reso
 }
 
 type resourceIdParts struct {
-	Subtype string  // The ``type`` field for the resource (e.g. "slack" for integration)
-	Slug string  // The ``name`` field for the resource
+	Subtype string // The ``type`` field for the resource (e.g. "slack" for integration)
+	Slug    string // The ``name`` field for the resource
 }
 
 // resourceIdToParts parses the last argument passed to the `terraform import sym_RESOURCE.RESOURCE_NAME RESOURCE_ID`
@@ -68,7 +67,7 @@ func resourceIdToParts(identifier, resource string) (*resourceIdParts, error) {
 
 	return &resourceIdParts{
 		Subtype: parts[0],
-		Slug: parts[1],
+		Slug:    parts[1],
 	}, nil
 }
 

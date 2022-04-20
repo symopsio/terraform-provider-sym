@@ -144,7 +144,6 @@ func (c *flowClient) Find(name string) (*Flow, error) {
 	return &result[0], nil
 }
 
-
 func (c *flowClient) Update(flow Flow) (string, error) {
 	log.Printf("Updating Sym Flow: %v", flow)
 	result := Flow{}

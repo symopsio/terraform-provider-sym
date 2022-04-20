@@ -67,9 +67,9 @@ func createEnvironment(_ context.Context, data *schema.ResourceData, meta interf
 // Read an environment using the HTTP client
 func readEnvironment(_ context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	var (
-		diags diag.Diagnostics
+		diags       diag.Diagnostics
 		environment *client.Environment
-		err error
+		err         error
 	)
 	c := meta.(*client.ApiClient)
 	id := data.Id()

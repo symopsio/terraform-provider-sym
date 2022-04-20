@@ -46,9 +46,9 @@ func createErrorLogger(_ context.Context, data *schema.ResourceData, meta interf
 
 func readErrorLogger(_ context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	var (
-		diags diag.Diagnostics
+		diags       diag.Diagnostics
 		errorLogger *client.ErrorLogger
-		err error
+		err         error
 	)
 	c := meta.(*client.ApiClient)
 	id := data.Id()

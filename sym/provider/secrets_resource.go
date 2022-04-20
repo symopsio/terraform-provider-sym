@@ -54,9 +54,9 @@ func createSecrets(_ context.Context, data *schema.ResourceData, meta interface{
 
 func readSecrets(_ context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	var (
-		diags diag.Diagnostics
+		diags   diag.Diagnostics
 		secrets *client.Secrets
-		err error
+		err     error
 	)
 	c := meta.(*client.ApiClient)
 	id := data.Id()
