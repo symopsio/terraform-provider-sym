@@ -16,6 +16,7 @@ type Secret struct {
 type SecretClient interface {
 	Create(secret Secret) (string, error)
 	Read(id string) (*Secret, error)
+	Find(slug string) (*Secret, error)
 	Update(secret Secret) (string, error)
 	Delete(id string) (string, error)
 }
@@ -56,6 +57,22 @@ func (c *secretClient) Read(id string) (*Secret, error) {
 
 	log.Printf("Got Secret: %s", result.Id)
 	return &result, nil
+}
+
+func (c *secretClient) Find(slug string) (*Secret, error) {
+	log.Printf("Getting Secret by slug: %s", slug)
+	var result []Secret
+
+	if err := c.HttpClient.Read(fmt.Sprintf("/entities/secrets?slug=%s", slug), &result); err != nil {
+		return nil, err
+	}
+
+	if len(result) != 1 {
+		return nil, fmt.Errorf("one Secret with the slug %s was expected, but %v were found", slug, len(result))
+	}
+
+	log.Printf("Got Secret by slug: %s (%s)", slug, result[0].Id)
+	return &result[0], nil
 }
 
 func (c *secretClient) Update(secret Secret) (string, error) {

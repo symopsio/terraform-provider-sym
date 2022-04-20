@@ -19,7 +19,7 @@ func Secret() *schema.Resource {
 		UpdateContext: updateSecret,
 		DeleteContext: deleteSecret,
 		Importer: &schema.ResourceImporter{
-			StateContext: schema.ImportStatePassthroughContext,
+			StateContext: getSlugImporter("path"),
 		},
 	}
 }
@@ -53,11 +53,22 @@ func createSecret(_ context.Context, data *schema.ResourceData, meta interface{}
 }
 
 func readSecret(_ context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	var diags diag.Diagnostics
+	var (
+		diags  diag.Diagnostics
+		secret *client.Secret
+		err    error
+	)
 	c := meta.(*client.ApiClient)
 	id := data.Id()
 
-	secret, err := c.Secret.Read(id)
+	if slug := data.Get("path"); slug != nil {
+		// If the path is already set, then assume we are coming from a ``terraform import`` command, and look up
+		// the secret by slug.
+		secret, err = c.Secret.Find(slug.(string))
+	} else {
+		secret, err = c.Secret.Read(id)
+	}
+
 	if err != nil {
 		if isNotFoundError(err) {
 			log.Println(notFoundWarning("Secret", id))
@@ -67,6 +78,11 @@ func readSecret(_ context.Context, data *schema.ResourceData, meta interface{}) 
 		diags = append(diags, utils.DiagFromError(err, "Unable to read Secret"))
 		return diags
 	}
+
+	// In the case of a normal read, ID will already be set and this is redundant.
+	// In the case of a `terraform import`, we need to set ID since it was previously TYPE:SLUG.
+	// This must happen below the error checking in case the lookup failed.
+	data.SetId(secret.Id)
 
 	diags = utils.DiagsCheckError(diags, data.Set("path", secret.Path), "Unable to read Secret path")
 	diags = utils.DiagsCheckError(diags, data.Set("source_id", secret.SourceId), "Unable to read Secret source_id")
