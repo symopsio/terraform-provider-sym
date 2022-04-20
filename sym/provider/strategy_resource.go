@@ -22,7 +22,7 @@ func Strategy() *schema.Resource {
 		UpdateContext: updateStrategy,
 		DeleteContext: deleteStrategy,
 		Importer: &schema.ResourceImporter{
-			StateContext: schema.ImportStatePassthroughContext,
+			StateContext: getNameAndTypeImporter("strategy"),
 		},
 	}
 }
@@ -102,11 +102,24 @@ func createStrategy(_ context.Context, data *schema.ResourceData, meta interface
 }
 
 func readStrategy(_ context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	var diags diag.Diagnostics
+	var (
+		diags diag.Diagnostics
+		strategy *client.Strategy
+		err error
+	)
 	c := meta.(*client.ApiClient)
 	id := data.Id()
 
-	strategy, err := c.Strategy.Read(id)
+	idParts, parseErr := resourceIdToParts(id, "strategy")
+	if parseErr == nil {
+		// If the ID was parsed as `TYPE:SLUG` successfully, perform a lookup using those values.
+		// This means we are in a `terraform import` scenario.
+		strategy, err = c.Strategy.Find(idParts.Slug, idParts.Subtype)
+	} else {
+		// If the ID could not be parsed as `TYPE:SLUG`, we are doing a normal read at apply-time.
+		strategy, err = c.Strategy.Read(id)
+	}
+
 	if err != nil {
 		if isNotFoundError(err) {
 			log.Println(notFoundWarning("Strategy", id))
@@ -116,6 +129,11 @@ func readStrategy(_ context.Context, data *schema.ResourceData, meta interface{}
 		diags = append(diags, utils.DiagFromError(err, "Unable to read Strategy"))
 		return diags
 	}
+
+	// In the case of a normal read, ID will already be set and this is redundant.
+	// In the case of a `terraform import`, we need to set ID since it was previously TYPE:SLUG.
+	// This must happen below the error checking in case the lookup failed.
+	data.SetId(strategy.Id)
 
 	diags = utils.DiagsCheckError(diags, data.Set("type", strategy.Type), "Unable to read Strategy type")
 	diags = utils.DiagsCheckError(diags, data.Set("integration_id", strategy.IntegrationId), "Unable to read Strategy integration_id")
