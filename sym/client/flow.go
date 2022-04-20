@@ -83,6 +83,7 @@ func (s Flow) String() string {
 type FlowClient interface {
 	Create(flow Flow) (string, error)
 	Read(id string) (*Flow, error)
+	Find(name string) (*Flow, error)
 	Update(flow Flow) (string, error)
 	Delete(id string) (string, error)
 }
@@ -126,6 +127,23 @@ func (c *flowClient) Read(id string) (*Flow, error) {
 	log.Printf("Got Sym Flow: %s", result.Id)
 	return &result, nil
 }
+
+func (c *flowClient) Find(name string) (*Flow, error) {
+	log.Printf("Getting Flow by name: %s", name)
+	var result []Flow
+
+	if err := c.HttpClient.Read(fmt.Sprintf("/entities/flows?slug=%s", name), &result); err != nil {
+		return nil, err
+	}
+
+	if len(result) != 1 {
+		return nil, fmt.Errorf("one Flow with the name %s was expected, but %v were found", name, len(result))
+	}
+
+	log.Printf("Got Flow by name: %s (%s)", name, result[0].Id)
+	return &result[0], nil
+}
+
 
 func (c *flowClient) Update(flow Flow) (string, error) {
 	log.Printf("Updating Sym Flow: %v", flow)
