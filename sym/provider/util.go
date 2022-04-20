@@ -45,29 +45,43 @@ func nameImporter(_ context.Context, data *schema.ResourceData, _ interface{}) (
 	return []*schema.ResourceData{data}, nil
 }
 
+type resourceIdParts struct {
+	Subtype string  // The ``type`` field for the resource (e.g. "slack" for integration)
+	Slug string  // The ``name`` field for the resource
+}
+
+// resourceIdToParts parses the last argument passed to the `terraform import sym_RESOURCE.RESOURCE_NAME RESOURCE_ID`
+// command into a resourceIdParts struct.
+//
+// The ``resource`` provided will be used for error message details.
+func resourceIdToParts(identifier, resource string) (*resourceIdParts, error) {
+	parts := strings.Split(identifier, ":")
+
+	if len(parts) != 2 {
+		return nil, utils.ErrInvalidImportTypeSlug(resource, identifier)
+	}
+
+	return &resourceIdParts{
+		Subtype: parts[0],
+		Slug: parts[1],
+	}, nil
+}
+
 // getNameAndTypeImporter returns a function that may be used as a Terraform ResourceImporter. It should be used for any
 // resource which has a ReadContext method that supports fetching from the API with a slug and a sub_type_name. For
 // example, see "sym_integration" or "sym_target".
 //
-// The resourceName provided will be used for error message details.
-func getNameAndTypeImporter(resourceName string) func(_ context.Context, data *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
+// This Importer function sets nothing on the resource, and is instead a validator that checks whether the provided
+// ID is a valid lookup in the form of `TYPE:SLUG`. The ReadContext methods are responsible for re-parsing the ID
+// to know whether they are in the context of an import.
+//
+// The ``resource`` provided will be used for error message details.
+func getNameAndTypeImporter(resource string) func(_ context.Context, data *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
 	return func(_ context.Context, data *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
-		// ID here is the last argument passed to the `terraform import sym_RESOURCE.RESOURCE_NAME RESOURCE_ID` command
-		identifier := data.Id()
-		idParts := strings.Split(identifier, ":")
-
-		if len(idParts) != 2 {
-			return nil, utils.ErrInvalidImportTypeSlug(resourceName, identifier)
-		}
-
-		if err := data.Set("type", idParts[0]); err != nil {
+		_, err := resourceIdToParts(data.Id(), resource)
+		if err != nil {
 			return nil, err
 		}
-
-		if err := data.Set("name", idParts[1]); err != nil {
-			return nil, err
-		}
-
 		return []*schema.ResourceData{data}, nil
 	}
 }

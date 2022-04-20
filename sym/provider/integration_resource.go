@@ -54,20 +54,19 @@ func createIntegration(_ context.Context, data *schema.ResourceData, meta interf
 func readIntegration(_ context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	var (
 		diags       diag.Diagnostics
-		id          string
 		integration *client.Integration
 		err         error
 	)
 	c := meta.(*client.ApiClient)
+	id := data.Id()
 
-	if slug := data.Get("name"); slug != nil {
-		// If slug is already set, then assume we are coming from a ``terraform import`` command, and look up
-		// the integration by slug and subtype.
-		subtype := data.Get("type").(string)
-		integration, err = c.Integration.Find(slug.(string), subtype)
+	idParts, parseErr := resourceIdToParts(id, "integration")
+	if parseErr == nil {
+		// If the ID was parsed as `TYPE:SLUG` successfully, perform a lookup using those values.
+		// This means we are in a `terraform import` scenario.
+		integration, err = c.Integration.Find(idParts.Slug, idParts.Subtype)
 	} else {
-		// Otherwise, this is probably a normal read, and we should just look up the integration by ID.
-		id = data.Id()
+		// If the ID could not be parsed as `TYPE:SLUG`, we are doing a normal read at apply-time.
 		integration, err = c.Integration.Read(id)
 	}
 
@@ -83,7 +82,7 @@ func readIntegration(_ context.Context, data *schema.ResourceData, meta interfac
 
 	// In the case of a normal read, ID will already be set and this is redundant.
 	// In the case of a `terraform import`, we need to set ID since it was previously TYPE:SLUG.
-	// This must happen below the error checking in case the integration object is nil.
+	// This must happen below the error checking in case the lookup failed.
 	data.SetId(integration.Id)
 
 	diags = utils.DiagsCheckError(diags, data.Set("type", integration.Type), "Unable to read Integration type")
