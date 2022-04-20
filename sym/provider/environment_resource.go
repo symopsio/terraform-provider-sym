@@ -22,7 +22,7 @@ func Environment() *schema.Resource {
 		UpdateContext: updateEnvironment,
 		DeleteContext: deleteEnvironment,
 		Importer: &schema.ResourceImporter{
-			StateContext: nameImporter,
+			StateContext: getSlugImporter("name"),
 		},
 		Schema: map[string]*schema.Schema{
 			"name":                utils.Required(schema.TypeString),

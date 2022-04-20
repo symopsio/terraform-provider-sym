@@ -34,15 +34,20 @@ func notFoundWarning(resource, id string) string {
 	return fmt.Sprintf("[WARN] Sym %s (%s) not found, removing from state", resource, id)
 }
 
-// nameImporter is a Terraform ResourceImporter. It may be added to any resource which has a ReadContext method that
-// supports fetching from the API with only a slug. For example, see "sym_runtime" or "sym_flow".
-func nameImporter(_ context.Context, data *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
-	// ID here is the last argument passed to the `terraform import sym_RESOURCE.RESOURCE_NAME RESOURCE_ID` command
-	if err := data.Set("name", data.Id()); err != nil {
-		return nil, err
-	}
 
-	return []*schema.ResourceData{data}, nil
+// getSlugImporter returns a function that may be used as a Terraform ResourceImporter. It should be used for any resource
+// which has a ReadContext method that supports fetching from the API with just a slug. For example, see "sym_flow" or
+// "sym_error_logger".
+//
+// This Importer function sets the ID provided from the `terraform import` command as the value for the field specified
+// by the slugField parameter so that it may be used by the ReadContext method look up the resource.
+func getSlugImporter(slugField string) func(_ context.Context, data *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
+	return func(_ context.Context, data *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
+		if err := data.Set(slugField, data.Id()); err != nil {
+			return nil, err
+		}
+		return []*schema.ResourceData{data}, nil
+	}
 }
 
 type resourceIdParts struct {
