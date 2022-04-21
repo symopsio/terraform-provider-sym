@@ -20,7 +20,7 @@ func Secret() *schema.Resource {
 		UpdateContext: updateSecret,
 		DeleteContext: deleteSecret,
 		Importer: &schema.ResourceImporter{
-			StateContext: getSlugImporter("path"),
+			StateContext: getSlugImporter("secret"),
 		},
 	}
 }

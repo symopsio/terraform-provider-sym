@@ -19,7 +19,7 @@ func Runtime() *schema.Resource {
 		UpdateContext: updateRuntime,
 		DeleteContext: deleteRuntime,
 		Importer: &schema.ResourceImporter{
-			StateContext: getSlugImporter("name"),
+			StateContext: getSlugImporter("runtime"),
 		},
 		Schema: map[string]*schema.Schema{
 			"name":       utils.Required(schema.TypeString),

@@ -19,7 +19,7 @@ func ErrorLogger() *schema.Resource {
 		UpdateContext: updateErrorLogger,
 		DeleteContext: deleteErrorLogger,
 		Importer: &schema.ResourceImporter{
-			StateContext: getSlugImporter("destination"),
+			StateContext: getSlugImporter("error_logger"),
 		},
 		Schema: map[string]*schema.Schema{
 			"integration_id": utils.Required(schema.TypeString),

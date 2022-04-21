@@ -31,7 +31,7 @@ func Flow() *schema.Resource {
 		UpdateContext: updateFlow,
 		DeleteContext: deleteFlow,
 		Importer: &schema.ResourceImporter{
-			StateContext: getSlugImporter("name"),
+			StateContext: getSlugImporter("flow"),
 		},
 	}
 }
