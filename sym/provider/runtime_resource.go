@@ -55,7 +55,7 @@ func readRuntime(_ context.Context, data *schema.ResourceData, meta interface{})
 	c := meta.(*client.ApiClient)
 	id := data.Id()
 
-	if _, err := uuid.ParseUUID(id); err == nil {
+	if _, parseErr := uuid.ParseUUID(id); parseErr == nil {
 		// If the ID is a UUID, look up the Runtime directly.
 		runtime, err = c.Runtime.Read(id)
 	} else {

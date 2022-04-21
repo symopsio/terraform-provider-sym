@@ -62,7 +62,7 @@ func readSecret(_ context.Context, data *schema.ResourceData, meta interface{}) 
 	c := meta.(*client.ApiClient)
 	id := data.Id()
 
-	if _, err := uuid.ParseUUID(id); err == nil {
+	if _, parseErr := uuid.ParseUUID(id); parseErr == nil {
 		// If the ID is a UUID, look up the Secret directly.
 		secret, err = c.Secret.Read(id)
 	} else {

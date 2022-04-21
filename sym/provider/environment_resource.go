@@ -75,7 +75,7 @@ func readEnvironment(_ context.Context, data *schema.ResourceData, meta interfac
 	c := meta.(*client.ApiClient)
 	id := data.Id()
 
-	if _, err := uuid.ParseUUID(id); err == nil {
+	if _, parseErr := uuid.ParseUUID(id); parseErr == nil {
 		// If the ID is a UUID, look up the Environment directly.
 		environment, err = c.Environment.Read(id)
 	} else {
