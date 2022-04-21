@@ -28,7 +28,7 @@ const (
 	DocsSupport        = "https://docs.symops.com/docs/support"
 	DocsSymflowInstall = "https://docs.symops.com/docs/install-sym-flow"
 	DocsSymflowLogin   = "https://docs.symops.com/docs/login-sym-flow"
-	DocsImport         = "https://docs.symops.com/docs/?????"
+	DocsImport         = "https://docs.symops.com/docs/reapplying-terraform"
 )
 
 var (
