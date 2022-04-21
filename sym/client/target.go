@@ -29,6 +29,7 @@ func (s Target) String() string {
 type TargetClient interface {
 	Create(target Target) (string, error)
 	Read(id string) (*Target, error)
+	Find(name string, targetType string) (*Target, error)
 	Update(target Target) (string, error)
 	Delete(id string) (string, error)
 }
@@ -69,6 +70,22 @@ func (c *targetClient) Read(id string) (*Target, error) {
 
 	log.Printf("Got Sym Target: %s", id)
 	return &result, nil
+}
+
+func (c *targetClient) Find(name, targetType string) (*Target, error) {
+	log.Printf("Getting Target by name: %s", name)
+	var result []Target
+
+	if err := c.HttpClient.Read(fmt.Sprintf("/entities/access-targets?slug=%s&type=%s", name, targetType), &result); err != nil {
+		return nil, err
+	}
+
+	if len(result) != 1 {
+		return nil, fmt.Errorf("one Target with the name %s was expected, but %v were found", name, len(result))
+	}
+
+	log.Printf("Got Target by type and name: %s %s (%s)", targetType, name, result[0].Id)
+	return &result[0], nil
 }
 
 func (c *targetClient) Update(target Target) (string, error) {

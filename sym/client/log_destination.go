@@ -19,6 +19,7 @@ func (s LogDestination) String() string {
 type LogDestinationClient interface {
 	Create(destination LogDestination) (string, error)
 	Read(id string) (*LogDestination, error)
+	Find(name, destinationType string) (*LogDestination, error)
 	Update(destination LogDestination) (string, error)
 	Delete(id string) (string, error)
 }
@@ -33,11 +34,11 @@ type logDestinationClient struct {
 	HttpClient SymHttpClient
 }
 
-func (i *logDestinationClient) Create(destination LogDestination) (string, error) {
+func (l *logDestinationClient) Create(destination LogDestination) (string, error) {
 	log.Printf("Creating Sym LogDestination: %v", destination)
 
 	result := LogDestination{}
-	if _, err := i.HttpClient.Create("/entities/log-destinations", &destination, &result); err != nil {
+	if _, err := l.HttpClient.Create("/entities/log-destinations", &destination, &result); err != nil {
 		return "", err
 	}
 
@@ -49,11 +50,11 @@ func (i *logDestinationClient) Create(destination LogDestination) (string, error
 	return result.Id, nil
 }
 
-func (i *logDestinationClient) Read(id string) (*LogDestination, error) {
+func (l *logDestinationClient) Read(id string) (*LogDestination, error) {
 	log.Printf("Getting Sym LogDestination: %s", id)
 	result := LogDestination{}
 
-	if err := i.HttpClient.Read(fmt.Sprintf("/entities/log-destinations/%s", id), &result); err != nil {
+	if err := l.HttpClient.Read(fmt.Sprintf("/entities/log-destinations/%s", id), &result); err != nil {
 		return nil, err
 	}
 
@@ -61,11 +62,27 @@ func (i *logDestinationClient) Read(id string) (*LogDestination, error) {
 	return &result, nil
 }
 
-func (i *logDestinationClient) Update(destination LogDestination) (string, error) {
+func (l *logDestinationClient) Find(name, destinationType string) (*LogDestination, error) {
+	log.Printf("Getting Sym Log Destination by type and name: %s %s", destinationType, name)
+	var result []LogDestination
+
+	if err := l.HttpClient.Read(fmt.Sprintf("/entities/log-destinations?slug=%s&type=%s", name, destinationType), &result); err != nil {
+		return nil, err
+	}
+
+	if len(result) != 1 {
+		return nil, fmt.Errorf("one Log Destination of type %s with the name %s was expected, but %v were found", destinationType, name, len(result))
+	}
+
+	log.Printf("Got Sym Log Destination by type and name: %s %s (%s)", destinationType, name, result[0].Id)
+	return &result[0], nil
+}
+
+func (l *logDestinationClient) Update(destination LogDestination) (string, error) {
 	log.Printf("Updating Sym LogDestination: %v", destination)
 	result := LogDestination{}
 
-	if _, err := i.HttpClient.Update(fmt.Sprintf("/entities/log-destinations/%s", destination.Id), &destination, &result); err != nil {
+	if _, err := l.HttpClient.Update(fmt.Sprintf("/entities/log-destinations/%s", destination.Id), &destination, &result); err != nil {
 		return "", err
 	}
 
@@ -77,10 +94,10 @@ func (i *logDestinationClient) Update(destination LogDestination) (string, error
 	return result.Id, nil
 }
 
-func (i *logDestinationClient) Delete(id string) (string, error) {
+func (l *logDestinationClient) Delete(id string) (string, error) {
 	log.Printf("Deleting Sym LogDestination: %s", id)
 
-	if err := i.HttpClient.Delete(fmt.Sprintf("/entities/log-destinations/%s", id)); err != nil {
+	if err := l.HttpClient.Delete(fmt.Sprintf("/entities/log-destinations/%s", id)); err != nil {
 		return "", err
 	}
 

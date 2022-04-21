@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 
+	"github.com/hashicorp/go-uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
@@ -22,7 +23,7 @@ func Environment() *schema.Resource {
 		UpdateContext: updateEnvironment,
 		DeleteContext: deleteEnvironment,
 		Importer: &schema.ResourceImporter{
-			StateContext: schema.ImportStatePassthroughContext,
+			StateContext: getSlugImporter("environment"),
 		},
 		Schema: map[string]*schema.Schema{
 			"name":                utils.Required(schema.TypeString),
@@ -66,11 +67,23 @@ func createEnvironment(_ context.Context, data *schema.ResourceData, meta interf
 
 // Read an environment using the HTTP client
 func readEnvironment(_ context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	var diags diag.Diagnostics
+	var (
+		diags       diag.Diagnostics
+		environment *client.Environment
+		err         error
+	)
 	c := meta.(*client.ApiClient)
 	id := data.Id()
 
-	environment, err := c.Environment.Read(id)
+	if _, parseErr := uuid.ParseUUID(id); parseErr == nil {
+		// If the ID is a UUID, look up the Environment directly.
+		environment, err = c.Environment.Read(id)
+	} else {
+		// Otherwise, we are probably in the context of a `terraform import` and should attempt
+		// to look up the Environment by slug.
+		environment, err = c.Environment.Find(id)
+	}
+
 	if err != nil {
 		if isNotFoundError(err) {
 			log.Println(notFoundWarning("Environment", id))
@@ -80,6 +93,11 @@ func readEnvironment(_ context.Context, data *schema.ResourceData, meta interfac
 		diags = append(diags, utils.DiagFromError(err, "Unable to read Environment"))
 		return diags
 	}
+
+	// In the case of a normal read, ID will already be set and this is redundant.
+	// In the case of a `terraform import`, we need to set ID since it was previously TYPE:SLUG.
+	// This must happen below the error checking in case the lookup failed.
+	data.SetId(environment.Id)
 
 	diags = utils.DiagsCheckError(diags, data.Set("name", environment.Name), "Unable to read Environment name")
 	diags = utils.DiagsCheckError(diags, data.Set("label", environment.Label), "Unable to read Environment label")

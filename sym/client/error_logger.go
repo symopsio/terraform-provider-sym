@@ -14,6 +14,7 @@ type ErrorLogger struct {
 type ErrorLoggerClient interface {
 	Create(errorLogger ErrorLogger) (string, error)
 	Read(id string) (*ErrorLogger, error)
+	Find(slug string) (*ErrorLogger, error)
 	Update(errorLogger ErrorLogger) (string, error)
 	Delete(id string) (string, error)
 }
@@ -54,6 +55,22 @@ func (c *errorLoggerClient) Read(id string) (*ErrorLogger, error) {
 
 	log.Printf("Got ErrorLogger: %s", result.Id)
 	return &result, nil
+}
+
+func (c *errorLoggerClient) Find(slug string) (*ErrorLogger, error) {
+	log.Printf("Getting ErrorLogger by slug: %s", slug)
+	var result []ErrorLogger
+
+	if err := c.HttpClient.Read(fmt.Sprintf("/entities/error-loggers?slug=%s", slug), &result); err != nil {
+		return nil, err
+	}
+
+	if len(result) != 1 {
+		return nil, fmt.Errorf("one Error Logger with the slug %s was expected, but %v were found", slug, len(result))
+	}
+
+	log.Printf("Got Error Logger by slug: %s (%s)", slug, result[0].Id)
+	return &result[0], nil
 }
 
 func (c *errorLoggerClient) Update(errorLogger ErrorLogger) (string, error) {

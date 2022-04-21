@@ -13,6 +13,7 @@ import (
 	"strings"
 
 	"github.com/hashicorp/go-cty/cty"
+	"github.com/hashicorp/go-uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
@@ -30,7 +31,7 @@ func Flow() *schema.Resource {
 		UpdateContext: updateFlow,
 		DeleteContext: deleteFlow,
 		Importer: &schema.ResourceImporter{
-			StateContext: schema.ImportStatePassthroughContext,
+			StateContext: getSlugImporter("flow"),
 		},
 	}
 }
@@ -158,11 +159,23 @@ func createFlow(_ context.Context, data *schema.ResourceData, meta interface{}) 
 }
 
 func readFlow(_ context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	var diags diag.Diagnostics
+	var (
+		diags diag.Diagnostics
+		flow  *client.Flow
+		err   error
+	)
 	c := meta.(*client.ApiClient)
 	id := data.Id()
 
-	flow, err := c.Flow.Read(id)
+	if _, parseErr := uuid.ParseUUID(id); parseErr == nil {
+		// If the ID is a UUID, look up the Flow directly.
+		flow, err = c.Flow.Read(id)
+	} else {
+		// Otherwise, we are probably in the context of a `terraform import` and should attempt
+		// to look up the Flow by slug.
+		flow, err = c.Flow.Find(id)
+	}
+
 	if err != nil {
 		if isNotFoundError(err) {
 			log.Println(notFoundWarning("Flow", id))
@@ -172,6 +185,11 @@ func readFlow(_ context.Context, data *schema.ResourceData, meta interface{}) di
 		diags = append(diags, utils.DiagFromError(err, "Unable to read Flow"))
 		return diags
 	}
+
+	// In the case of a normal read, ID will already be set and this is redundant.
+	// In the case of a `terraform import`, we need to set ID since it was previously TYPE:SLUG.
+	// This must happen below the error checking in case the lookup failed.
+	data.SetId(flow.Id)
 
 	diags = utils.DiagsCheckError(diags, data.Set("name", flow.Name), "Unable to read Flow name")
 	diags = utils.DiagsCheckError(diags, data.Set("label", flow.Label), "Unable to read Flow label")

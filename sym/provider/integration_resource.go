@@ -18,7 +18,7 @@ func Integration() *schema.Resource {
 		UpdateContext: updateIntegration,
 		DeleteContext: deleteIntegration,
 		Importer: &schema.ResourceImporter{
-			StateContext: schema.ImportStatePassthroughContext,
+			StateContext: getNameAndTypeImporter("integration"),
 		},
 		Schema: map[string]*schema.Schema{
 			"type":        utils.Required(schema.TypeString),
@@ -52,11 +52,24 @@ func createIntegration(_ context.Context, data *schema.ResourceData, meta interf
 }
 
 func readIntegration(_ context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	var diags diag.Diagnostics
+	var (
+		diags       diag.Diagnostics
+		integration *client.Integration
+		err         error
+	)
 	c := meta.(*client.ApiClient)
 	id := data.Id()
 
-	integration, err := c.Integration.Read(id)
+	idParts, parseErr := resourceIdToParts(id, "integration")
+	if parseErr == nil {
+		// If the ID was parsed as `TYPE:SLUG` successfully, perform a lookup using those values.
+		// This means we are in a `terraform import` scenario.
+		integration, err = c.Integration.Find(idParts.Slug, idParts.Subtype)
+	} else {
+		// If the ID could not be parsed as `TYPE:SLUG`, we are doing a normal read at apply-time.
+		integration, err = c.Integration.Read(id)
+	}
+
 	if err != nil {
 		if isNotFoundError(err) {
 			log.Println(notFoundWarning("Integration", id))
@@ -66,6 +79,11 @@ func readIntegration(_ context.Context, data *schema.ResourceData, meta interfac
 		diags = append(diags, utils.DiagFromError(err, "Unable to read Integration"))
 		return diags
 	}
+
+	// In the case of a normal read, ID will already be set and this is redundant.
+	// In the case of a `terraform import`, we need to set ID since it was previously TYPE:SLUG.
+	// This must happen below the error checking in case the lookup failed.
+	data.SetId(integration.Id)
 
 	diags = utils.DiagsCheckError(diags, data.Set("type", integration.Type), "Unable to read Integration type")
 	diags = utils.DiagsCheckError(diags, data.Set("name", integration.Name), "Unable to read Integration name")

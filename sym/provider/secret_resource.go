@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 
+	"github.com/hashicorp/go-uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
@@ -19,7 +20,7 @@ func Secret() *schema.Resource {
 		UpdateContext: updateSecret,
 		DeleteContext: deleteSecret,
 		Importer: &schema.ResourceImporter{
-			StateContext: schema.ImportStatePassthroughContext,
+			StateContext: getSlugImporter("secret"),
 		},
 	}
 }
@@ -53,11 +54,23 @@ func createSecret(_ context.Context, data *schema.ResourceData, meta interface{}
 }
 
 func readSecret(_ context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	var diags diag.Diagnostics
+	var (
+		diags  diag.Diagnostics
+		secret *client.Secret
+		err    error
+	)
 	c := meta.(*client.ApiClient)
 	id := data.Id()
 
-	secret, err := c.Secret.Read(id)
+	if _, parseErr := uuid.ParseUUID(id); parseErr == nil {
+		// If the ID is a UUID, look up the Secret directly.
+		secret, err = c.Secret.Read(id)
+	} else {
+		// Otherwise, we are probably in the context of a `terraform import` and should attempt
+		// to look up the Secret by slug.
+		secret, err = c.Secret.Find(id)
+	}
+
 	if err != nil {
 		if isNotFoundError(err) {
 			log.Println(notFoundWarning("Secret", id))
@@ -67,6 +80,11 @@ func readSecret(_ context.Context, data *schema.ResourceData, meta interface{}) 
 		diags = append(diags, utils.DiagFromError(err, "Unable to read Secret"))
 		return diags
 	}
+
+	// In the case of a normal read, ID will already be set and this is redundant.
+	// In the case of a `terraform import`, we need to set ID since it was previously TYPE:SLUG.
+	// This must happen below the error checking in case the lookup failed.
+	data.SetId(secret.Id)
 
 	diags = utils.DiagsCheckError(diags, data.Set("path", secret.Path), "Unable to read Secret path")
 	diags = utils.DiagsCheckError(diags, data.Set("source_id", secret.SourceId), "Unable to read Secret source_id")

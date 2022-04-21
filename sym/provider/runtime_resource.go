@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 
+	"github.com/hashicorp/go-uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
@@ -18,7 +19,7 @@ func Runtime() *schema.Resource {
 		UpdateContext: updateRuntime,
 		DeleteContext: deleteRuntime,
 		Importer: &schema.ResourceImporter{
-			StateContext: schema.ImportStatePassthroughContext,
+			StateContext: getSlugImporter("runtime"),
 		},
 		Schema: map[string]*schema.Schema{
 			"name":       utils.Required(schema.TypeString),
@@ -46,11 +47,23 @@ func createRuntime(_ context.Context, data *schema.ResourceData, meta interface{
 }
 
 func readRuntime(_ context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	var diags diag.Diagnostics
+	var (
+		diags   diag.Diagnostics
+		runtime *client.Runtime
+		err     error
+	)
 	c := meta.(*client.ApiClient)
 	id := data.Id()
 
-	runtime, err := c.Runtime.Read(id)
+	if _, parseErr := uuid.ParseUUID(id); parseErr == nil {
+		// If the ID is a UUID, look up the Runtime directly.
+		runtime, err = c.Runtime.Read(id)
+	} else {
+		// Otherwise, we are probably in the context of a `terraform import` and should attempt
+		// to look up the Runtime by slug.
+		runtime, err = c.Runtime.Find(id)
+	}
+
 	if err != nil {
 		if isNotFoundError(err) {
 			log.Println(notFoundWarning("Runtime", id))
@@ -60,6 +73,11 @@ func readRuntime(_ context.Context, data *schema.ResourceData, meta interface{})
 		diags = append(diags, utils.DiagFromError(err, "Unable to read Runtime"))
 		return diags
 	}
+
+	// In the case of a normal read, ID will already be set and this is redundant.
+	// In the case of a `terraform import`, we need to set ID since it was previously TYPE:SLUG.
+	// This must happen below the error checking in case the lookup failed.
+	data.SetId(runtime.Id)
 
 	diags = utils.DiagsCheckError(diags, data.Set("name", runtime.Name), "Unable to read Runtime name")
 	diags = utils.DiagsCheckError(diags, data.Set("label", runtime.Label), "Unable to read Runtime label")

@@ -34,6 +34,7 @@ func (s Strategy) String() string {
 type StrategyClient interface {
 	Create(strategy Strategy) (string, error)
 	Read(id string) (*Strategy, error)
+	Find(name, strategyType string) (*Strategy, error)
 	Update(strategy Strategy) (string, error)
 	Delete(id string) (string, error)
 }
@@ -72,6 +73,22 @@ func (c *strategyClient) Read(id string) (*Strategy, error) {
 	}
 
 	return &result, nil
+}
+
+func (c *strategyClient) Find(name, strategyType string) (*Strategy, error) {
+	log.Printf("Getting Sym Strategy by type %s and name %s", strategyType, name)
+	var result []Strategy
+
+	if err := c.HttpClient.Read(fmt.Sprintf("/entities/access-strategies?slug=%s&type=%s", name, strategyType), &result); err != nil {
+		return nil, err
+	}
+
+	if len(result) != 1 {
+		return nil, fmt.Errorf("one Strategy of type %s with the name %s was expected, but %v were found", strategyType, name, len(result))
+	}
+
+	log.Printf("Got Sym Strategy by type %s and name %s (%s)", strategyType, name, result[0].Id)
+	return &result[0], nil
 }
 
 func (c *strategyClient) Update(strategy Strategy) (string, error) {

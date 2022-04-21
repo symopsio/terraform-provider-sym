@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 
+	"github.com/hashicorp/go-uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
@@ -18,7 +19,7 @@ func ErrorLogger() *schema.Resource {
 		UpdateContext: updateErrorLogger,
 		DeleteContext: deleteErrorLogger,
 		Importer: &schema.ResourceImporter{
-			StateContext: schema.ImportStatePassthroughContext,
+			StateContext: getSlugImporter("error_logger"),
 		},
 		Schema: map[string]*schema.Schema{
 			"integration_id": utils.Required(schema.TypeString),
@@ -45,11 +46,23 @@ func createErrorLogger(_ context.Context, data *schema.ResourceData, meta interf
 }
 
 func readErrorLogger(_ context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	var diags diag.Diagnostics
+	var (
+		diags       diag.Diagnostics
+		errorLogger *client.ErrorLogger
+		err         error
+	)
 	c := meta.(*client.ApiClient)
 	id := data.Id()
 
-	errorLogger, err := c.ErrorLogger.Read(id)
+	if _, parseErr := uuid.ParseUUID(id); parseErr == nil {
+		// If the ID is a UUID, look up the ErrorLogger directly.
+		errorLogger, err = c.ErrorLogger.Read(id)
+	} else {
+		// Otherwise, we are probably in the context of a `terraform import` and should attempt
+		// to look up the ErrorLogger by slug.
+		errorLogger, err = c.ErrorLogger.Find(id)
+	}
+
 	if err != nil {
 		if isNotFoundError(err) {
 			log.Println(notFoundWarning("ErrorLogger", id))
@@ -59,6 +72,11 @@ func readErrorLogger(_ context.Context, data *schema.ResourceData, meta interfac
 		diags = append(diags, utils.DiagFromError(err, "Unable to read ErrorLogger"))
 		return diags
 	}
+
+	// In the case of a normal read, ID will already be set and this is redundant.
+	// In the case of a `terraform import`, we need to set ID since it was previously TYPE:SLUG.
+	// This must happen below the error checking in case the lookup failed.
+	data.SetId(errorLogger.Id)
 
 	diags = utils.DiagsCheckError(diags, data.Set("integration_id", errorLogger.IntegrationId), "Unable to read ErrorLogger integration_id")
 	diags = utils.DiagsCheckError(diags, data.Set("destination", errorLogger.Destination), "Unable to read ErrorLogger destination")

@@ -19,7 +19,7 @@ func Target() *schema.Resource {
 		UpdateContext: updateTarget,
 		DeleteContext: deleteTarget,
 		Importer: &schema.ResourceImporter{
-			StateContext: schema.ImportStatePassthroughContext,
+			StateContext: getNameAndTypeImporter("target"),
 		},
 	}
 }
@@ -58,11 +58,24 @@ func createTarget(_ context.Context, data *schema.ResourceData, meta interface{}
 }
 
 func readTarget(_ context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	var diags diag.Diagnostics
+	var (
+		diags  diag.Diagnostics
+		target *client.Target
+		err    error
+	)
 	c := meta.(*client.ApiClient)
 	id := data.Id()
 
-	target, err := c.Target.Read(id)
+	idParts, parseErr := resourceIdToParts(id, "target")
+	if parseErr == nil {
+		// If the ID was parsed as `TYPE:SLUG` successfully, perform a lookup using those values.
+		// This means we are in a `terraform import` scenario.
+		target, err = c.Target.Find(idParts.Slug, idParts.Subtype)
+	} else {
+		// If the ID could not be parsed as `TYPE:SLUG`, we are doing a normal read at apply-time.
+		target, err = c.Target.Read(id)
+	}
+
 	if err != nil {
 		if isNotFoundError(err) {
 			log.Println(notFoundWarning("Target", id))
@@ -72,6 +85,11 @@ func readTarget(_ context.Context, data *schema.ResourceData, meta interface{}) 
 		diags = append(diags, utils.DiagFromError(err, "Unable to read Target"))
 		return diags
 	}
+
+	// In the case of a normal read, ID will already be set and this is redundant.
+	// In the case of a `terraform import`, we need to set ID since it was previously TYPE:SLUG.
+	// This must happen below the error checking in case the lookup failed.
+	data.SetId(target.Id)
 
 	diags = utils.DiagsCheckError(diags, data.Set("type", target.Type), "Unable to read Target type")
 	diags = utils.DiagsCheckError(diags, data.Set("name", target.Name), "Unable to read Target name")
