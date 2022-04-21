@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/hashicorp/go-uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/symopsio/terraform-provider-sym/sym/client"
@@ -38,13 +39,16 @@ func notFoundWarning(resource, id string) string {
 // which has a ReadContext method that supports fetching from the API with just a slug. For example, see "sym_flow" or
 // "sym_error_logger".
 //
-// This Importer function sets the ID provided from the `terraform import` command as the value for the field specified
-// by the slugField parameter so that it may be used by the ReadContext method look up the resource.
-func getSlugImporter(slugField string) func(_ context.Context, data *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
+// This Importer function sets nothing on the resource, and is instead a validator that checks whether the provided
+// ID is not a UUID. The ReadContext methods are responsible for re-parsing the ID to know whether they are in the
+// context of an import.
+func getSlugImporter(resource string) func(_ context.Context, data *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
 	return func(_ context.Context, data *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
-		if err := data.Set(slugField, data.Id()); err != nil {
-			return nil, err
+		if _, err := uuid.ParseUUID(data.Id()); err == nil {
+			// If the UUID was parsed successfully, let the user know UUIDs are not allowed.
+			return nil, utils.ErrInvalidImportUUID(resource)
 		}
+
 		return []*schema.ResourceData{data}, nil
 	}
 }

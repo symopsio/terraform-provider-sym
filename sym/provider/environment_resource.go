@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 
+	"github.com/hashicorp/go-uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
@@ -74,12 +75,13 @@ func readEnvironment(_ context.Context, data *schema.ResourceData, meta interfac
 	c := meta.(*client.ApiClient)
 	id := data.Id()
 
-	if slug := data.Get("name"); slug != nil {
-		// If the slug is already set, then assume we are coming from a ``terraform import`` command, and look up
-		// the environment by slug.
-		environment, err = c.Environment.Find(slug.(string))
-	} else {
+	if _, err := uuid.ParseUUID(id); err == nil {
+		// If the ID is a UUID, look up the Environment directly.
 		environment, err = c.Environment.Read(id)
+	} else {
+		// Otherwise, we are probably in the context of a `terraform import` and should attempt
+		// to look up the Environment by slug.
+		environment, err = c.Environment.Find(id)
 	}
 
 	if err != nil {

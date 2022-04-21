@@ -71,3 +71,8 @@ var ErrInvalidImportTypeSlug = func(resource, identifier string) error {
 	errorMessage := fmt.Sprintf("The provided %s identifier %s could not be parsed. Identifiers must be in the form of `TYPE:SLUG`.", resource, identifier)
 	return GenerateError(errorMessage, DocsImport)
 }
+
+var ErrInvalidImportUUID = func(resource string) error {
+	errorMessage := fmt.Sprintf("Looks like you tried to import a %s by UUID, but it only supports importing by `SLUG`.", resource)
+	return GenerateError(errorMessage, DocsImport)
+}

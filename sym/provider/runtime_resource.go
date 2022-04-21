@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 
+	"github.com/hashicorp/go-uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
@@ -54,12 +55,13 @@ func readRuntime(_ context.Context, data *schema.ResourceData, meta interface{})
 	c := meta.(*client.ApiClient)
 	id := data.Id()
 
-	if slug := data.Get("name"); slug != nil {
-		// If the slug is already set, then assume we are coming from a ``terraform import`` command, and look up
-		// the runtime by slug.
-		runtime, err = c.Runtime.Find(slug.(string))
-	} else {
+	if _, err := uuid.ParseUUID(id); err == nil {
+		// If the ID is a UUID, look up the Runtime directly.
 		runtime, err = c.Runtime.Read(id)
+	} else {
+		// Otherwise, we are probably in the context of a `terraform import` and should attempt
+		// to look up the Runtime by slug.
+		runtime, err = c.Runtime.Find(id)
 	}
 
 	if err != nil {

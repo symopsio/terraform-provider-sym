@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 
+	"github.com/hashicorp/go-uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
@@ -53,12 +54,13 @@ func readErrorLogger(_ context.Context, data *schema.ResourceData, meta interfac
 	c := meta.(*client.ApiClient)
 	id := data.Id()
 
-	if slug := data.Get("destination"); slug != nil {
-		// If the destination is already set, then we are in the context of a `terraform import` and must look up
-		// the ErrorLogger by slug.
-		errorLogger, err = c.ErrorLogger.Find(slug.(string))
-	} else {
+	if _, err := uuid.ParseUUID(id); err == nil {
+		// If the ID is a UUID, look up the ErrorLogger directly.
 		errorLogger, err = c.ErrorLogger.Read(id)
+	} else {
+		// Otherwise, we are probably in the context of a `terraform import` and should attempt
+		// to look up the ErrorLogger by slug.
+		errorLogger, err = c.ErrorLogger.Find(id)
 	}
 
 	if err != nil {

@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 
+	"github.com/hashicorp/go-uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
@@ -61,12 +62,13 @@ func readSecret(_ context.Context, data *schema.ResourceData, meta interface{}) 
 	c := meta.(*client.ApiClient)
 	id := data.Id()
 
-	if slug := data.Get("path"); slug != nil {
-		// If the path is already set, then assume we are coming from a ``terraform import`` command, and look up
-		// the secret by slug.
-		secret, err = c.Secret.Find(slug.(string))
-	} else {
+	if _, err := uuid.ParseUUID(id); err == nil {
+		// If the ID is a UUID, look up the Secret directly.
 		secret, err = c.Secret.Read(id)
+	} else {
+		// Otherwise, we are probably in the context of a `terraform import` and should attempt
+		// to look up the Secret by slug.
+		secret, err = c.Secret.Find(id)
 	}
 
 	if err != nil {
