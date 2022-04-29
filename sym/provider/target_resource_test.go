@@ -85,7 +85,7 @@ func TestAccSymTarget_custom(t *testing.T) {
 					resource.TestCheckResourceAttr("sym_target.custom", "type", "custom"),
 					resource.TestCheckResourceAttr("sym_target.custom", "name", createData.ResourceName),
 					resource.TestCheckResourceAttr("sym_target.custom", "label", "My Custom Target"),
-					resource.TestCheckResourceAttr("sym_target.custom", "settings.target_id", "am-target"),
+					resource.TestCheckResourceAttr("sym_target.custom", "settings.identifier", "am-target"),
 				),
 			},
 			{
@@ -94,7 +94,7 @@ func TestAccSymTarget_custom(t *testing.T) {
 					resource.TestCheckResourceAttr("sym_target.custom", "type", "custom"),
 					resource.TestCheckResourceAttr("sym_target.custom", "name", updateData.ResourceName),
 					resource.TestCheckResourceAttr("sym_target.custom", "label", "Other Custom Target"),
-					resource.TestCheckResourceAttr("sym_target.custom", "settings.target_id", "am-still-target"),
+					resource.TestCheckResourceAttr("sym_target.custom", "settings.identifier", "am-still-target"),
 				),
 			},
 		},
@@ -136,7 +136,7 @@ func awsIamTarget(t TestData, label, iamGroup string) string {
 	return sb.String()
 }
 
-func customTarget(t TestData, label, targetId string) string {
+func customTarget(t TestData, label, identifier string) string {
 	var sb strings.Builder
 
 	sb.WriteString(providerResource{org: t.OrgSlug}.String())
@@ -146,7 +146,7 @@ func customTarget(t TestData, label, targetId string) string {
 		type_:         "custom",
 		label:         label,
 		settings: map[string]string{
-			"target_id": targetId,
+			"identifier": identifier,
 		},
 	}.String())
 
