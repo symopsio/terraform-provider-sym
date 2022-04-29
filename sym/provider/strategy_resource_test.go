@@ -155,7 +155,7 @@ func customStrategy(t TestData, label, implPath string) string {
 		name:          t.ResourcePrefix + "-custom-target",
 		label:         "Custom Target",
 		settings: map[string]string{
-			"target_id": "hello-i-am-target",
+			"identifier": "hello-i-am-target",
 		},
 	}.String())
 
