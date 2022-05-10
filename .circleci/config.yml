@@ -22,7 +22,7 @@ commands:
 jobs:
   unit_and_acceptance_test:
     docker:
-      - image: hashicorp/terraform
+      - image: zenika/terraform-aws-cli
     steps:
       - setup
       - run: make testacc-ci
