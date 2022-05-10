@@ -25,7 +25,7 @@ jobs:
       - image: zenika/terraform-aws-cli
     steps:
       - setup
-      - run: make testacc-ci
+      - run: TF_ACC=1 go test ./... -v -timeout 120m
       - when:
           condition:
             equal: [ main, << pipeline.git.branch >> ]
