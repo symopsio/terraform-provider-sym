@@ -22,7 +22,7 @@ commands:
 jobs:
   unit_and_acceptance_test:
     docker:
-      - image: cimg/go:1.16
+      - image: hashicorp/terraform
     steps:
       - setup
       - run: make testacc-ci
@@ -58,9 +58,9 @@ workflows:
       - unit_and_acceptance_test:
           context:
             - slack-secrets
-          filters:
-            tags:
-              only: /v.*/
+#          filters:
+#            tags:
+#              only: /v.*/
       - release:
           requires:
             - unit_and_acceptance_test
