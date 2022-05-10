@@ -24,7 +24,7 @@ commands:
 jobs:
   unit_and_acceptance_test:
     docker:
-      - image: hashicorp/terraform
+      - image: cimg/go:1.16
     steps:
       - setup
       - run: TF_ACC=1 go test ./... -v -timeout 120m
