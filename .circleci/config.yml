@@ -24,7 +24,7 @@ commands:
 jobs:
   unit_and_acceptance_test:
     docker:
-      - image: zenika/terraform-aws-cli
+      - image: hashicorp/terraform
     steps:
       - setup
       - run: TF_ACC=1 go test ./... -v -timeout 120m
