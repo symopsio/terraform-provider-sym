@@ -14,9 +14,7 @@ commands:
     steps:
       - checkout
       - restore_pkg_cache
-      - run: |
-          mkdir -p dist
-          GOPRIVATE="github.com/symopsio" go build -o dist/terraform-provider-sym
+      - run: GOPRIVATE="github.com/symopsio" make
       - save_cache:
           key: *cache_name
           paths:
@@ -33,7 +31,7 @@ jobs:
             curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
             sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
             sudo apt-get update && sudo apt-get install terraform
-      - run: TF_ACC=1 go test ./... -v -timeout 120m
+      - run: make testacc-ci
       - when:
           condition:
             equal: [ main, << pipeline.git.branch >> ]
