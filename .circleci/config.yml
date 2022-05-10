@@ -14,7 +14,9 @@ commands:
     steps:
       - checkout
       - restore_pkg_cache
-      - run: GOPRIVATE="github.com/symopsio" make
+      - run: |
+          mkdir -p dist
+          GOPRIVATE="github.com/symopsio" go build -o dist/terraform-provider-sym
       - save_cache:
           key: *cache_name
           paths:
