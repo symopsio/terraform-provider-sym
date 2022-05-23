@@ -355,7 +355,10 @@ type flowResource struct {
 func (r flowResource) String() string {
 	var p strings.Builder
 	p.WriteString("params = {\n")
-	p.WriteString(fmt.Sprintf("		strategy_id = %s\n", r.params.strategyId))
+
+	if r.params.strategyId != "" {
+		p.WriteString(fmt.Sprintf("		strategy_id = %s\n", r.params.strategyId))
+	}
 	p.WriteString(fmt.Sprintf("		allow_revoke = %v\n", r.params.allowRevoke))
 	p.WriteString("		prompt_fields_json = jsonencode([\n")
 	for _, f := range r.params.promptFields {

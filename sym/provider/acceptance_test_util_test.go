@@ -495,6 +495,72 @@ resource "sym_flow" "this" {
 	}
 }
 `,
+		},	{
+			"no_strategy",
+			flowResource{
+				"this",
+				"my-env",
+				"SSO Access2",
+				"sym:template:approval:1.0.0",
+				"internal/testdata/impl.py",
+				"sym_environment.this.id",
+				params{
+					strategyId:  "",
+					allowRevoke: false,
+					promptFields: []field{
+						{
+							name:     "reason",
+							type_:    "string",
+							required: true,
+							label:    "Reason",
+						},
+						{
+							name:          "urgency",
+							type_:         "list",
+							required:      true,
+							allowedValues: []string{"Low", "Medium", "High"},
+						},
+						{
+							name:     "username",
+							type_:    "string",
+							default_: "lolol",
+						},
+					},
+				},
+			},
+			`
+resource "sym_flow" "this" {
+	name = "my-env"
+	label = "SSO Access2"
+	template = "sym:template:approval:1.0.0"
+	implementation = "internal/testdata/impl.py"
+	environment_id = sym_environment.this.id
+
+	params = {
+		allow_revoke = false
+		prompt_fields_json = jsonencode([
+			{
+			name = "reason"
+			type = "string"
+			label = "Reason"
+			required = true
+			},
+			{
+			name = "urgency"
+			type = "list"
+			required = true
+			allowed_values = ["Low", "Medium", "High"]
+			},
+			{
+			name = "username"
+			type = "string"
+			default = "lolol"
+			required = false
+			},
+	])
+	}
+}
+`,
 		},
 	}
 	for _, tt := range tests {

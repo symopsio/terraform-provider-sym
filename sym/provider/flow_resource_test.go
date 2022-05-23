@@ -42,7 +42,43 @@ func TestAccSymFlow_basic(t *testing.T) {
 	})
 }
 
-func flowConfig(data TestData, implPath string, allowRevoke bool) string {
+func TestAccSymFlow_noStrategy(t *testing.T) {
+	data := BuildTestData("basic-environment")
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: createFlowNoStrategyConfig(data),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("sym_flow.this", "name", data.ResourceName),
+					resource.TestCheckResourceAttr("sym_flow.this", "label", "SSO Access2"),
+					resource.TestCheckResourceAttr("sym_flow.this", "template", "sym:template:approval:1.0.0"),
+					resource.TestCheckResourceAttrSet("sym_flow.this", "implementation"),
+					resource.TestCheckResourceAttrPair("sym_flow.this", "environment_id", "sym_environment.this", "id"),
+					resource.TestCheckNoResourceAttr("sym_flow.this", "params.strategy_id"),
+					resource.TestCheckResourceAttr("sym_flow.this", "params.allow_revoke", "false"),
+					resource.TestCheckResourceAttr("sym_flow.this", "params.prompt_fields_json", `[{"name":"reason","type":"string","required":true,"label":"Reason"},{"name":"urgency","type":"list","required":true,"default":"Low","allowed_values":["Low","Medium","High"]}]`),
+				),
+			},
+			{
+				Config: updateFlowNoStrategyConfig(data),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("sym_flow.this", "name", data.ResourceName),
+					resource.TestCheckResourceAttr("sym_flow.this", "label", "SSO Access2"),
+					resource.TestCheckResourceAttr("sym_flow.this", "template", "sym:template:approval:1.0.0"),
+					resource.TestCheckResourceAttrSet("sym_flow.this", "implementation"),
+					resource.TestCheckResourceAttrPair("sym_flow.this", "environment_id", "sym_environment.this", "id"),
+					resource.TestCheckNoResourceAttr("sym_flow.this", "params.strategy_id"),
+					resource.TestCheckResourceAttr("sym_flow.this", "params.allow_revoke", "true"),
+				),
+			},
+		},
+	})
+}
+
+func flowConfig(data TestData, implPath string, allowRevoke bool, strategyId string) string {
 	return makeTerraformConfig(
 		providerResource{org: data.OrgSlug},
 		integrationResource{
@@ -125,7 +161,7 @@ func flowConfig(data TestData, implPath string, allowRevoke bool) string {
 			implementation: implPath,
 			environmentId:  "sym_environment.this.id",
 			params: params{
-				strategyId:  "sym_strategy.sso_main.id",
+				strategyId:  strategyId,
 				allowRevoke: allowRevoke,
 				promptFields: []field{
 					{
@@ -148,9 +184,17 @@ func flowConfig(data TestData, implPath string, allowRevoke bool) string {
 }
 
 func createFlowConfig(data TestData) string {
-	return flowConfig(data, "internal/testdata/before_impl.py", false)
+	return flowConfig(data, "internal/testdata/before_impl.py", false, "sym_strategy.sso_main.id")
 }
 
 func updateFlowConfig(data TestData) string {
-	return flowConfig(data, "internal/testdata/after_impl.py", true)
+	return flowConfig(data, "internal/testdata/after_impl.py", true, "sym_strategy.sso_main.id")
+}
+
+func createFlowNoStrategyConfig(data TestData) string {
+	return flowConfig(data, "internal/testdata/before_impl.py", false, "")
+}
+
+func updateFlowNoStrategyConfig(data TestData) string {
+	return flowConfig(data, "internal/testdata/after_impl.py", true, "")
 }
