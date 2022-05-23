@@ -2,7 +2,7 @@
 # things this flow needs to do in AWS.
 resource "sym_integration" "runtime_context" {
   type = "permission_context"
-  name = "aws-flow-context-test"
+  name = "aws-flow-context-test-${local.environment}"
   label = "Runtime context"
   external_id = "123456789012"
 
@@ -16,7 +16,7 @@ resource "sym_integration" "runtime_context" {
 
 resource "sym_integration" "slack" {
   type = "slack"
-  name = "tf-flow-test"
+  name = "tf-flow-test-${local.environment}"
   label = "Slack"
   external_id = "T1234567"
 }

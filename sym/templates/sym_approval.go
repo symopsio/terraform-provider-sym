@@ -58,13 +58,6 @@ func (t *SymApprovalTemplate) terraformToAPI(params *HCLParamMap) client.APIPara
 
 	if field := params.checkKey("strategy_id"); field != nil {
 		raw["strategy_id"] = field.Value()
-	} else {
-		params.addWarning(
-			"strategy_id",
-			"No Strategy supplied",
-			"Without a Strategy, escalations will be a no-op",
-			"https://docs.symops.com/docs/sym-approval",
-		)
 	}
 
 	if field := params.checkKey("allow_revoke"); field != nil {
@@ -106,17 +99,16 @@ func apiParamsToTFParams(apiParams client.APIParams) (*HCLParamMap, error) {
 		return nil, err
 	}
 
-	apiParamsStrategyID, ok := apiParams["strategy_id"].(string)
-	if !ok {
-		return nil, fmt.Errorf("%s: API Response did not contain required field: `strategy_id`", errMsg)
-	}
-
 	allowRevoke, _ := apiParams["allow_revoke"].(bool)
 
 	params := map[string]string{
-		"strategy_id":        apiParamsStrategyID,
 		"allow_revoke":       strconv.FormatBool(allowRevoke),
 		"prompt_fields_json": string(fieldsJSON),
 	}
+
+	if apiParamsStrategyID, ok := apiParams["strategy_id"].(string); ok {
+		params["strategy_id"] = apiParamsStrategyID
+	}
+
 	return &HCLParamMap{Params: params}, nil
 }
