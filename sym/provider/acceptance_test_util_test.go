@@ -495,7 +495,7 @@ resource "sym_flow" "this" {
 	}
 }
 `,
-		},	{
+		}, {
 			"no_strategy",
 			flowResource{
 				"this",
