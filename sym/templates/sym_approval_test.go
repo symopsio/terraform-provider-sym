@@ -30,7 +30,7 @@ func Test_apiParamsToTFParams(t *testing.T) {
 			},
 			&HCLParamMap{
 				Params: map[string]string{
-					"allow_revoke": "false",
+					"allow_revoke":       "false",
 					"prompt_fields_json": `[{"name":"reason","type":"string","required":true,"label":"Reason"},{"name":"urgency","type":"string","required":true,"allowed_values":["Low","Medium","High"]}]`,
 				},
 			},
