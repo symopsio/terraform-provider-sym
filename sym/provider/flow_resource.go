@@ -97,7 +97,7 @@ func buildAPIParamsFromResourceData(data *schema.ResourceData) (client.APIParams
 			return nil, utils.DiagsFromError(err, "Failed to create Flow")
 		}
 	} else {
-		return apiParams, nil
+		return apiParams, params.Diags
 	}
 }
 
@@ -135,6 +135,7 @@ func createFlow(_ context.Context, data *schema.ResourceData, meta interface{}) 
 	if flowParams, d := buildAPIParamsFromResourceData(data); d.HasError() {
 		diags = append(diags, d...)
 	} else {
+		diags = append(diags, d...)
 		flow.Params = flowParams
 	}
 
@@ -248,6 +249,7 @@ func updateFlow(_ context.Context, data *schema.ResourceData, meta interface{}) 
 		diags = append(diags, d...)
 		return diags
 	} else {
+		diags = append(diags, d...)
 		flow.Params = flowParams
 	}
 

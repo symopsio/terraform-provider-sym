@@ -1,5 +1,9 @@
+locals {
+  environment = "tf-provider-example"
+}
+
 resource "sym_runtime" "this" {
-  name       = "test-flow-runtime"
+  name       = "test-flow-runtime-${local.environment}"
   label      = "Test Flow Runtime"
   context_id = sym_integration.runtime_context.id
 }
@@ -10,7 +14,7 @@ resource "sym_error_logger" "slack_logger" {
 }
 
 resource "sym_environment" "this" {
-  name       = "flow-sandbox"
+  name       = "flow-sandbox-${local.environment}"
   label      = "Flow Sandbox"
   runtime_id = sym_runtime.this.id
   error_logger_id = sym_error_logger.slack_logger.id
@@ -23,7 +27,7 @@ resource "sym_environment" "this" {
 # FLOW ##########
 
 resource "sym_flow" "this" {
-  name  = "sso_access"
+  name  = "sso_access-${local.environment}"
   label = "SSO Access2"
 
   template       = "sym:template:approval:1.0.0"

@@ -24,12 +24,17 @@ func Test_apiParamsToTFParams(t *testing.T) {
 			"no-strategy-id",
 			client.APIParams{
 				"prompt_fields": []interface{}{
-					map[string]interface{}{"name": "reason", "type": "string", "required": true, "label": "Reason", "allow_revoke": true},
+					map[string]interface{}{"name": "reason", "type": "string", "required": true, "label": "Reason"},
 					map[string]interface{}{"name": "urgency", "type": "string", "required": true, "allowed_values": []interface{}{"Low", "Medium", "High"}},
 				},
 			},
-			nil,
-			true,
+			&HCLParamMap{
+				Params: map[string]string{
+					"allow_revoke":       "false",
+					"prompt_fields_json": `[{"name":"reason","type":"string","required":true,"label":"Reason"},{"name":"urgency","type":"string","required":true,"allowed_values":["Low","Medium","High"]}]`,
+				},
+			},
+			false,
 		},
 		{
 			"no-prompt-fields",
@@ -45,7 +50,7 @@ func Test_apiParamsToTFParams(t *testing.T) {
 				"strategy_id": "haha-business",
 				"prompt_fields": []interface{}{
 					map[string]interface{}{"name": "reason", "type": "string", "required": true, "label": "Reason"},
-					map[string]interface{}{"name": "urgency", "type": "string", "required": true, "allowed_values": []interface{}{"Low", "Medium", "High"}, "allow_revoke": "true"},
+					map[string]interface{}{"name": "urgency", "type": "string", "required": true, "allowed_values": []interface{}{"Low", "Medium", "High"}},
 				},
 				"allow_revoke": true,
 			},

@@ -1,7 +1,7 @@
 # A target is a thing that we are managing access to
 resource "sym_target" "prod_break_glass" {
   type = "aws_sso_permission_set"
-  name = "flow-test-prod-break-glass"
+  name = "flow-test-prod-break-glass-${local.environment}"
   label = "Prod Break Glass"
 
   settings = {
@@ -13,7 +13,7 @@ resource "sym_target" "prod_break_glass" {
 
 resource "sym_target" "sandbox_break_glass" {
   type = "aws_sso_permission_set"
-  name = "flow-test-sandbox-break-glass"
+  name = "flow-test-sandbox-break-glass-${local.environment}"
   label = "Sandbox Break Glass"
 
   settings = {
@@ -26,7 +26,7 @@ resource "sym_target" "sandbox_break_glass" {
 # A strategy uses an integration to grant people access to targets
 resource "sym_strategy" "sso_main" {
   type = "aws_sso"
-  name = "flow-sso-main"
+  name = "flow-sso-main-${local.environment}"
   label = "Flow SSO Main"
   integration_id = sym_integration.runtime_context.id
   targets = [ sym_target.prod_break_glass.id, sym_target.sandbox_break_glass.id ]
