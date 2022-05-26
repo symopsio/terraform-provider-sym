@@ -42,7 +42,10 @@ func SuppressFlowDiffs(k string, old string, new string, d *schema.ResourceData)
 	// allow_revoke defaults to true, so don't show a diff if allow_revoke is not specified
 	suppressAllowRevokeDiffs := k == "params.allow_revoke" && old == "true" && new == ""
 
-	return suppressJsonDiffs || suppressAllowRevokeDiffs
+	// schedule_deescalation defaults to true, so don't show a diff if schedule_deescalation is not specified
+	suppressScheduleDeescalationDiffs := k == "params.schedule_deescalation" && old == "true" && new == ""
+
+	return suppressJsonDiffs || suppressAllowRevokeDiffs || suppressScheduleDeescalationDiffs
 }
 
 // SuppressNullSettingsDiffs is a DiffSuppressFunc that can be passed into

@@ -273,22 +273,36 @@ func deleteFlow(_ context.Context, data *schema.ResourceData, meta interface{}) 
 }
 
 func validateParams(input interface{}, path cty.Path) diag.Diagnostics {
+	diags := diag.Diagnostics{}
+
 	if params, ok := input.(map[string]interface{}); ok {
 		if allowRevoke, ok := params["allow_revoke"]; ok {
 			if allowRevoke, ok := allowRevoke.(string); ok {
 				_, err := strconv.ParseBool(allowRevoke)
 				if err != nil {
-					return diag.Diagnostics{
-						diag.Diagnostic{
-							Severity:      diag.Error,
-							Summary:       "allow_revoke must be a boolean value",
-							Detail:        fmt.Sprintf("failed to parse %q to bool", allowRevoke),
-							AttributePath: append(path, cty.IndexStep{Key: cty.StringVal("allow_revoke")}),
-						},
-					}
+					diags = append(diags, diag.Diagnostic{
+						Severity:      diag.Error,
+						Summary:       "allow_revoke must be a boolean value",
+						Detail:        fmt.Sprintf("failed to parse %q to bool", allowRevoke),
+						AttributePath: append(path, cty.IndexStep{Key: cty.StringVal("allow_revoke")}),
+					})
+				}
+			}
+		}
+
+		if scheduleDeescalation, ok := params["schedule_deescalation"]; ok {
+			if scheduleDeescalation, ok := scheduleDeescalation.(string); ok {
+				if _, err := strconv.ParseBool(scheduleDeescalation); err != nil {
+					diags = append(diags, diag.Diagnostic{
+						Severity: diag.Error,
+						Summary: "schedule_deescalation must be a boolean value",
+						Detail: fmt.Sprintf("failed to parse %q to bool", scheduleDeescalation),
+						AttributePath: append(path, cty.IndexStep{Key: cty.StringVal("schedule_deescalation")}),
+					})
 				}
 			}
 		}
 	}
-	return nil
+
+	return diags
 }

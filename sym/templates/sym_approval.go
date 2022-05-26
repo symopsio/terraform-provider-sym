@@ -28,9 +28,10 @@ func fieldResource() *schema.Resource {
 func (t *SymApprovalTemplate) ParamResource() *schema.Resource {
 	return &schema.Resource{
 		Schema: map[string]*schema.Schema{
-			"strategy_id":   utils.Optional(schema.TypeString),
-			"allow_revoke":  utils.OptionalWithDefault(schema.TypeBool, true),
-			"prompt_fields": utils.OptionalList(fieldResource()),
+			"strategy_id":           utils.Optional(schema.TypeString),
+			"allow_revoke":          utils.OptionalWithDefault(schema.TypeBool, true),
+			"schedule_deescalation": utils.OptionalWithDefault(schema.TypeBool, true),
+			"prompt_fields":         utils.OptionalList(fieldResource()),
 		},
 	}
 }
@@ -72,6 +73,18 @@ func (t *SymApprovalTemplate) terraformToAPI(params *HCLParamMap) client.APIPara
 		raw["allow_revoke"] = true
 	}
 
+	if field := params.checkKey("schedule_deescalation"); field != nil {
+		// If schedule_deescalation is set, validate that it is a boolean and add it to params
+		scheduleDeescalation, err := strconv.ParseBool(field.Value())
+		if err != nil {
+			_ = params.checkError("schedule_deescalation", "schedule_deescalation must be a boolean value", err)
+		}
+		raw["schedule_deescalation"] = scheduleDeescalation
+	} else {
+		// Default schedule_deescalation to true
+		raw["schedule_deescalation"] = true
+	}
+
 	return raw
 }
 
@@ -100,9 +113,11 @@ func apiParamsToTFParams(apiParams client.APIParams) (*HCLParamMap, error) {
 	}
 
 	allowRevoke, _ := apiParams["allow_revoke"].(bool)
+	scheduleDeescalation, _ := apiParams["schedule_deescalation"].(bool)
 
 	params := map[string]string{
 		"allow_revoke":       strconv.FormatBool(allowRevoke),
+		"schedule_deescalation": strconv.FormatBool(scheduleDeescalation),
 		"prompt_fields_json": string(fieldsJSON),
 	}
 
