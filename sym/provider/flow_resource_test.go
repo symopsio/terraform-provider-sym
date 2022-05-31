@@ -22,7 +22,7 @@ func TestAccSymFlow_basic(t *testing.T) {
 					resource.TestCheckResourceAttrSet("sym_flow.this", "implementation"),
 					resource.TestCheckResourceAttrPair("sym_flow.this", "environment_id", "sym_environment.this", "id"),
 					resource.TestCheckResourceAttrPair("sym_flow.this", "params.strategy_id", "sym_strategy.sso_main", "id"),
-					resource.TestCheckResourceAttr("sym_flow.this", "params.allow_revoke", "false"),
+					resource.TestCheckResourceAttr("sym_flow.this", "params.allow_revoke", "true"),
 					resource.TestCheckResourceAttr("sym_flow.this", "params.schedule_deescalation", "false"),
 					resource.TestCheckResourceAttr("sym_flow.this", "params.prompt_fields_json", `[{"name":"reason","type":"string","required":true,"label":"Reason"},{"name":"urgency","type":"list","required":true,"default":"Low","allowed_values":["Low","Medium","High"]}]`),
 				),
@@ -36,7 +36,7 @@ func TestAccSymFlow_basic(t *testing.T) {
 					resource.TestCheckResourceAttrSet("sym_flow.this", "implementation"),
 					resource.TestCheckResourceAttrPair("sym_flow.this", "environment_id", "sym_environment.this", "id"),
 					resource.TestCheckResourceAttrPair("sym_flow.this", "params.strategy_id", "sym_strategy.sso_main", "id"),
-					resource.TestCheckResourceAttr("sym_flow.this", "params.allow_revoke", "true"),
+					resource.TestCheckResourceAttr("sym_flow.this", "params.allow_revoke", "false"),
 					resource.TestCheckResourceAttr("sym_flow.this", "params.schedule_deescalation", "true"),
 				),
 			},
@@ -60,7 +60,7 @@ func TestAccSymFlow_noStrategy(t *testing.T) {
 					resource.TestCheckResourceAttrSet("sym_flow.this", "implementation"),
 					resource.TestCheckResourceAttrPair("sym_flow.this", "environment_id", "sym_environment.this", "id"),
 					resource.TestCheckNoResourceAttr("sym_flow.this", "params.strategy_id"),
-					resource.TestCheckResourceAttr("sym_flow.this", "params.allow_revoke", "false"),
+					resource.TestCheckResourceAttr("sym_flow.this", "params.allow_revoke", "true"),
 					resource.TestCheckResourceAttr("sym_flow.this", "params.schedule_deescalation", "false"),
 					resource.TestCheckResourceAttr("sym_flow.this", "params.prompt_fields_json", `[{"name":"reason","type":"string","required":true,"label":"Reason"},{"name":"urgency","type":"list","required":true,"default":"Low","allowed_values":["Low","Medium","High"]}]`),
 				),
@@ -74,7 +74,7 @@ func TestAccSymFlow_noStrategy(t *testing.T) {
 					resource.TestCheckResourceAttrSet("sym_flow.this", "implementation"),
 					resource.TestCheckResourceAttrPair("sym_flow.this", "environment_id", "sym_environment.this", "id"),
 					resource.TestCheckNoResourceAttr("sym_flow.this", "params.strategy_id"),
-					resource.TestCheckResourceAttr("sym_flow.this", "params.allow_revoke", "true"),
+					resource.TestCheckResourceAttr("sym_flow.this", "params.allow_revoke", "false"),
 					resource.TestCheckResourceAttr("sym_flow.this", "params.schedule_deescalation", "true"),
 				),
 			},
@@ -189,17 +189,17 @@ func flowConfig(data TestData, implPath string, allowRevoke bool, strategyId str
 }
 
 func createFlowConfig(data TestData) string {
-	return flowConfig(data, "internal/testdata/before_impl.py", false, "sym_strategy.sso_main.id", false)
+	return flowConfig(data, "internal/testdata/before_impl.py", true, "sym_strategy.sso_main.id", false)
 }
 
 func updateFlowConfig(data TestData) string {
-	return flowConfig(data, "internal/testdata/after_impl.py", true, "sym_strategy.sso_main.id", true)
+	return flowConfig(data, "internal/testdata/after_impl.py", false, "sym_strategy.sso_main.id", true)
 }
 
 func createFlowNoStrategyConfig(data TestData) string {
-	return flowConfig(data, "internal/testdata/before_impl.py", false, "", false)
+	return flowConfig(data, "internal/testdata/before_impl.py", true, "", false)
 }
 
 func updateFlowNoStrategyConfig(data TestData) string {
-	return flowConfig(data, "internal/testdata/after_impl.py", true, "", true)
+	return flowConfig(data, "internal/testdata/after_impl.py", false, "", true)
 }
