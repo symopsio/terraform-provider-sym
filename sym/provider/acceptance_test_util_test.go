@@ -438,8 +438,8 @@ func Test_flowResource_String(t *testing.T) {
 				"internal/testdata/impl.py",
 				"sym_environment.this.id",
 				params{
-					strategyId:  "sym_strategy.sso_main.id",
-					allowRevoke: false,
+					strategyId:           "sym_strategy.sso_main.id",
+					allowRevoke:          false,
 					scheduleDeescalation: false,
 					promptFields: []field{
 						{
@@ -507,8 +507,8 @@ resource "sym_flow" "this" {
 				"internal/testdata/impl.py",
 				"sym_environment.this.id",
 				params{
-					strategyId:  "",
-					allowRevoke: false,
+					strategyId:           "",
+					allowRevoke:          false,
 					scheduleDeescalation: false,
 					promptFields: []field{
 						{

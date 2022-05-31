@@ -116,9 +116,9 @@ func apiParamsToTFParams(apiParams client.APIParams) (*HCLParamMap, error) {
 	scheduleDeescalation, _ := apiParams["schedule_deescalation"].(bool)
 
 	params := map[string]string{
-		"allow_revoke":       strconv.FormatBool(allowRevoke),
+		"allow_revoke":          strconv.FormatBool(allowRevoke),
 		"schedule_deescalation": strconv.FormatBool(scheduleDeescalation),
-		"prompt_fields_json": string(fieldsJSON),
+		"prompt_fields_json":    string(fieldsJSON),
 	}
 
 	if apiParamsStrategyID, ok := apiParams["strategy_id"].(string); ok {

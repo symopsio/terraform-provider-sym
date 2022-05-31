@@ -294,9 +294,9 @@ func validateParams(input interface{}, path cty.Path) diag.Diagnostics {
 			if scheduleDeescalation, ok := scheduleDeescalation.(string); ok {
 				if _, err := strconv.ParseBool(scheduleDeescalation); err != nil {
 					diags = append(diags, diag.Diagnostic{
-						Severity: diag.Error,
-						Summary: "schedule_deescalation must be a boolean value",
-						Detail: fmt.Sprintf("failed to parse %q to bool", scheduleDeescalation),
+						Severity:      diag.Error,
+						Summary:       "schedule_deescalation must be a boolean value",
+						Detail:        fmt.Sprintf("failed to parse %q to bool", scheduleDeescalation),
 						AttributePath: append(path, cty.IndexStep{Key: cty.StringVal("schedule_deescalation")}),
 					})
 				}
