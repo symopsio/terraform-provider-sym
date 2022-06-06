@@ -360,6 +360,7 @@ func (r flowResource) String() string {
 		p.WriteString(fmt.Sprintf("		strategy_id = %s\n", r.params.strategyId))
 	}
 	p.WriteString(fmt.Sprintf("		allow_revoke = %v\n", r.params.allowRevoke))
+	p.WriteString(fmt.Sprintf("		schedule_deescalation = %v\n", r.params.scheduleDeescalation))
 	p.WriteString("		prompt_fields_json = jsonencode([\n")
 	for _, f := range r.params.promptFields {
 		p.WriteString("			{\n")
@@ -400,9 +401,10 @@ resource "sym_flow" %[1]q {
 }
 
 type params struct {
-	strategyId   string
-	allowRevoke  bool
-	promptFields []field
+	strategyId           string
+	allowRevoke          bool
+	scheduleDeescalation bool
+	promptFields         []field
 }
 
 type field struct {
