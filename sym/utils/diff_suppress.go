@@ -134,6 +134,6 @@ func SuppressEquivalentFileContentDiffs(k string, old string, new string, _ *sch
 	return bytes.Equal(newBytes, oldBytes)
 }
 
-func SuppressCaseSensitiveNamesDiffs(k string, old string, new string, _ *schema.ResourceData) bool {
+func SuppressCaseSensitiveNamesDiffs(k, old, new string, _ *schema.ResourceData) bool {
 	return strings.EqualFold(old, new)
 }
