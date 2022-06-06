@@ -28,8 +28,13 @@ func fieldResource() *schema.Resource {
 func (t *SymApprovalTemplate) ParamResource() *schema.Resource {
 	return &schema.Resource{
 		Schema: map[string]*schema.Schema{
-			"strategy_id":   utils.Optional(schema.TypeString),
-			"allow_revoke":  utils.OptionalWithDefault(schema.TypeBool, true),
+			"strategy_id":  utils.Optional(schema.TypeString),
+			"allow_revoke": utils.OptionalWithDefault(schema.TypeBool, true),
+			"allowed_sources": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem:     schema.TypeString,
+			},
 			"prompt_fields": utils.OptionalList(fieldResource()),
 		},
 	}
