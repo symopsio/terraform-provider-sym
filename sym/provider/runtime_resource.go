@@ -22,7 +22,7 @@ func Runtime() *schema.Resource {
 			StateContext: getSlugImporter("runtime"),
 		},
 		Schema: map[string]*schema.Schema{
-			"name":       utils.Required(schema.TypeString),
+			"name":       utils.RequiredCaseInsentitiveString(),
 			"label":      utils.Optional(schema.TypeString),
 			"context_id": utils.Required(schema.TypeString),
 		},

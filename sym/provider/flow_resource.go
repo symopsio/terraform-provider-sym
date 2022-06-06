@@ -39,7 +39,7 @@ func Flow() *schema.Resource {
 // Map the resource's fields to types
 func flowSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-		"name":     utils.Required(schema.TypeString),
+		"name":     utils.RequiredCaseInsentitiveString(),
 		"label":    utils.Optional(schema.TypeString),
 		"template": utils.Required(schema.TypeString),
 		"implementation": {

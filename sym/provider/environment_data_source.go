@@ -14,7 +14,7 @@ func DataSourceEnvironment() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: dataSourceEnvironmentRead,
 		Schema: map[string]*schema.Schema{
-			"name":                utils.Required(schema.TypeString),
+			"name":                utils.RequiredCaseInsentitiveString(),
 			"label":               utils.Optional(schema.TypeString),
 			"runtime_id":          utils.Optional(schema.TypeString),
 			"log_destination_ids": utils.StringList(false),

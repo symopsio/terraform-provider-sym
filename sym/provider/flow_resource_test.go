@@ -1,6 +1,7 @@
 package provider
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -30,6 +31,42 @@ func TestAccSymFlow_basic(t *testing.T) {
 				Config: updateFlowConfig(data),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("sym_flow.this", "name", data.ResourceName),
+					resource.TestCheckResourceAttr("sym_flow.this", "label", "SSO Access2"),
+					resource.TestCheckResourceAttr("sym_flow.this", "template", "sym:template:approval:1.0.0"),
+					resource.TestCheckResourceAttrSet("sym_flow.this", "implementation"),
+					resource.TestCheckResourceAttrPair("sym_flow.this", "environment_id", "sym_environment.this", "id"),
+					resource.TestCheckResourceAttrPair("sym_flow.this", "params.strategy_id", "sym_strategy.sso_main", "id"),
+					resource.TestCheckResourceAttr("sym_flow.this", "params.allow_revoke", "true"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccSymFlow_nameCaseInsensitive(t *testing.T) {
+	data := BuildTestData("BASIC-ENVIRONMENT")
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: createFlowConfig(data),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("sym_flow.this", "name", data.ResourceName),
+					resource.TestCheckResourceAttr("sym_flow.this", "label", "SSO Access2"),
+					resource.TestCheckResourceAttr("sym_flow.this", "template", "sym:template:approval:1.0.0"),
+					resource.TestCheckResourceAttrSet("sym_flow.this", "implementation"),
+					resource.TestCheckResourceAttrPair("sym_flow.this", "environment_id", "sym_environment.this", "id"),
+					resource.TestCheckResourceAttrPair("sym_flow.this", "params.strategy_id", "sym_strategy.sso_main", "id"),
+					resource.TestCheckResourceAttr("sym_flow.this", "params.allow_revoke", "false"),
+					resource.TestCheckResourceAttr("sym_flow.this", "params.prompt_fields_json", `[{"name":"reason","type":"string","required":true,"label":"Reason"},{"name":"urgency","type":"list","required":true,"default":"Low","allowed_values":["Low","Medium","High"]}]`),
+				),
+			},
+			{
+				Config: updateFlowConfig(data),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("sym_flow.this", "name", strings.ToLower(data.ResourceName)),
 					resource.TestCheckResourceAttr("sym_flow.this", "label", "SSO Access2"),
 					resource.TestCheckResourceAttr("sym_flow.this", "template", "sym:template:approval:1.0.0"),
 					resource.TestCheckResourceAttrSet("sym_flow.this", "implementation"),
