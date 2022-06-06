@@ -13,6 +13,14 @@ var (
 		}
 	}
 
+	RequiredCaseInsentitiveString = func() *schema.Schema {
+		return &schema.Schema{
+			Type:             schema.TypeString,
+			Required:         true,
+			DiffSuppressFunc: SuppressCaseSensitiveNamesDiffs,
+		}
+	}
+
 	RequiredWithDefault = func(valueType schema.ValueType, defaultFunc schema.SchemaDefaultFunc) *schema.Schema {
 		return &schema.Schema{
 			Type:        valueType,

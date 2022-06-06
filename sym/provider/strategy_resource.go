@@ -33,7 +33,7 @@ func strategySchema() map[string]*schema.Schema {
 		"integration_id": utils.Optional(schema.TypeString),
 		"settings":       utils.SettingsMap(),
 		"targets":        utils.StringList(true),
-		"name":           utils.Required(schema.TypeString),
+		"name":           utils.RequiredCaseInsentitiveString(),
 		"label":          utils.Optional(schema.TypeString),
 		"implementation": {
 			Type:             schema.TypeString,

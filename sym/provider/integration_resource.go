@@ -23,7 +23,7 @@ func Integration() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"type":        utils.Required(schema.TypeString),
 			"settings":    utils.SettingsMap(),
-			"name":        utils.Required(schema.TypeString),
+			"name":        utils.RequiredCaseInsentitiveString(),
 			"external_id": utils.Required(schema.TypeString),
 			"label":       utils.Optional(schema.TypeString),
 		},
