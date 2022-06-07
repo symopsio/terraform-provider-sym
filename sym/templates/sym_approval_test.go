@@ -80,3 +80,74 @@ func Test_apiParamsToTFParams(t *testing.T) {
 		})
 	}
 }
+
+func Test_apiParamsToTFParams_allowed_sources(t *testing.T) {
+	tests := []struct {
+		name    string
+		input   client.APIParams
+		want    *HCLParamMap
+		wantErr bool
+	}{
+		// allowed_sources_json = jsonencode(["slack", "api"])"]),
+		{
+			"no-strategy-id",
+			client.APIParams{
+				"prompt_fields":   []interface{}{},
+				"allowed_sources": []interface{}{"slack", "api"},
+			},
+			&HCLParamMap{
+				Params: map[string]string{
+					"allow_revoke":          "false",
+					"schedule_deescalation": "false",
+					"prompt_fields_json":    `[]`,
+					"allowed_sources_json":  `["slack","api"]`,
+				},
+			},
+			false,
+		},
+		// allowed_sources_json = null,
+		{
+			"no-strategy-id",
+			client.APIParams{
+				"prompt_fields":   []interface{}{},
+				"allowed_sources": []interface{}{},
+			},
+			&HCLParamMap{
+				Params: map[string]string{
+					"allow_revoke":          "false",
+					"schedule_deescalation": "false",
+					"prompt_fields_json":    `[]`,
+					"allowed_sources_json":  `null`,
+				},
+			},
+			false,
+		},
+		// allowed_sources_json not set,
+		{
+			"no-strategy-id",
+			client.APIParams{
+				"prompt_fields": []interface{}{},
+			},
+			&HCLParamMap{
+				Params: map[string]string{
+					"allow_revoke":          "false",
+					"schedule_deescalation": "false",
+					"prompt_fields_json":    `[]`,
+				},
+			},
+			false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := apiParamsToTFParams(tt.input)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("apiParamsToTFParams() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("apiParamsToTFParams() got = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

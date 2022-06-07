@@ -59,12 +59,12 @@ func (t *SymApprovalTemplate) terraformToAPI(params *HCLParamMap) client.APIPara
 	}
 
 	if field := params.checkKey("allowed_sources_json"); field != nil {
-		var fields interface{}
-		err := json.Unmarshal([]byte(field.Value()), &fields)
+		var allowedSources interface{}
+		err := json.Unmarshal([]byte(field.Value()), &allowedSources)
 		if err != nil {
 			params.addDiag("allowed_sources_json", "Error decoding allowed_sources_json")
 		}
-		raw["allowed_sources"] = fields
+		raw["allowed_sources"] = allowedSources
 	}
 
 	if field := params.checkKey("strategy_id"); field != nil {
@@ -125,18 +125,30 @@ func apiParamsToTFParams(apiParams client.APIParams) (*HCLParamMap, error) {
 	}
 
 	// allowed_sources
+	var allowedSourcesOutput string
+	var allowedSourcesList []string
 
-	// call apiParams to get the allowed_sources as a map[string]interface{}
-	allowedSourcesFields, allowedSourcesOk := apiParams["allowed_sources"].(map[string]interface{})
+	// call apiParams to get the allowed_sources as a []interface{}
+	allowedSourcesFields, exists := apiParams["allowed_sources"]
+	if exists {
+		allowedSourcesFields, ok := allowedSourcesFields.([]interface{})
 
-	if !allowedSourcesOk {
-		return nil, fmt.Errorf("%s: API Response returned an invalid response for: `allowed_sources`", errMsg)
-	}
+		if ok {
+			// convert each element to a string and append it to our list
+			for _, fieldInterface := range allowedSourcesFields {
+				fieldString, ok := fieldInterface.(string)
+				if ok {
+					allowedSourcesList = append(allowedSourcesList, fieldString)
+				}
+			}
 
-	allowedSourcesJSON, err := json.Marshal(allowedSourcesFields)
+			allowedSourcesJSON, err := json.Marshal(allowedSourcesList)
 
-	if err != nil {
-		return nil, err
+			if err != nil {
+				return nil, err
+			}
+			allowedSourcesOutput = string(allowedSourcesJSON)
+		}
 	}
 
 	allowRevoke, _ := apiParams["allow_revoke"].(bool)
@@ -144,9 +156,11 @@ func apiParamsToTFParams(apiParams client.APIParams) (*HCLParamMap, error) {
 
 	params := map[string]string{
 		"allow_revoke":          strconv.FormatBool(allowRevoke),
-		"allowed_sources_json":  string(allowedSourcesJSON),
 		"schedule_deescalation": strconv.FormatBool(scheduleDeescalation),
 		"prompt_fields_json":    string(fieldsJSON),
+	}
+	if allowedSourcesOutput != "" {
+		params["allowed_sources_json"] = allowedSourcesOutput
 	}
 
 	if apiParamsStrategyID, ok := apiParams["strategy_id"].(string); ok {
