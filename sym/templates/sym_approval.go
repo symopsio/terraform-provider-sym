@@ -30,6 +30,7 @@ func (t *SymApprovalTemplate) ParamResource() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"strategy_id":           utils.Optional(schema.TypeString),
 			"allow_revoke":          utils.OptionalWithDefault(schema.TypeBool, true),
+			"allowed_sources":       utils.StringList(false),
 			"schedule_deescalation": utils.OptionalWithDefault(schema.TypeBool, true),
 			"prompt_fields":         utils.OptionalList(fieldResource()),
 		},
@@ -55,6 +56,15 @@ func (t *SymApprovalTemplate) terraformToAPI(params *HCLParamMap) client.APIPara
 			"You can customize the request modal presented to users by specifying additional fields.",
 			"https://docs.symops.com/docs/sym-approval",
 		)
+	}
+
+	if field := params.checkKey("allowed_sources_json"); field != nil {
+		var fields interface{}
+		err := json.Unmarshal([]byte(field.Value()), &fields)
+		if err != nil {
+			params.addDiag("allowed_sources_json", "Error decoding allowed_sources_json")
+		}
+		raw["allowed_sources"] = fields
 	}
 
 	if field := params.checkKey("strategy_id"); field != nil {
@@ -93,15 +103,17 @@ func (t *SymApprovalTemplate) APIToTerraform(apiParams client.APIParams) (*HCLPa
 }
 
 func (t *SymApprovalTemplate) APIToTerraformKeyMap() map[string]string {
-	return map[string]string{"prompt_fields": "prompt_fields_json"}
+	return map[string]string{"prompt_fields": "prompt_fields_json", "allowed_sources": "allowed_sources_json"}
 }
 
 func apiParamsToTFParams(apiParams client.APIParams) (*HCLParamMap, error) {
 	paramFields := make([]client.ParamField, 0)
 	errMsg := "an unexpected error occurred, please contact Sym support"
 
-	promptFields, ok := apiParams["prompt_fields"].([]interface{})
-	if !ok {
+	// prompt_fields
+	promptFields, promptFieldOk := apiParams["prompt_fields"].([]interface{})
+
+	if !promptFieldOk {
 		return nil, fmt.Errorf("%s: API Response did not contain required field: `prompt_fields`", errMsg)
 	}
 	for _, fieldInterface := range promptFields {
@@ -112,11 +124,27 @@ func apiParamsToTFParams(apiParams client.APIParams) (*HCLParamMap, error) {
 		return nil, err
 	}
 
+	// allowed_sources
+
+	// call apiParams to get the allowed_sources as a map[string]interface{}
+	allowedSourcesFields, allowedSourcesOk := apiParams["allowed_sources"].(map[string]interface{})
+
+	if !allowedSourcesOk {
+		return nil, fmt.Errorf("%s: API Response returned an invalid response for: `allowed_sources`", errMsg)
+	}
+
+	allowedSourcesJSON, err := json.Marshal(allowedSourcesFields)
+
+	if err != nil {
+		return nil, err
+	}
+
 	allowRevoke, _ := apiParams["allow_revoke"].(bool)
 	scheduleDeescalation, _ := apiParams["schedule_deescalation"].(bool)
 
 	params := map[string]string{
 		"allow_revoke":          strconv.FormatBool(allowRevoke),
+		"allowed_sources_json":  string(allowedSourcesJSON),
 		"schedule_deescalation": strconv.FormatBool(scheduleDeescalation),
 		"prompt_fields_json":    string(fieldsJSON),
 	}
