@@ -143,6 +143,19 @@ resource "sym_runtime" "test" {
 	context_id = 123-456-7890
 }
 `,
+		}, {
+			"runtime-no-context",
+			runtimeResource{
+				terraformName: "test",
+				name: "test-runtime",
+				label: "Test Runtime",
+			},
+				`
+resource "sym_runtime" "test" {
+	name = "test-runtime"
+	label = "Test Runtime"
+}
+`,
 		},
 	}
 
