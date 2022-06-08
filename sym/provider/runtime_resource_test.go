@@ -47,7 +47,7 @@ func TestAccSymRuntime_withoutContext(t *testing.T) {
 			{
 				Config: createRuntimeConfig,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckNoResourceAttr("sym_runtime.this", "context_id"),
+					resource.TestCheckResourceAttr("sym_runtime.this", "context_id", ""),
 					resource.TestCheckResourceAttr("sym_runtime.this", "name", runtimeData.ResourceName),
 					resource.TestCheckResourceAttr("sym_runtime.this", "label", "Test Runtime"),
 				),
@@ -55,7 +55,7 @@ func TestAccSymRuntime_withoutContext(t *testing.T) {
 			{
 				Config: updateRuntimeConfig,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckNoResourceAttr("sym_runtime.this", "context_id"),
+					resource.TestCheckResourceAttr("sym_runtime.this", "context_id", ""),
 					resource.TestCheckResourceAttr("sym_runtime.this", "name", runtimeData.ResourceName),
 					resource.TestCheckResourceAttr("sym_runtime.this", "label", "Updated Test Runtime"),
 				),
