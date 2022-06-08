@@ -47,7 +47,7 @@ func TestAccSymRuntime_withoutContext(t *testing.T) {
 			{
 				Config: createRuntimeConfig,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("sym_runtime.this", "context_id", ""),
+					resource.TestCheckNoResourceAttr("sym_runtime.this", "context_id"),
 					resource.TestCheckResourceAttr("sym_runtime.this", "name", runtimeData.ResourceName),
 					resource.TestCheckResourceAttr("sym_runtime.this", "label", "Test Runtime"),
 				),
@@ -55,6 +55,7 @@ func TestAccSymRuntime_withoutContext(t *testing.T) {
 			{
 				Config: updateRuntimeConfig,
 				Check: resource.ComposeTestCheckFunc(
+					// context_id will now be present in state due to the read step but it should still be empty
 					resource.TestCheckResourceAttr("sym_runtime.this", "context_id", ""),
 					resource.TestCheckResourceAttr("sym_runtime.this", "name", runtimeData.ResourceName),
 					resource.TestCheckResourceAttr("sym_runtime.this", "label", "Updated Test Runtime"),
