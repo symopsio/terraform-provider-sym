@@ -41,7 +41,7 @@ func TestAccSymRuntime_withoutContext(t *testing.T) {
 	updateRuntimeConfig := runtimeConfig(runtimeData, "Updated Test Runtime", "")
 
 	resource.Test(t, resource.TestCase{
-		PreCheck: func() { testAccPreCheck(t) },
+		PreCheck:          func() { testAccPreCheck(t) },
 		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
 			{

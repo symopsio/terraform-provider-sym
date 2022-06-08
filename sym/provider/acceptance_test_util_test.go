@@ -147,10 +147,10 @@ resource "sym_runtime" "test" {
 			"runtime-no-context",
 			runtimeResource{
 				terraformName: "test",
-				name: "test-runtime",
-				label: "Test Runtime",
+				name:          "test-runtime",
+				label:         "Test Runtime",
 			},
-				`
+			`
 resource "sym_runtime" "test" {
 	name = "test-runtime"
 	label = "Test Runtime"
