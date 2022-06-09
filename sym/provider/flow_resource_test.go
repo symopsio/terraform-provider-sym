@@ -24,6 +24,7 @@ func TestAccSymFlow_basic(t *testing.T) {
 					resource.TestCheckResourceAttrPair("sym_flow.this", "environment_id", "sym_environment.this", "id"),
 					resource.TestCheckResourceAttrPair("sym_flow.this", "params.strategy_id", "sym_strategy.sso_main", "id"),
 					resource.TestCheckResourceAttr("sym_flow.this", "params.allow_revoke", "true"),
+					resource.TestCheckResourceAttr("sym_flow.this", "params.allowed_sources_json", `["slack","api"]`),
 					resource.TestCheckResourceAttr("sym_flow.this", "params.schedule_deescalation", "false"),
 					resource.TestCheckResourceAttr("sym_flow.this", "params.prompt_fields_json", `[{"name":"reason","type":"string","required":true,"label":"Reason"},{"name":"urgency","type":"list","required":true,"default":"Low","allowed_values":["Low","Medium","High"]}]`),
 				),
@@ -99,6 +100,7 @@ func TestAccSymFlow_noStrategy(t *testing.T) {
 					resource.TestCheckNoResourceAttr("sym_flow.this", "params.strategy_id"),
 					resource.TestCheckResourceAttr("sym_flow.this", "params.allow_revoke", "true"),
 					resource.TestCheckResourceAttr("sym_flow.this", "params.schedule_deescalation", "false"),
+					resource.TestCheckNoResourceAttr("sym_flow.this", "params.allowed_sources_json"),
 					resource.TestCheckResourceAttr("sym_flow.this", "params.prompt_fields_json", `[{"name":"reason","type":"string","required":true,"label":"Reason"},{"name":"urgency","type":"list","required":true,"default":"Low","allowed_values":["Low","Medium","High"]}]`),
 				),
 			},
@@ -119,7 +121,44 @@ func TestAccSymFlow_noStrategy(t *testing.T) {
 	})
 }
 
-func flowConfig(data TestData, implPath string, allowRevoke bool, strategyId string, scheduleDeescalation bool) string {
+func TestAccSymFlow_allowedSourcesOnlyAPI(t *testing.T) {
+	data := BuildTestData("allowed-sources-slack-api")
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: createFlowConfigWithOnlyAPISource(data),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("sym_flow.this", "name", data.ResourceName),
+					resource.TestCheckResourceAttr("sym_flow.this", "label", "SSO Access2"),
+					resource.TestCheckResourceAttr("sym_flow.this", "template", "sym:template:approval:1.0.0"),
+					resource.TestCheckResourceAttrSet("sym_flow.this", "implementation"),
+					resource.TestCheckResourceAttrPair("sym_flow.this", "environment_id", "sym_environment.this", "id"),
+					resource.TestCheckResourceAttrPair("sym_flow.this", "params.strategy_id", "sym_strategy.sso_main", "id"),
+					resource.TestCheckResourceAttr("sym_flow.this", "params.allow_revoke", "true"),
+					resource.TestCheckResourceAttr("sym_flow.this", "params.allowed_sources_json", `["api"]`),
+					resource.TestCheckResourceAttr("sym_flow.this", "params.prompt_fields_json", `[{"name":"reason","type":"string","required":true,"label":"Reason"},{"name":"urgency","type":"list","required":true,"default":"Low","allowed_values":["Low","Medium","High"]}]`),
+				),
+			},
+			{
+				Config: updateFlowConfig(data),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("sym_flow.this", "name", data.ResourceName),
+					resource.TestCheckResourceAttr("sym_flow.this", "label", "SSO Access2"),
+					resource.TestCheckResourceAttr("sym_flow.this", "template", "sym:template:approval:1.0.0"),
+					resource.TestCheckResourceAttrSet("sym_flow.this", "implementation"),
+					resource.TestCheckResourceAttrPair("sym_flow.this", "environment_id", "sym_environment.this", "id"),
+					resource.TestCheckResourceAttrPair("sym_flow.this", "params.strategy_id", "sym_strategy.sso_main", "id"),
+					resource.TestCheckResourceAttr("sym_flow.this", "params.allow_revoke", "false"),
+				),
+			},
+		},
+	})
+}
+
+func flowConfig(data TestData, implPath string, allowRevoke bool, strategyId string, scheduleDeescalation bool, allowedSources string) string {
 	return makeTerraformConfig(
 		providerResource{org: data.OrgSlug},
 		integrationResource{
@@ -204,6 +243,7 @@ func flowConfig(data TestData, implPath string, allowRevoke bool, strategyId str
 			params: params{
 				strategyId:           strategyId,
 				allowRevoke:          allowRevoke,
+				allowedSources:       allowedSources,
 				scheduleDeescalation: scheduleDeescalation,
 				promptFields: []field{
 					{
@@ -226,17 +266,25 @@ func flowConfig(data TestData, implPath string, allowRevoke bool, strategyId str
 }
 
 func createFlowConfig(data TestData) string {
-	return flowConfig(data, "internal/testdata/before_impl.py", true, "sym_strategy.sso_main.id", false)
+	return flowConfig(data, "internal/testdata/before_impl.py", true, "sym_strategy.sso_main.id", false,
+		`["slack", "api"]`)
 }
 
 func updateFlowConfig(data TestData) string {
-	return flowConfig(data, "internal/testdata/after_impl.py", false, "sym_strategy.sso_main.id", true)
+	return flowConfig(data, "internal/testdata/after_impl.py", false, "sym_strategy.sso_main.id", true,
+		"")
 }
 
 func createFlowNoStrategyConfig(data TestData) string {
-	return flowConfig(data, "internal/testdata/before_impl.py", true, "", false)
+	return flowConfig(data, "internal/testdata/before_impl.py", true, "", false,
+		"")
 }
 
 func updateFlowNoStrategyConfig(data TestData) string {
-	return flowConfig(data, "internal/testdata/after_impl.py", false, "", true)
+	return flowConfig(data, "internal/testdata/after_impl.py", false, "", true,
+		"")
+}
+
+func createFlowConfigWithOnlyAPISource(data TestData) string {
+	return flowConfig(data, "internal/testdata/after_impl.py", true, "sym_strategy.sso_main.id", true, `["api"]`)
 }

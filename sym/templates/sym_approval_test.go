@@ -90,7 +90,7 @@ func Test_apiParamsToTFParams_allowed_sources(t *testing.T) {
 	}{
 		// allowed_sources_json = jsonencode(["slack", "api"])"]),
 		{
-			"no-strategy-id",
+			"allow-slack-and-api",
 			client.APIParams{
 				"prompt_fields":   []interface{}{},
 				"allowed_sources": []interface{}{"slack", "api"},
@@ -107,7 +107,7 @@ func Test_apiParamsToTFParams_allowed_sources(t *testing.T) {
 		},
 		// allowed_sources_json = null,
 		{
-			"no-strategy-id",
+			"allowed-sources-is-null",
 			client.APIParams{
 				"prompt_fields":   []interface{}{},
 				"allowed_sources": []interface{}{},
@@ -124,7 +124,7 @@ func Test_apiParamsToTFParams_allowed_sources(t *testing.T) {
 		},
 		// allowed_sources_json not set,
 		{
-			"no-strategy-id",
+			"allowed-sources-not-set",
 			client.APIParams{
 				"prompt_fields": []interface{}{},
 			},
