@@ -108,13 +108,20 @@ type runtimeResource struct {
 }
 
 func (r runtimeResource) String() string {
-	return fmt.Sprintf(`
+	var sb strings.Builder
+
+	sb.WriteString(fmt.Sprintf(`
 resource "sym_runtime" %[1]q {
 	name = %[2]q
 	label = %[3]q
-	context_id = %[4]s
-}
-`, r.terraformName, r.name, r.label, r.contextId)
+`, r.terraformName, r.name, r.label))
+
+	if r.contextId != "" {
+		sb.WriteString(fmt.Sprintf("\tcontext_id = %s\n", r.contextId))
+	}
+
+	sb.WriteString("}\n")
+	return sb.String()
 }
 
 type logDestinationResource struct {

@@ -33,5 +33,5 @@ func runtimeDataConfig(data TestData) string {
 data "sym_runtime" "test" {
   name = sym_runtime.this.name
 }
-`, runtimeConfig(data, "Test Runtime"))
+`, runtimeConfig(data, "Test Runtime", "sym_integration.runtime_test_context.id"))
 }

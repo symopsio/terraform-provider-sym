@@ -24,7 +24,7 @@ func Runtime() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"name":       utils.RequiredCaseInsentitiveString(),
 			"label":      utils.Optional(schema.TypeString),
-			"context_id": utils.Required(schema.TypeString),
+			"context_id": utils.Optional(schema.TypeString),
 		},
 	}
 }
