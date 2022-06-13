@@ -40,7 +40,7 @@ func TestAccSymFlow_basic(t *testing.T) {
 					resource.TestCheckResourceAttrPair("sym_flow.this", "environment_id", "sym_environment.this", "id"),
 					resource.TestCheckResourceAttrPair("sym_flow.this", "params.strategy_id", "sym_strategy.sso_main", "id"),
 					resource.TestCheckResourceAttr("sym_flow.this", "params.allow_revoke", "false"),
-					resource.TestCheckNoResourceAttr("sym_flow.this", "params.header_text")
+					resource.TestCheckNoResourceAttr("sym_flow.this", "params.header_text"),
 					resource.TestCheckResourceAttr("sym_flow.this", "params.schedule_deescalation", "true"),
 				),
 			},
