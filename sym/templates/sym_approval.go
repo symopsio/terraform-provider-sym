@@ -168,7 +168,7 @@ func apiParamsToTFParams(apiParams client.APIParams) (*HCLParamMap, error) {
 		params["allowed_sources_json"] = allowedSourcesOutput
 	}
 
-    if headerTextField, ok := apiParams["header_text"].(string); ok {
+	if headerTextField, ok := apiParams["header_text"].(string); ok {
 		params["header_text"] = headerTextField
 	}
 
