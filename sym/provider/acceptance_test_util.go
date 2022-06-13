@@ -373,6 +373,11 @@ func (r flowResource) String() string {
 	if r.params.allowedSources != "" {
 		p.WriteString(fmt.Sprintf("		allowed_sources_json = jsonencode(%v)\n", r.params.allowedSources))
 	}
+
+	if r.params.headerText != "" {
+	    p.WriteString(fmt.Sprintf("		header_text = %s\n", r.params.headerText))
+	}
+
 	p.WriteString("		prompt_fields_json = jsonencode([\n")
 	for _, f := range r.params.promptFields {
 		p.WriteString("			{\n")
@@ -416,6 +421,7 @@ type params struct {
 	strategyId           string
 	allowRevoke          bool
 	allowedSources       string
+	headerText           string
 	scheduleDeescalation bool
 	promptFields         []field
 }
