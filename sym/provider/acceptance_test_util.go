@@ -370,7 +370,7 @@ func (r flowResource) String() string {
 	p.WriteString(fmt.Sprintf("		schedule_deescalation = %v\n", r.params.scheduleDeescalation))
 
 	if r.params.headerText != "" {
-		p.WriteString(fmt.Sprintf("		header_text = %s\n", r.params.headerText))
+		p.WriteString(fmt.Sprintf("		header_text = %s\n\n", r.params.headerText))
 	}
 
 	// if allowedSources is not nil, include it in the params
