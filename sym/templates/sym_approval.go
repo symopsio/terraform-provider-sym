@@ -28,11 +28,12 @@ func fieldResource() *schema.Resource {
 func (t *SymApprovalTemplate) ParamResource() *schema.Resource {
 	return &schema.Resource{
 		Schema: map[string]*schema.Schema{
-			"strategy_id":           utils.Optional(schema.TypeString),
-			"allow_revoke":          utils.OptionalWithDefault(schema.TypeBool, true),
-			"allowed_sources":       utils.StringList(false),
-			"schedule_deescalation": utils.OptionalWithDefault(schema.TypeBool, true),
-			"prompt_fields":         utils.OptionalList(fieldResource()),
+			"strategy_id":            utils.Optional(schema.TypeString),
+			"allow_revoke":           utils.OptionalWithDefault(schema.TypeBool, true),
+			"allowed_sources":        utils.StringList(false),
+			"schedule_deescalation":  utils.OptionalWithDefault(schema.TypeBool, true),
+			"prompt_fields":          utils.OptionalList(fieldResource()),
+			"additional_header_text": utils.Optional(schema.TypeString),
 		},
 	}
 }
@@ -69,6 +70,10 @@ func (t *SymApprovalTemplate) terraformToAPI(params *HCLParamMap) client.APIPara
 
 	if field := params.checkKey("strategy_id"); field != nil {
 		raw["strategy_id"] = field.Value()
+	}
+
+	if field := params.checkKey("additional_header_text"); field != nil {
+		raw["additional_header_text"] = field.Value()
 	}
 
 	if field := params.checkKey("allow_revoke"); field != nil {
@@ -161,6 +166,10 @@ func apiParamsToTFParams(apiParams client.APIParams) (*HCLParamMap, error) {
 	}
 	if allowedSourcesOutput != "" {
 		params["allowed_sources_json"] = allowedSourcesOutput
+	}
+
+	if additionalHeaderTextField, ok := apiParams["additional_header_text"].(string); ok {
+		params["additional_header_text"] = additionalHeaderTextField
 	}
 
 	if apiParamsStrategyID, ok := apiParams["strategy_id"].(string); ok {

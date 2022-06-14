@@ -92,15 +92,17 @@ func Test_apiParamsToTFParams_allowed_sources(t *testing.T) {
 		{
 			"allow-slack-and-api",
 			client.APIParams{
-				"prompt_fields":   []interface{}{},
-				"allowed_sources": []interface{}{"slack", "api"},
+				"prompt_fields":          []interface{}{},
+				"allowed_sources":        []interface{}{"slack", "api"},
+				"additional_header_text": "Default Header Text",
 			},
 			&HCLParamMap{
 				Params: map[string]string{
-					"allow_revoke":          "false",
-					"schedule_deescalation": "false",
-					"prompt_fields_json":    `[]`,
-					"allowed_sources_json":  `["slack","api"]`,
+					"allow_revoke":           "false",
+					"schedule_deescalation":  "false",
+					"prompt_fields_json":     `[]`,
+					"allowed_sources_json":   `["slack","api"]`,
+					"additional_header_text": "Default Header Text",
 				},
 			},
 			false,

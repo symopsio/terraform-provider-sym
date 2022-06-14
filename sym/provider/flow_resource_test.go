@@ -25,6 +25,7 @@ func TestAccSymFlow_basic(t *testing.T) {
 					resource.TestCheckResourceAttrPair("sym_flow.this", "params.strategy_id", "sym_strategy.sso_main", "id"),
 					resource.TestCheckResourceAttr("sym_flow.this", "params.allow_revoke", "true"),
 					resource.TestCheckResourceAttr("sym_flow.this", "params.allowed_sources_json", `["slack","api"]`),
+					resource.TestCheckResourceAttr("sym_flow.this", "params.additional_header_text", "Additional Header Text"),
 					resource.TestCheckResourceAttr("sym_flow.this", "params.schedule_deescalation", "false"),
 					resource.TestCheckResourceAttr("sym_flow.this", "params.prompt_fields_json", `[{"name":"reason","type":"string","required":true,"label":"Reason"},{"name":"urgency","type":"list","required":true,"default":"Low","allowed_values":["Low","Medium","High"]}]`),
 				),
@@ -39,6 +40,7 @@ func TestAccSymFlow_basic(t *testing.T) {
 					resource.TestCheckResourceAttrPair("sym_flow.this", "environment_id", "sym_environment.this", "id"),
 					resource.TestCheckResourceAttrPair("sym_flow.this", "params.strategy_id", "sym_strategy.sso_main", "id"),
 					resource.TestCheckResourceAttr("sym_flow.this", "params.allow_revoke", "false"),
+					resource.TestCheckNoResourceAttr("sym_flow.this", "params.header_text"),
 					resource.TestCheckResourceAttr("sym_flow.this", "params.schedule_deescalation", "true"),
 				),
 			},
@@ -158,7 +160,7 @@ func TestAccSymFlow_allowedSourcesOnlyAPI(t *testing.T) {
 	})
 }
 
-func flowConfig(data TestData, implPath string, allowRevoke bool, strategyId string, scheduleDeescalation bool, allowedSources string) string {
+func flowConfig(data TestData, implPath string, allowRevoke bool, strategyId string, scheduleDeescalation bool, allowedSources string, additionalHeaderText string) string {
 	return makeTerraformConfig(
 		providerResource{org: data.OrgSlug},
 		integrationResource{
@@ -244,6 +246,7 @@ func flowConfig(data TestData, implPath string, allowRevoke bool, strategyId str
 				strategyId:           strategyId,
 				allowRevoke:          allowRevoke,
 				allowedSources:       allowedSources,
+				additionalHeaderText: additionalHeaderText,
 				scheduleDeescalation: scheduleDeescalation,
 				promptFields: []field{
 					{
@@ -267,24 +270,24 @@ func flowConfig(data TestData, implPath string, allowRevoke bool, strategyId str
 
 func createFlowConfig(data TestData) string {
 	return flowConfig(data, "internal/testdata/before_impl.py", true, "sym_strategy.sso_main.id", false,
-		`["slack", "api"]`)
+		`["slack", "api"]`, "Additional Header Text")
 }
 
 func updateFlowConfig(data TestData) string {
 	return flowConfig(data, "internal/testdata/after_impl.py", false, "sym_strategy.sso_main.id", true,
-		"")
+		"", "")
 }
 
 func createFlowNoStrategyConfig(data TestData) string {
 	return flowConfig(data, "internal/testdata/before_impl.py", true, "", false,
-		"")
+		"", "")
 }
 
 func updateFlowNoStrategyConfig(data TestData) string {
 	return flowConfig(data, "internal/testdata/after_impl.py", false, "", true,
-		"")
+		"", "")
 }
 
 func createFlowConfigWithOnlyAPISource(data TestData) string {
-	return flowConfig(data, "internal/testdata/after_impl.py", true, "sym_strategy.sso_main.id", true, `["api"]`)
+	return flowConfig(data, "internal/testdata/after_impl.py", true, "sym_strategy.sso_main.id", true, `["api"]`, "")
 }
