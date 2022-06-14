@@ -102,7 +102,7 @@ func Test_apiParamsToTFParams_allowed_sources(t *testing.T) {
 					"schedule_deescalation": "false",
 					"prompt_fields_json":    `[]`,
 					"allowed_sources_json":  `["slack","api"]`,
-					"header_text":            "Default Header Text",
+					"header_text":           "Default Header Text",
 				},
 			},
 			false,
