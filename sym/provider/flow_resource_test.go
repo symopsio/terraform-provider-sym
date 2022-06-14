@@ -160,7 +160,7 @@ func TestAccSymFlow_allowedSourcesOnlyAPI(t *testing.T) {
 	})
 }
 
-func flowConfig(data TestData, implPath string, allowRevoke bool, strategyId string, scheduleDeescalation bool, allowedSources string, headerText string) string {
+func flowConfig(data TestData, implPath string, allowRevoke bool, strategyId string, scheduleDeescalation bool, allowedSources string, additionalHeaderText string) string {
 	return makeTerraformConfig(
 		providerResource{org: data.OrgSlug},
 		integrationResource{
@@ -246,7 +246,7 @@ func flowConfig(data TestData, implPath string, allowRevoke bool, strategyId str
 				strategyId:           strategyId,
 				allowRevoke:          allowRevoke,
 				allowedSources:       allowedSources,
-				headerText:           headerText,
+				additionalHeaderText: additionalHeaderText,
 				scheduleDeescalation: scheduleDeescalation,
 				promptFields: []field{
 					{
