@@ -369,8 +369,8 @@ func (r flowResource) String() string {
 	p.WriteString(fmt.Sprintf("		allow_revoke = %v\n", r.params.allowRevoke))
 	p.WriteString(fmt.Sprintf("		schedule_deescalation = %v\n", r.params.scheduleDeescalation))
 
-	if r.params.headerText != "" {
-		p.WriteString(fmt.Sprintf("		header_text = \"%s\"\n", r.params.headerText))
+	if r.params.additionalHeaderText != "" {
+		p.WriteString(fmt.Sprintf("		additional_header_text = \"%s\"\n", r.params.additionalHeaderText))
 	}
 
 	// if allowedSources is not nil, include it in the params
@@ -421,7 +421,7 @@ type params struct {
 	strategyId           string
 	allowRevoke          bool
 	allowedSources       string
-	headerText           string
+	additionalHeaderText string
 	scheduleDeescalation bool
 	promptFields         []field
 }

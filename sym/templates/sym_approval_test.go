@@ -94,7 +94,7 @@ func Test_apiParamsToTFParams_allowed_sources(t *testing.T) {
 			client.APIParams{
 				"prompt_fields":   []interface{}{},
 				"allowed_sources": []interface{}{"slack", "api"},
-				"header_text":     "Default Header Text",
+				"additional_header_text":     "Default Header Text",
 			},
 			&HCLParamMap{
 				Params: map[string]string{
@@ -102,7 +102,7 @@ func Test_apiParamsToTFParams_allowed_sources(t *testing.T) {
 					"schedule_deescalation": "false",
 					"prompt_fields_json":    `[]`,
 					"allowed_sources_json":  `["slack","api"]`,
-					"header_text":           "Default Header Text",
+					"additional_header_text":           "Default Header Text",
 				},
 			},
 			false,
