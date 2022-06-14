@@ -10,7 +10,7 @@ At this point, the registry will be able to provide the new release - check out 
 
 ## Development
 
-1. Add the asdf plugins: `asdf plugin add golang richgo`
+1. Add the asdf plugins: `asdf plugin add golang richgo terraform`
 2. Run `asdf install` to install necessary tools from .tool-versions
 3. Run `make local` to create the binary locally
 
