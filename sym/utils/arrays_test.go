@@ -4,8 +4,8 @@ import "testing"
 
 func TestContainsStr(t *testing.T) {
 	type args struct {
-		list   []string
-		str string
+		list []string
+		str  string
 	}
 
 	tests := []struct {
