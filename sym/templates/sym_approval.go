@@ -50,6 +50,37 @@ func (t *SymApprovalTemplate) terraformToAPI(params *HCLParamMap) client.APIPara
 			params.addDiag("prompt_fields_json", "Error decoding prompt_fields_json")
 		}
 		raw["prompt_fields"] = fields
+
+		// Validate each defined prompt field for the purpose of surfacing warnings.
+		for _, f := range fields.([]interface{}) {
+			promptField := f.(map[string]interface{})
+			fieldType, fieldTypeOk := utils.GetStr(promptField, "type")
+			if !fieldTypeOk {
+				// If there is no "type", validation should hard fail later on, so just skip warning validation.
+				continue
+			}
+
+			allowedValues, allowedValuesOk := utils.GetStrArray(promptField, "allowed_values")
+			if !allowedValuesOk {
+				// If there is no "allowed_values", there is nothing to validate for now, so skip.
+				continue
+			}
+
+			if utils.ContainsStr([]string{"int", "string"}, fieldType) && len(allowedValues) > 0 {
+				fieldName, fieldNameOk := utils.GetStr(promptField, "name")
+				if !fieldNameOk {
+					// If this field doesn't have a name, it's going to fail for other reasons, so skip warning.
+					continue
+				}
+
+				params.addWarning(
+					"prompt_fields_json",
+					fmt.Sprintf("The %q field's allowed_values will be ignored.", fieldName),
+					fmt.Sprintf("Fields of type %s do not support 'allowed_values'. Did you mean to use the 'list' type?", fieldType),
+					"https://docs.symops.com/docs/flow-parameters#params",
+				)
+			}
+		}
 	} else {
 		params.addWarning(
 			"prompt_fields_json",
