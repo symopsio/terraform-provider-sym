@@ -12,6 +12,7 @@ import (
 
 func DataSourceIntegration() *schema.Resource {
 	return &schema.Resource{
+		Description: "Use this data source to get information about a Sym Integration for use in other resources.",
 		ReadContext: dataSourceIntegrationRead,
 		Schema: map[string]*schema.Schema{
 			"type":        utils.Required(schema.TypeString),

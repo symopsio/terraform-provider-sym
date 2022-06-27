@@ -12,6 +12,7 @@ import (
 
 func DataSourceSecrets() *schema.Resource {
 	return &schema.Resource{
+		Description: "Use this data source to get information about a Sym Secrets resource for use in other resources.",
 		ReadContext: dataSourceSecretsRead,
 		Schema:      SecretsSchema(),
 	}

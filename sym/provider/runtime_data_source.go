@@ -12,6 +12,7 @@ import (
 
 func DataSourceRuntime() *schema.Resource {
 	return &schema.Resource{
+		Description: "Use this data source to get information about a Sym Runtime for use in other resources.",
 		ReadContext: dataSourceRuntimeRead,
 		Schema: map[string]*schema.Schema{
 			"name":       utils.RequiredCaseInsentitiveString(),
