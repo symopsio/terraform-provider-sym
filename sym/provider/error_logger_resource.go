@@ -14,6 +14,7 @@ import (
 
 func ErrorLogger() *schema.Resource {
 	return &schema.Resource{
+		Description:   "",
 		CreateContext: createErrorLogger,
 		ReadContext:   readErrorLogger,
 		UpdateContext: updateErrorLogger,
