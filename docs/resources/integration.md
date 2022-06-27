@@ -3,17 +3,30 @@
 page_title: "sym_integration Resource - terraform-provider-sym"
 subcategory: ""
 description: |-
-  The sym_integration resource allows you to provide Sym with the credentials and context to connect to an external service. For example, a PagerDuty integration.
+  The sym_integration resource allows you to provide Sym with the credentials and context to connect to an external service. For example, a PagerDuty integration or a Slack integration.
 ---
 
 # sym_integration (Resource)
 
-The `sym_integration` resource allows you to provide Sym with the credentials and context to connect to an external service. For example, a PagerDuty integration.
+The `sym_integration` resource allows you to provide Sym with the credentials and context to connect to an external service. For example, a PagerDuty integration or a Slack integration.
 
 ## Example Usage
 
 ```terraform
+# pagerduty integration
 resource "sym_integration" "pagerduty" {
+  type = "pagerduty"
+  name = "prod-pagerduty"
+
+  external_id = "mycompany.pagerduty.com"
+
+  settings = {
+    api_token_secret = "xxx"
+  }
+}
+
+# slack integration
+resource "sym_integration" "slack" {
   type = "slack"
   name = "prod-workspace"
 
@@ -45,5 +58,5 @@ Import is supported using the following syntax:
 
 ```shell
 # sym_integration can be imported in the format type:slug
-terraform import sym_integration.slack slack:prod-workspace
+terraform import sym_integration.slack pagerduty:prod-pagerduty
 ```

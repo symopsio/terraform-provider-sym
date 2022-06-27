@@ -13,7 +13,7 @@ import (
 
 func Integration() *schema.Resource {
 	return &schema.Resource{
-		Description:   "The `sym_integration` resource allows you to provide Sym with the credentials and context to connect to an external service. For example, a Pagerduty integration.",
+		Description:   "The `sym_integration` resource allows you to provide Sym with the credentials and context to connect to an external service. For example, a PagerDuty integration or a Slack integration.",
 		CreateContext: createIntegration,
 		ReadContext:   readIntegration,
 		UpdateContext: updateIntegration,
