@@ -13,6 +13,7 @@ import (
 
 func Target() *schema.Resource {
 	return &schema.Resource{
+		Description:   "The `sym_target` resource allows you describe something that users can request access to.",
 		Schema:        targetSchema(),
 		CreateContext: createTarget,
 		ReadContext:   readTarget,

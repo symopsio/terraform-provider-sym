@@ -14,6 +14,7 @@ import (
 
 func Secret() *schema.Resource {
 	return &schema.Resource{
+		Description:   "The `sym_secret` resource allows you to specify a specific secret to be accessed by the Sym platform.",
 		Schema:        secretSchema(),
 		CreateContext: createSecret,
 		ReadContext:   readSecret,

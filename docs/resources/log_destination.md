@@ -3,12 +3,12 @@
 page_title: "sym_log_destination Resource - terraform-provider-sym"
 subcategory: ""
 description: |-
-  
+  The sym_log_destination resource allows you to specify where audit logs should be streamed.
 ---
 
 # sym_log_destination (Resource)
 
-
+The `sym_log_destination` resource allows you to specify where audit logs should be streamed.
 
 ## Example Usage
 

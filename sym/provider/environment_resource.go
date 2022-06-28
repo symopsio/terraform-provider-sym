@@ -18,7 +18,7 @@ import (
 // the Sym environment in which their flows will run.
 func Environment() *schema.Resource {
 	return &schema.Resource{
-		Description:   "Provides an environment to deploy one or more Flows. You may use multiple environments such as 'sandbox' and 'prod' to safely test your flows in isolation before deploying them for production usage.",
+		Description:   "The `sym_environment` resource provides an environment to deploy one or more Flows. You may use multiple environments such as 'sandbox' and 'prod' to safely test your flows in isolation before deploying them for production usage.",
 		CreateContext: createEnvironment,
 		ReadContext:   readEnvironment,
 		UpdateContext: updateEnvironment,

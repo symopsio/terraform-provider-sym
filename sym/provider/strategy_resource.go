@@ -16,6 +16,7 @@ import (
 
 func Strategy() *schema.Resource {
 	return &schema.Resource{
+		Description:   "The `sym_strategy` resource allows you specify a set of Targets, and a way of granting access to those Targets.",
 		Schema:        strategySchema(),
 		CreateContext: createStrategy,
 		ReadContext:   readStrategy,

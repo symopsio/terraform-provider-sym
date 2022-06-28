@@ -3,12 +3,12 @@
 page_title: "sym_runtime Resource - terraform-provider-sym"
 subcategory: ""
 description: |-
-  
+  The sym_runtime resource allows you describe an execution context for the Sym runtime. For more details, see Getting Started https://docs.symops.com/docs/deploy-sym-platform.
 ---
 
 # sym_runtime (Resource)
 
-
+The `sym_runtime` resource allows you describe an execution context for the Sym runtime. For more details, see [Getting Started](https://docs.symops.com/docs/deploy-sym-platform).
 
 ## Example Usage
 

@@ -3,12 +3,12 @@
 page_title: "sym_secrets Resource - terraform-provider-sym"
 subcategory: ""
 description: |-
-  
+  The sym_secrets resource allows you to specify a source for secrets to be accessed by the Sym platform.
 ---
 
 # sym_secrets (Resource)
 
-
+The `sym_secrets` resource allows you to specify a source for secrets to be accessed by the Sym platform.
 
 ## Example Usage
 

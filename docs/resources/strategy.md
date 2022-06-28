@@ -3,12 +3,12 @@
 page_title: "sym_strategy Resource - terraform-provider-sym"
 subcategory: ""
 description: |-
-  
+  The sym_strategy resource allows you specify a set of Targets, and a way of granting access to those Targets.
 ---
 
 # sym_strategy (Resource)
 
-
+The `sym_strategy` resource allows you specify a set of Targets, and a way of granting access to those Targets.
 
 ## Example Usage
 

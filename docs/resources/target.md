@@ -3,12 +3,12 @@
 page_title: "sym_target Resource - terraform-provider-sym"
 subcategory: ""
 description: |-
-  
+  The sym_target resource allows you describe something that users can request access to.
 ---
 
 # sym_target (Resource)
 
-
+The `sym_target` resource allows you describe something that users can request access to.
 
 ## Example Usage
 

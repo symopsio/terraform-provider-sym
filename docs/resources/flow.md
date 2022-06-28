@@ -3,12 +3,12 @@
 page_title: "sym_flow Resource - terraform-provider-sym"
 subcategory: ""
 description: |-
-  
+  The sym_flow resource defines an approval workflow in Sym, allowing users to request temporary and auto-expiring access to sensitive resources.
 ---
 
 # sym_flow (Resource)
 
-
+The `sym_flow` resource defines an approval workflow in Sym, allowing users to request temporary and auto-expiring access to sensitive resources.
 
 ## Example Usage
 
