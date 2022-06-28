@@ -27,6 +27,10 @@ Running `terraform apply` in the example folder will create a local `terraform.t
 
 To debug problems, first turn on trace logging: `TF_LOG=trace terraform apply`.
 
+### Generating Documentation
+
+Automatically generating Terraform documentation requires the use of the [terraform-plugin-docs](https://github.com/hashicorp/terraform-plugin-docs) binary. To generate docs, run `tfplugindocs` at the root of this repo.
+
 ### Acceptance Tests
 
 The `sym/provider` package defines [Terraform acceptance tests](https://www.terraform.io/plugin/sdkv2/testing/acceptance-tests) which will execute **real requests** against an API.
