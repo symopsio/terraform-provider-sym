@@ -17,15 +17,23 @@ description: |-
 
 ### Required
 
-- `context_id` (String)
 - `name` (String)
 
 ### Optional
 
+- `context_id` (String)
 - `label` (String)
 
 ### Read-Only
 
 - `id` (String) The ID of this resource.
 
+## Import
 
+Import is supported using the following syntax:
+
+```shell
+# sym_runtime can be imported using the slug
+# you can find a runtime's slug by running `symflow resources list sym_runtime`
+terraform import sym_runtime.this prod_runtime
+```

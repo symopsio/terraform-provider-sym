@@ -58,5 +58,6 @@ Import is supported using the following syntax:
 
 ```shell
 # sym_integration can be imported in the format type:slug
-terraform import sym_integration.slack pagerduty:prod-pagerduty
+# you can find an integration's type and slug by running `symflow resources list sym_integration`
+terraform import sym_integration.pagerduty pagerduty:prod-pagerduty
 ```

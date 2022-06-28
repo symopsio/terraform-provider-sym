@@ -32,4 +32,12 @@ description: |-
 
 - `id` (String) The ID of this resource.
 
+## Import
 
+Import is supported using the following syntax:
+
+```shell
+# sym_flow can be imported using the slug
+# you can find a flow's slug by running `symflow resources list sym_flow`
+terraform import sym_flow.sso_flow sso_access_prod
+```
