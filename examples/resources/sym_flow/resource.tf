@@ -76,7 +76,6 @@ resource "sym_flow" "this" {
 
   params = {
     strategy_id = sym_strategy.sso_main.id
-    schedule_deescalation = false
 
     # This is called `fields` in the API
     prompt_fields_json = jsonencode([

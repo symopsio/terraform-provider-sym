@@ -3,12 +3,12 @@
 page_title: "sym_environment Resource - terraform-provider-sym"
 subcategory: ""
 description: |-
-  The sym_environment resource provides an environment to deploy one or more Flows. You may use multiple environments such as 'sandbox' and 'prod' to safely test your flows in isolation before deploying them for production usage.
+  The sym_environment resource provides an Environment to deploy one or more Flows. You may use multiple Environments such as 'sandbox' and 'prod' to safely test your flows in isolation before deploying them for production usage.
 ---
 
 # sym_environment (Resource)
 
-The `sym_environment` resource provides an environment to deploy one or more Flows. You may use multiple environments such as 'sandbox' and 'prod' to safely test your flows in isolation before deploying them for production usage.
+The `sym_environment` resource provides an Environment to deploy one or more Flows. You may use multiple Environments such as 'sandbox' and 'prod' to safely test your flows in isolation before deploying them for production usage.
 
 ## Example Usage
 

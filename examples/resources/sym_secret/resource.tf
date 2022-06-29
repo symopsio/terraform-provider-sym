@@ -23,7 +23,6 @@ resource "sym_secrets" "github" {
 
 resource "aws_secretsmanager_secret" "github_api_key" {
   name                    = "github-strategy/github-api-key"
-  recovery_window_in_days = 0
   description             = "Personal API Key to call Github APIs"
 
   tags = {

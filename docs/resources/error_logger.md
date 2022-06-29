@@ -3,12 +3,12 @@
 page_title: "sym_error_logger Resource - terraform-provider-sym"
 subcategory: ""
 description: |-
-  
+  The sym_error_logger resources defines a Slack channel destination for error messages encountered while executing a Flow.
 ---
 
 # sym_error_logger (Resource)
 
-
+The `sym_error_logger` resources defines a Slack channel destination for error messages encountered while executing a Flow.
 
 ## Example Usage
 

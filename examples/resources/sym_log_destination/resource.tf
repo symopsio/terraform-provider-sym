@@ -23,8 +23,8 @@ resource "aws_kinesis_firehose_delivery_stream" "this" {
   destination = "extended_s3"
 
   extended_s3_configuration {
-    role_arn   = module.kinesis_firehose_connector[0].firehose_role_arn
-    bucket_arn = module.kinesis_firehose_connector[0].firehose_bucket_arn
+    role_arn   = module.kinesis_firehose_connector.firehose_role_arn
+    bucket_arn = module.kinesis_firehose_connector.firehose_bucket_arn
 
   }
 }
@@ -33,6 +33,6 @@ resource "sym_log_destination" "s3_firehose" {
   type           = "kinesis_firehose"
   integration_id = sym_integration.runtime_context.id
   settings = {
-    stream_name = aws_kinesis_firehose_delivery_stream.this[0].name
+    stream_name = aws_kinesis_firehose_delivery_stream.this.name
   }
 }
