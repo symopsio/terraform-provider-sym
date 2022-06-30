@@ -25,6 +25,7 @@ import (
 // Flow represents a Sym Flow
 func Flow() *schema.Resource {
 	return &schema.Resource{
+		Description:   "The `sym_flow` resource defines an approval workflow in Sym, allowing users to request temporary and auto-expiring access to sensitive resources.",
 		Schema:        flowSchema(),
 		CreateContext: createFlow,
 		ReadContext:   readFlow,

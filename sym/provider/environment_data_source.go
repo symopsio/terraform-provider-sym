@@ -12,6 +12,7 @@ import (
 
 func DataSourceEnvironment() *schema.Resource {
 	return &schema.Resource{
+		Description: "Use this data source to get information about a Sym Environment for use in other resources.",
 		ReadContext: dataSourceEnvironmentRead,
 		Schema: map[string]*schema.Schema{
 			"name":                utils.RequiredCaseInsentitiveString(),

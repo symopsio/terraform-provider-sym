@@ -14,6 +14,7 @@ import (
 
 func ErrorLogger() *schema.Resource {
 	return &schema.Resource{
+		Description:   "The `sym_error_logger` resource defines a Slack channel destination for error messages encountered while executing a Flow.",
 		CreateContext: createErrorLogger,
 		ReadContext:   readErrorLogger,
 		UpdateContext: updateErrorLogger,

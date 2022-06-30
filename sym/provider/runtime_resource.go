@@ -14,6 +14,7 @@ import (
 
 func Runtime() *schema.Resource {
 	return &schema.Resource{
+		Description:   "The `sym_runtime` resource allows you describe an execution context for the Sym runtime. For more details, see [Getting Started](https://docs.symops.com/docs/deploy-sym-platform).",
 		CreateContext: createRuntime,
 		ReadContext:   readRuntime,
 		UpdateContext: updateRuntime,

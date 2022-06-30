@@ -13,6 +13,7 @@ import (
 
 func Secrets() *schema.Resource {
 	return &schema.Resource{
+		Description:   "The `sym_secrets` resource allows you to specify a source for secrets to be accessed by the Sym platform.",
 		Schema:        SecretsSchema(),
 		CreateContext: createSecrets,
 		ReadContext:   readSecrets,

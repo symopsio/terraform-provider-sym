@@ -14,6 +14,7 @@ import (
 
 func LogDestination() *schema.Resource {
 	return &schema.Resource{
+		Description:   "The `sym_log_destination` resource allows you to specify where audit logs should be streamed.",
 		Schema:        LogDestinationSchema(),
 		CreateContext: createLogDestination,
 		ReadContext:   readLogDestination,
