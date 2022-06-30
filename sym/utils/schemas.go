@@ -29,15 +29,6 @@ func Optional(valueType schema.ValueType, description string) *schema.Schema {
 	}
 }
 
-func OptionalWithDefault(valueType schema.ValueType, default_ interface{}, description string) *schema.Schema {
-	return &schema.Schema{
-		Type:        valueType,
-		Optional:    true,
-		Default:     default_,
-		Description: description,
-	}
-}
-
 func SettingsMap(description string) *schema.Schema {
 	return &schema.Schema{
 		Type: schema.TypeMap,
@@ -48,15 +39,6 @@ func SettingsMap(description string) *schema.Schema {
 		Default:          map[string]string{},
 		DiffSuppressFunc: SuppressNullSettingsDiffs,
 		Description:      description,
-	}
-}
-
-func OptionalList(resource *schema.Resource, description string) *schema.Schema {
-	return &schema.Schema{
-		Type:        schema.TypeList,
-		Optional:    true,
-		Elem:        resource,
-		Description: description,
 	}
 }
 
