@@ -15,9 +15,9 @@ func DataSourceRuntime() *schema.Resource {
 		Description: "Use this data source to get information about a Sym Runtime for use in other resources.",
 		ReadContext: dataSourceRuntimeRead,
 		Schema: map[string]*schema.Schema{
-			"name":       utils.RequiredCaseInsentitiveString(),
-			"label":      utils.Optional(schema.TypeString),
-			"context_id": utils.Optional(schema.TypeString),
+			"name":       utils.RequiredCaseInsensitiveString("The name for the Sym Runtime."),
+			"label":      utils.Optional(schema.TypeString, "An optional label for the Sym Runtime."),
+			"context_id": utils.Optional(schema.TypeString, "The ID of the Runtime Context integration associated with this Runtime."),
 		},
 	}
 }

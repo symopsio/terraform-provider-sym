@@ -30,12 +30,12 @@ func Strategy() *schema.Resource {
 
 func strategySchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-		"type":           utils.Required(schema.TypeString),
-		"integration_id": utils.Optional(schema.TypeString),
-		"settings":       utils.SettingsMap(),
-		"targets":        utils.StringList(true),
-		"name":           utils.RequiredCaseInsentitiveString(),
-		"label":          utils.Optional(schema.TypeString),
+		"type":           utils.Required(schema.TypeString, "The type of the Strategy."),
+		"integration_id": utils.Optional(schema.TypeString, "The ID of the `sym_integration` associated with this Strategy."),
+		"settings":       utils.SettingsMap("A map of settings specific to this type of Strategy."),
+		"targets":        utils.StringList(true, "A list of IDs for targets associated with this Strategy."),
+		"name":           utils.RequiredCaseInsensitiveString("The name for this Strategy."),
+		"label":          utils.Optional(schema.TypeString, "An optional label for this Strategy."),
 		"implementation": {
 			Type:             schema.TypeString,
 			Optional:         true,
@@ -43,6 +43,7 @@ func strategySchema() map[string]*schema.Schema {
 			StateFunc: func(val interface{}) string {
 				return utils.ParseImpl(val.(string))
 			},
+			Description: "Relative path to the implementation written in python if this is a custom strategy.",
 		},
 	}
 }

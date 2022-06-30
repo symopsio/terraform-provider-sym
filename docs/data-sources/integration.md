@@ -17,14 +17,14 @@ Use this data source to get information about a Sym Integration for use in other
 
 ### Required
 
-- `name` (String)
-- `type` (String)
+- `name` (String) The name for this Integration.
+- `type` (String) The type of Integration. Eg. 'slack' or 'pagerduty'
 
 ### Optional
 
-- `external_id` (String)
-- `label` (String)
-- `settings` (Map of String)
+- `external_id` (String) The external ID for this Integration.
+- `label` (String) An optional label for this Integration.
+- `settings` (Map of String) A map of settings specific to this Integration.
 
 ### Read-Only
 

@@ -40,9 +40,9 @@ func Flow() *schema.Resource {
 // Map the resource's fields to types
 func flowSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-		"name":     utils.RequiredCaseInsentitiveString(),
-		"label":    utils.Optional(schema.TypeString),
-		"template": utils.Required(schema.TypeString),
+		"name":     utils.RequiredCaseInsensitiveString("The name of the Flow."),
+		"label":    utils.Optional(schema.TypeString, "An optional label for the Flow."),
+		"template": utils.Required(schema.TypeString, "The SRN of the template this flow uses. Eg. 'sym:template:approval:1.0.0'"),
 		"implementation": {
 			Type:             schema.TypeString,
 			Required:         true,
@@ -50,14 +50,16 @@ func flowSchema() map[string]*schema.Schema {
 			StateFunc: func(val interface{}) string {
 				return utils.ParseImpl(val.(string))
 			},
+			Description: "Relative path of the implementation file written in python.",
 		},
-		"vars":           utils.SettingsMap(),
-		"environment_id": utils.Required(schema.TypeString),
+		"vars":           utils.SettingsMap(""),
+		"environment_id": utils.Required(schema.TypeString, "The ID of the Environment this Flow is associated with."),
 		"params": {
 			Type:             schema.TypeMap,
 			Required:         true,
 			DiffSuppressFunc: utils.SuppressFlowDiffs,
 			ValidateDiagFunc: validateParams,
+			Description:      "A set of parameters, as defined by the Template, which configure the Flow. See the documentation for your specific Template for more details.",
 		},
 	}
 }

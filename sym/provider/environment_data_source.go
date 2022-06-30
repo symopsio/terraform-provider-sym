@@ -15,11 +15,11 @@ func DataSourceEnvironment() *schema.Resource {
 		Description: "Use this data source to get information about a Sym Environment for use in other resources.",
 		ReadContext: dataSourceEnvironmentRead,
 		Schema: map[string]*schema.Schema{
-			"name":                utils.RequiredCaseInsentitiveString(),
-			"label":               utils.Optional(schema.TypeString),
-			"runtime_id":          utils.Optional(schema.TypeString),
-			"log_destination_ids": utils.StringList(false),
-			"integrations":        utils.SettingsMap(),
+			"name":                utils.RequiredCaseInsensitiveString("The name of the Environment"),
+			"label":               utils.Optional(schema.TypeString, "An optional label for the Environment"),
+			"runtime_id":          utils.Optional(schema.TypeString, "The ID of the Runtime associated with this Environment"),
+			"log_destination_ids": utils.StringList(false, "IDs for each Log Destination to funnel logs to"),
+			"integrations":        utils.SettingsMap("A map of Integrations available to this Environment"),
 		},
 	}
 }

@@ -39,12 +39,12 @@ resource "sym_runtime" "this" {
 
 ### Required
 
-- `name` (String)
+- `name` (String) The name for the Runtime.
 
 ### Optional
 
-- `context_id` (String)
-- `label` (String)
+- `context_id` (String) The ID of the Runtime Context integration associated with this Runtime.
+- `label` (String) An optional label for the Runtime.
 
 ### Read-Only
 

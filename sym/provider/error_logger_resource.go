@@ -23,8 +23,8 @@ func ErrorLogger() *schema.Resource {
 			StateContext: getSlugImporter("error_logger"),
 		},
 		Schema: map[string]*schema.Schema{
-			"integration_id": utils.Required(schema.TypeString),
-			"destination":    utils.Required(schema.TypeString),
+			"integration_id": utils.Required(schema.TypeString, "The ID for the Slack Integration associated with this error logger."),
+			"destination":    utils.Required(schema.TypeString, "The destination channel to send error messages to."),
 		},
 	}
 }

@@ -31,14 +31,14 @@ resource "sym_target" "sandbox_break_glass" {
 
 ### Required
 
-- `name` (String)
-- `type` (String)
+- `name` (String) The name of the Target.
+- `type` (String) The type of the Target.
 
 ### Optional
 
 - `field_bindings` (List of String)
-- `label` (String)
-- `settings` (Map of String)
+- `label` (String) An optional label for this Target.
+- `settings` (Map of String) Map of settings specific to this type of Target.
 
 ### Read-Only
 

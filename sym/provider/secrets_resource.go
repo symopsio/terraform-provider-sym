@@ -27,10 +27,10 @@ func Secrets() *schema.Resource {
 
 func SecretsSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-		"type":     utils.Required(schema.TypeString),
-		"name":     utils.RequiredCaseInsentitiveString(),
-		"label":    utils.Optional(schema.TypeString),
-		"settings": utils.SettingsMap(),
+		"type":     utils.Required(schema.TypeString, "The type of Secrets source."),
+		"name":     utils.RequiredCaseInsensitiveString("The name for this Secrets source."),
+		"label":    utils.Optional(schema.TypeString, "A label for this Secrets source."),
+		"settings": utils.SettingsMap("A map of settings specific to this type of Secrets source."),
 	}
 }
 

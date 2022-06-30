@@ -1,115 +1,73 @@
 package utils
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-var (
-	Required = func(valueType schema.ValueType) *schema.Schema {
-		return &schema.Schema{
-			Type:     valueType,
-			Required: true,
-		}
+func Required(valueType schema.ValueType, description string) *schema.Schema {
+	return &schema.Schema{
+		Description: description,
+		Type:        valueType,
+		Required:    true,
 	}
+}
 
-	RequiredCaseInsentitiveString = func() *schema.Schema {
-		return &schema.Schema{
-			Type:             schema.TypeString,
-			Required:         true,
-			DiffSuppressFunc: SuppressCaseSensitiveNamesDiffs,
-		}
+func RequiredCaseInsensitiveString(description string) *schema.Schema {
+	return &schema.Schema{
+		Type:             schema.TypeString,
+		Required:         true,
+		DiffSuppressFunc: SuppressCaseSensitiveNamesDiffs,
+		Description:      description,
 	}
+}
 
-	RequiredWithDefault = func(valueType schema.ValueType, defaultFunc schema.SchemaDefaultFunc) *schema.Schema {
-		return &schema.Schema{
-			Type:        valueType,
-			Required:    true,
-			DefaultFunc: defaultFunc,
-		}
+func Optional(valueType schema.ValueType, description string) *schema.Schema {
+	return &schema.Schema{
+		Type:        valueType,
+		Optional:    true,
+		Description: description,
 	}
+}
 
-	Optional = func(valueType schema.ValueType) *schema.Schema {
-		return &schema.Schema{
-			Type:     valueType,
-			Optional: true,
-		}
+func OptionalWithDefault(valueType schema.ValueType, default_ interface{}, description string) *schema.Schema {
+	return &schema.Schema{
+		Type:        valueType,
+		Optional:    true,
+		Default:     default_,
+		Description: description,
 	}
+}
 
-	OptionalWithDefault = func(valueType schema.ValueType, default_ interface{}) *schema.Schema {
-		return &schema.Schema{
-			Type:     valueType,
-			Optional: true,
-			Default:  default_,
-		}
-	}
-
-	Deprecated = func(schema *schema.Schema, message string) *schema.Schema {
-		schema.Deprecated = message
-		return schema
-	}
-
-	SettingsMap = func() *schema.Schema {
-		return &schema.Schema{
-			Type: schema.TypeMap,
-			Elem: &schema.Schema{
-				Type: schema.TypeString,
-			},
-			Optional:         true,
-			Default:          map[string]string{},
-			DiffSuppressFunc: SuppressNullSettingsDiffs,
-		}
-	}
-
-	TagsMap = func() *schema.Schema {
-		return &schema.Schema{
-			Type: schema.TypeMap,
-			Elem: &schema.Schema{
-				Type: schema.TypeString,
-			},
-			Required: true,
-		}
-	}
-
-	OptionalList = func(resource *schema.Resource) *schema.Schema {
-		return &schema.Schema{
-			Type:     schema.TypeList,
-			Optional: true,
-			Elem:     resource,
-		}
-	}
-
-	RequiredList = func(resource *schema.Resource) *schema.Schema {
-		return &schema.Schema{
-			Type:     schema.TypeList,
-			Required: true,
-			Elem:     resource,
-		}
-	}
-
-	RequiredSet = func(resource *schema.Resource) *schema.Schema {
-		return &schema.Schema{
-			Type:     schema.TypeSet,
-			Required: true,
-			Elem:     resource,
-		}
-	}
-
-	StringList = func(required bool) *schema.Schema {
-		return &schema.Schema{
-			Type: schema.TypeList,
-			Elem: &schema.Schema{
-				Type: schema.TypeString,
-			},
-			Required: required,
-			Optional: !required,
-		}
-	}
-
-	NotYetImplemented diag.Diagnostics = []diag.Diagnostic{
-		{
-			Severity: diag.Error,
-			Summary:  "Not yet implemented",
+func SettingsMap(description string) *schema.Schema {
+	return &schema.Schema{
+		Type: schema.TypeMap,
+		Elem: &schema.Schema{
+			Type: schema.TypeString,
 		},
+		Optional:         true,
+		Default:          map[string]string{},
+		DiffSuppressFunc: SuppressNullSettingsDiffs,
+		Description:      description,
 	}
-)
+}
+
+func OptionalList(resource *schema.Resource, description string) *schema.Schema {
+	return &schema.Schema{
+		Type:        schema.TypeList,
+		Optional:    true,
+		Elem:        resource,
+		Description: description,
+	}
+}
+
+func StringList(required bool, description string) *schema.Schema {
+	return &schema.Schema{
+		Type: schema.TypeList,
+		Elem: &schema.Schema{
+			Type: schema.TypeString,
+		},
+		Required:    required,
+		Optional:    !required,
+		Description: description,
+	}
+}

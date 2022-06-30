@@ -23,9 +23,9 @@ func Runtime() *schema.Resource {
 			StateContext: getSlugImporter("runtime"),
 		},
 		Schema: map[string]*schema.Schema{
-			"name":       utils.RequiredCaseInsentitiveString(),
-			"label":      utils.Optional(schema.TypeString),
-			"context_id": utils.Optional(schema.TypeString),
+			"name":       utils.RequiredCaseInsensitiveString("The name for the Runtime."),
+			"label":      utils.Optional(schema.TypeString, "An optional label for the Runtime."),
+			"context_id": utils.Optional(schema.TypeString, "The ID of the Runtime Context integration associated with this Runtime."),
 		},
 	}
 }

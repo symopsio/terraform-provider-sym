@@ -16,24 +16,24 @@ type SymApprovalTemplate struct{}
 func fieldResource() *schema.Resource {
 	return &schema.Resource{
 		Schema: map[string]*schema.Schema{
-			"name":           utils.Required(schema.TypeString),
-			"type":           utils.Required(schema.TypeString),
-			"required":       utils.OptionalWithDefault(schema.TypeBool, true),
-			"label":          utils.Optional(schema.TypeString),
-			"default":        utils.Optional(schema.TypeString),
-			"allowed_values": utils.StringList(false),
+			"name":           utils.Required(schema.TypeString, ""),
+			"type":           utils.Required(schema.TypeString, ""),
+			"required":       utils.OptionalWithDefault(schema.TypeBool, true, ""),
+			"label":          utils.Optional(schema.TypeString, ""),
+			"default":        utils.Optional(schema.TypeString, ""),
+			"allowed_values": utils.StringList(false, ""),
 		},
 	}
 }
 func (t *SymApprovalTemplate) ParamResource() *schema.Resource {
 	return &schema.Resource{
 		Schema: map[string]*schema.Schema{
-			"strategy_id":            utils.Optional(schema.TypeString),
-			"allow_revoke":           utils.OptionalWithDefault(schema.TypeBool, true),
-			"allowed_sources":        utils.StringList(false),
-			"schedule_deescalation":  utils.OptionalWithDefault(schema.TypeBool, true),
-			"prompt_fields":          utils.OptionalList(fieldResource()),
-			"additional_header_text": utils.Optional(schema.TypeString),
+			"strategy_id":            utils.Optional(schema.TypeString, ""),
+			"allow_revoke":           utils.OptionalWithDefault(schema.TypeBool, true, ""),
+			"allowed_sources":        utils.StringList(false, ""),
+			"schedule_deescalation":  utils.OptionalWithDefault(schema.TypeBool, true, ""),
+			"prompt_fields":          utils.OptionalList(fieldResource(), ""),
+			"additional_header_text": utils.Optional(schema.TypeString, ""),
 		},
 	}
 }

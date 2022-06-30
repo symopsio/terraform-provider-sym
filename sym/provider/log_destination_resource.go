@@ -28,9 +28,9 @@ func LogDestination() *schema.Resource {
 
 func LogDestinationSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-		"type":           utils.Required(schema.TypeString),
-		"integration_id": utils.Optional(schema.TypeString),
-		"settings":       utils.SettingsMap(),
+		"type":           utils.Required(schema.TypeString, "The type of the Log Destination."),
+		"integration_id": utils.Optional(schema.TypeString, "The ID for the Integration associated with this Log Destination."),
+		"settings":       utils.SettingsMap("A map of settings specific to this Log Destination."),
 	}
 }
 

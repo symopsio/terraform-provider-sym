@@ -15,11 +15,11 @@ func DataSourceIntegration() *schema.Resource {
 		Description: "Use this data source to get information about a Sym Integration for use in other resources.",
 		ReadContext: dataSourceIntegrationRead,
 		Schema: map[string]*schema.Schema{
-			"type":        utils.Required(schema.TypeString),
-			"settings":    utils.SettingsMap(),
-			"name":        utils.RequiredCaseInsentitiveString(),
-			"external_id": utils.Optional(schema.TypeString),
-			"label":       utils.Optional(schema.TypeString),
+			"type":        utils.Required(schema.TypeString, "The type of Integration. Eg. 'slack' or 'pagerduty'"),
+			"settings":    utils.SettingsMap("A map of settings specific to this Integration."),
+			"name":        utils.RequiredCaseInsensitiveString("The name for this Integration."),
+			"external_id": utils.Optional(schema.TypeString, "The external ID for this Integration."),
+			"label":       utils.Optional(schema.TypeString, "An optional label for this Integration."),
 		},
 	}
 }

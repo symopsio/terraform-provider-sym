@@ -28,10 +28,10 @@ func Secret() *schema.Resource {
 
 func secretSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-		"path":      utils.Required(schema.TypeString),
-		"source_id": utils.Required(schema.TypeString),
-		"label":     utils.Optional(schema.TypeString),
-		"settings":  utils.SettingsMap(),
+		"path":      utils.Required(schema.TypeString, "The path of the Secret."),
+		"source_id": utils.Required(schema.TypeString, "The ID of the `sym_secrets` resource which serves as the source for this Secret."),
+		"label":     utils.Optional(schema.TypeString, "An optional label for the Secret."),
+		"settings":  utils.SettingsMap(""),
 	}
 }
 
