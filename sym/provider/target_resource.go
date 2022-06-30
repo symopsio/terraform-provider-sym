@@ -28,7 +28,7 @@ func Target() *schema.Resource {
 func targetSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"type":           utils.Required(schema.TypeString, "The type of the Target."),
-		"name":           utils.RequiredCaseInsensitiveString("The name of the Target."),
+		"name":           utils.RequiredCaseInsensitiveString("A unique identifier for the Target."),
 		"label":          utils.Optional(schema.TypeString, "An optional label for this Target."),
 		"field_bindings": utils.StringList(false, ""),
 		"settings":       utils.SettingsMap("Map of settings specific to this type of Target."),

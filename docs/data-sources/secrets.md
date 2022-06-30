@@ -17,7 +17,7 @@ Use this data source to get information about a Sym Secrets resource for use in 
 
 ### Required
 
-- `name` (String) The name for this Secrets source.
+- `name` (String) A unique identifier for this Secrets source.
 - `type` (String) The type of Secrets source.
 
 ### Optional

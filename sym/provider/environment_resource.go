@@ -27,7 +27,7 @@ func Environment() *schema.Resource {
 			StateContext: getSlugImporter("environment"),
 		},
 		Schema: map[string]*schema.Schema{
-			"name":                utils.RequiredCaseInsensitiveString("The name of the Environment"),
+			"name":                utils.RequiredCaseInsensitiveString("A unique identifier for the Environment"),
 			"label":               utils.Optional(schema.TypeString, "An optional label for the Environment"),
 			"runtime_id":          utils.Required(schema.TypeString, "The ID of the Runtime associated with this Environment"),
 			"integrations":        utils.SettingsMap("A map of Integrations available to this Environment"),

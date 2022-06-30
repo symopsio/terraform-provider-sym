@@ -17,7 +17,7 @@ Use this data source to get information about a Sym Environment for use in other
 
 ### Required
 
-- `name` (String) The name of the Environment
+- `name` (String) The unique identifier for the Environment
 
 ### Optional
 

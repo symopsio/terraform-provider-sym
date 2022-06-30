@@ -31,7 +31,7 @@ resource "sym_target" "sandbox_break_glass" {
 
 ### Required
 
-- `name` (String) The name of the Target.
+- `name` (String) A unique identifier for the Target.
 - `type` (String) The type of the Target.
 
 ### Optional

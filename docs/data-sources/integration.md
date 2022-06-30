@@ -17,7 +17,7 @@ Use this data source to get information about a Sym Integration for use in other
 
 ### Required
 
-- `name` (String) The name for this Integration.
+- `name` (String) A unique identifier for this Integration.
 - `type` (String) The type of Integration. Eg. 'slack' or 'pagerduty'
 
 ### Optional

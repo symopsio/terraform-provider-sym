@@ -17,7 +17,7 @@ Use this data source to get information about a Sym Runtime for use in other res
 
 ### Required
 
-- `name` (String) The name for the Sym Runtime.
+- `name` (String) The unique identifier for this Sym Runtime.
 
 ### Optional
 

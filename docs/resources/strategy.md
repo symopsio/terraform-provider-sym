@@ -60,7 +60,7 @@ resource "sym_strategy" "sso_main" {
 
 ### Required
 
-- `name` (String) The name for this Strategy.
+- `name` (String) A unique identifier for this Strategy.
 - `targets` (List of String) A list of IDs for targets associated with this Strategy.
 - `type` (String) The type of the Strategy.
 

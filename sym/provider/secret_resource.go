@@ -28,10 +28,10 @@ func Secret() *schema.Resource {
 
 func secretSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-		"path":      utils.Required(schema.TypeString, "The path of the Secret."),
+		"path":      utils.Required(schema.TypeString, "The name of the Secret in Secrets Manager."),
 		"source_id": utils.Required(schema.TypeString, "The ID of the `sym_secrets` resource which serves as the source for this Secret."),
 		"label":     utils.Optional(schema.TypeString, "An optional label for the Secret."),
-		"settings":  utils.SettingsMap(""),
+		"settings":  utils.SettingsMap("Used to specify the key if the secret is stored as a JSON blob. Eg. settings = { json_key = \"secret_key\" }"),
 	}
 }
 

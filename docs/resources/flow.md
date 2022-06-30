@@ -127,14 +127,14 @@ def get_approvers(request):
 
 - `environment_id` (String) The ID of the Environment this Flow is associated with.
 - `implementation` (String) Relative path of the implementation file written in python.
-- `name` (String) The name of the Flow.
+- `name` (String) A unique identifier for the Flow.
 - `params` (Map of String) A set of parameters, as defined by the Template, which configure the Flow. See the documentation for your specific Template for more details.
 - `template` (String) The SRN of the template this flow uses. Eg. 'sym:template:approval:1.0.0'
 
 ### Optional
 
 - `label` (String) An optional label for the Flow.
-- `vars` (Map of String)
+- `vars` (Map of String) A map of variables and their values to pass to `impl.py`. Useful for making IDs generated dynamically by Terraform available to your `impl.py`.
 
 ### Read-Only
 

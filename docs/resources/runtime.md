@@ -39,7 +39,7 @@ resource "sym_runtime" "this" {
 
 ### Required
 
-- `name` (String) The name for the Runtime.
+- `name` (String) A unique identifier for this Sym Runtime.
 
 ### Optional
 

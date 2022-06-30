@@ -55,7 +55,7 @@ resource "sym_environment" "this" {
 
 ### Required
 
-- `name` (String) The name of the Environment
+- `name` (String) A unique identifier for the Environment
 - `runtime_id` (String) The ID of the Runtime associated with this Environment
 
 ### Optional

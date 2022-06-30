@@ -40,7 +40,7 @@ func Flow() *schema.Resource {
 // Map the resource's fields to types
 func flowSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-		"name":     utils.RequiredCaseInsensitiveString("The name of the Flow."),
+		"name":     utils.RequiredCaseInsensitiveString("A unique identifier for the Flow."),
 		"label":    utils.Optional(schema.TypeString, "An optional label for the Flow."),
 		"template": utils.Required(schema.TypeString, "The SRN of the template this flow uses. Eg. 'sym:template:approval:1.0.0'"),
 		"implementation": {
@@ -52,7 +52,7 @@ func flowSchema() map[string]*schema.Schema {
 			},
 			Description: "Relative path of the implementation file written in python.",
 		},
-		"vars":           utils.SettingsMap(""),
+		"vars":           utils.SettingsMap("A map of variables and their values to pass to `impl.py`. Useful for making IDs generated dynamically by Terraform available to your `impl.py`. "),
 		"environment_id": utils.Required(schema.TypeString, "The ID of the Environment this Flow is associated with."),
 		"params": {
 			Type:             schema.TypeMap,
