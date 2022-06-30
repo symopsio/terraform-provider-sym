@@ -12,7 +12,7 @@ resource "sym_integration" "runtime_context" {
   }
 }
 
-resource "sym_secrets" "github" {
+resource "sym_secrets" "this" {
   type = "aws_secrets_manager"
   name = "github-secrets"
 
@@ -32,5 +32,5 @@ resource "aws_secretsmanager_secret" "github_api_key" {
 
 resource "sym_secret" "github_api_key" {
   path      = aws_secretsmanager_secret.github_api_key.name
-  source_id = sym_secrets.github.id
+  source_id = sym_secrets.this.id
 }

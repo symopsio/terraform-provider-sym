@@ -74,7 +74,7 @@ resource "sym_log_destination" "s3_firehose" {
 Import is supported using the following syntax:
 
 ```shell
-# sym_log_destination can be imported in the format type:slug
+# sym_log_destination can be imported in the format type:slug (the slug is the name attribute)
 # you can find a log destination's type and slug by running `symflow resources list sym_log_destination`
 terraform import sym_log_destination.firehose kinesis_firehose:my_stream_name
 ```
