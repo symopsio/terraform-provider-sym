@@ -129,7 +129,7 @@ def get_approvers(request):
 - `implementation` (String) Relative path of the implementation file written in python.
 - `name` (String) A unique identifier for the Flow.
 - `params` (Map of String) A set of parameters, as defined by the Template, which configure the Flow. See the documentation for your specific Template for more details.
-- `template` (String) The SRN of the template this flow uses. Eg. 'sym:template:approval:1.0.0'
+- `template` (String) The SRN of the template this flow uses. E.g. 'sym:template:approval:1.0.0'
 
 ### Optional
 

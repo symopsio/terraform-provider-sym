@@ -42,7 +42,7 @@ func flowSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"name":     utils.RequiredCaseInsensitiveString("A unique identifier for the Flow."),
 		"label":    utils.Optional(schema.TypeString, "An optional label for the Flow."),
-		"template": utils.Required(schema.TypeString, "The SRN of the template this flow uses. Eg. 'sym:template:approval:1.0.0'"),
+		"template": utils.Required(schema.TypeString, "The SRN of the template this flow uses. E.g. 'sym:template:approval:1.0.0'"),
 		"implementation": {
 			Type:             schema.TypeString,
 			Required:         true,

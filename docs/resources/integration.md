@@ -41,12 +41,12 @@ resource "sym_integration" "slack" {
 
 - `external_id` (String) The external ID for this Integration.
 - `name` (String) A unique identifier for this Integration.
-- `type` (String) The type of the Integration. Eg. 'slack' or 'pagerduty'
+- `type` (String) The type of the Integration. E.g. 'slack' or 'pagerduty'
 
 ### Optional
 
 - `label` (String) An optional label.
-- `settings` (Map of String) A map of settings specific to this Integration.
+- `settings` (Map of String) A map of settings specific to this type of Integration.
 
 ### Read-Only
 

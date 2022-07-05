@@ -62,7 +62,7 @@ resource "sym_secret" "github_api_key" {
 ### Optional
 
 - `label` (String) An optional label for the Secret.
-- `settings` (Map of String) Used to specify the key if the secret is stored as a JSON blob. Eg. settings = { json_key = "secret_key" }
+- `settings` (Map of String) Used to specify the key if the secret is stored as a JSON blob. E.g. settings = { json_key = "secret_key" }
 
 ### Read-Only
 

@@ -3,12 +3,12 @@
 page_title: "sym_target Resource - terraform-provider-sym"
 subcategory: ""
 description: |-
-  The sym_target resource allows you describe something that users can request access to.
+  The sym_target resource allows you to describe something that users can request access to.
 ---
 
 # sym_target (Resource)
 
-The `sym_target` resource allows you describe something that users can request access to.
+The `sym_target` resource allows you to describe something that users can request access to.
 
 ## Example Usage
 
@@ -36,7 +36,7 @@ resource "sym_target" "sandbox_break_glass" {
 
 ### Optional
 
-- `field_bindings` (List of String)
+- `field_bindings` (List of String) Settings whose values will be dynamically populated by submitted request values. See [docs](https://docs.symops.com/docs/dynamic-target-settings) for more details.
 - `label` (String) An optional label for this Target.
 - `settings` (Map of String) Map of settings specific to this type of Target.
 

@@ -21,7 +21,7 @@ Use this data source to get information about a Sym Runtime for use in other res
 
 ### Optional
 
-- `context_id` (String) The ID of the Runtime Context integration associated with this Runtime.
+- `context_id` (String) The ID of the Runtime Permission Context integration associated with this Runtime.
 - `label` (String) An optional label for the Sym Runtime.
 
 ### Read-Only

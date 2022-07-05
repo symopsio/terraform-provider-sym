@@ -43,7 +43,7 @@ resource "sym_runtime" "this" {
 
 ### Optional
 
-- `context_id` (String) The ID of the Runtime Context integration associated with this Runtime.
+- `context_id` (String) The ID of the Runtime Permission Context integration associated with this Runtime.
 - `label` (String) An optional label for the Runtime.
 
 ### Read-Only

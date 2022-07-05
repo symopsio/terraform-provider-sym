@@ -13,7 +13,7 @@ import (
 
 func Target() *schema.Resource {
 	return &schema.Resource{
-		Description:   "The `sym_target` resource allows you describe something that users can request access to.",
+		Description:   "The `sym_target` resource allows you to describe something that users can request access to.",
 		Schema:        targetSchema(),
 		CreateContext: createTarget,
 		ReadContext:   readTarget,
@@ -30,7 +30,7 @@ func targetSchema() map[string]*schema.Schema {
 		"type":           utils.Required(schema.TypeString, "The type of the Target."),
 		"name":           utils.RequiredCaseInsensitiveString("A unique identifier for the Target."),
 		"label":          utils.Optional(schema.TypeString, "An optional label for this Target."),
-		"field_bindings": utils.StringList(false, ""),
+		"field_bindings": utils.StringList(false, "Settings whose values will be dynamically populated by submitted request values. See [docs](https://docs.symops.com/docs/dynamic-target-settings) for more details."),
 		"settings":       utils.SettingsMap("Map of settings specific to this type of Target."),
 	}
 }
@@ -44,9 +44,9 @@ func createTarget(_ context.Context, data *schema.ResourceData, meta interface{}
 		Settings: getSettings(data),
 	}
 
-	field_bindings := data.Get("field_bindings").([]interface{})
-	for i := range field_bindings {
-		target.FieldBindings = append(target.FieldBindings, field_bindings[i].(string))
+	fieldBindings := data.Get("field_bindings").([]interface{})
+	for i := range fieldBindings {
+		target.FieldBindings = append(target.FieldBindings, fieldBindings[i].(string))
 	}
 
 	id, err := c.Target.Create(target)

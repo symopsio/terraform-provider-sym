@@ -17,7 +17,7 @@ func DataSourceRuntime() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"name":       utils.RequiredCaseInsensitiveString("The unique identifier for this Sym Runtime."),
 			"label":      utils.Optional(schema.TypeString, "An optional label for the Sym Runtime."),
-			"context_id": utils.Optional(schema.TypeString, "The ID of the Runtime Context integration associated with this Runtime."),
+			"context_id": utils.Optional(schema.TypeString, "The ID of the Runtime Permission Context integration associated with this Runtime."),
 		},
 	}
 }
