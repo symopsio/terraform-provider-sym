@@ -31,8 +31,8 @@ resource "sym_error_logger" "slack_logger" {
 
 ### Required
 
-- `destination` (String)
-- `integration_id` (String)
+- `destination` (String) The destination channel to send error messages to.
+- `integration_id` (String) The ID for the Slack Integration associated with this error logger.
 
 ### Read-Only
 

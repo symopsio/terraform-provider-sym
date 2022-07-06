@@ -60,16 +60,16 @@ resource "sym_strategy" "sso_main" {
 
 ### Required
 
-- `name` (String)
-- `targets` (List of String)
-- `type` (String)
+- `name` (String) A unique identifier for this Strategy.
+- `targets` (List of String) A list of IDs for targets associated with this Strategy.
+- `type` (String) The type of the Strategy.
 
 ### Optional
 
-- `implementation` (String)
-- `integration_id` (String)
-- `label` (String)
-- `settings` (Map of String)
+- `implementation` (String) Relative path to the implementation written in python if this is a custom strategy.
+- `integration_id` (String) The ID of the `sym_integration` associated with this Strategy.
+- `label` (String) An optional label for this Strategy.
+- `settings` (Map of String) A map of settings specific to this type of Strategy.
 
 ### Read-Only
 

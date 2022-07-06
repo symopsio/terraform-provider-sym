@@ -22,11 +22,11 @@ func Integration() *schema.Resource {
 			StateContext: getNameAndTypeImporter("integration"),
 		},
 		Schema: map[string]*schema.Schema{
-			"type":        utils.Required(schema.TypeString),
-			"settings":    utils.SettingsMap(),
-			"name":        utils.RequiredCaseInsentitiveString(),
-			"external_id": utils.Required(schema.TypeString),
-			"label":       utils.Optional(schema.TypeString),
+			"type":        utils.Required(schema.TypeString, "The type of the Integration. E.g. 'slack' or 'pagerduty'"),
+			"settings":    utils.SettingsMap("A map of settings specific to this type of Integration."),
+			"name":        utils.RequiredCaseInsensitiveString("A unique identifier for this Integration."),
+			"external_id": utils.Required(schema.TypeString, "The external ID for this Integration. E.g. Slack workspace ID for Slack Integration"),
+			"label":       utils.Optional(schema.TypeString, "An optional label."),
 		},
 	}
 }

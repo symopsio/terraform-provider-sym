@@ -39,12 +39,12 @@ resource "sym_runtime" "this" {
 
 ### Required
 
-- `name` (String)
+- `name` (String) A unique identifier for this Sym Runtime.
 
 ### Optional
 
-- `context_id` (String)
-- `label` (String)
+- `context_id` (String) The ID of the Runtime Permission Context integration associated with this Runtime.
+- `label` (String) An optional label for the Runtime.
 
 ### Read-Only
 

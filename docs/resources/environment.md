@@ -55,15 +55,15 @@ resource "sym_environment" "this" {
 
 ### Required
 
-- `name` (String)
-- `runtime_id` (String)
+- `name` (String) A unique identifier for the Environment
+- `runtime_id` (String) The ID of the Runtime associated with this Environment
 
 ### Optional
 
-- `error_logger_id` (String)
-- `integrations` (Map of String)
-- `label` (String)
-- `log_destination_ids` (List of String)
+- `error_logger_id` (String) The ID of the Error Logger
+- `integrations` (Map of String) A map of Integrations available to this Environment
+- `label` (String) An optional label for the Environment
+- `log_destination_ids` (List of String) IDs for each Log Destination to funnel logs to
 
 ### Read-Only
 

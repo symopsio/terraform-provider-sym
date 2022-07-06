@@ -8,7 +8,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/symopsio/terraform-provider-sym/sym/client"
-	"github.com/symopsio/terraform-provider-sym/sym/utils"
 )
 
 type SymApprovalTemplate struct{}
@@ -16,24 +15,37 @@ type SymApprovalTemplate struct{}
 func fieldResource() *schema.Resource {
 	return &schema.Resource{
 		Schema: map[string]*schema.Schema{
-			"name":           utils.Required(schema.TypeString),
-			"type":           utils.Required(schema.TypeString),
-			"required":       utils.OptionalWithDefault(schema.TypeBool, true),
-			"label":          utils.Optional(schema.TypeString),
-			"default":        utils.Optional(schema.TypeString),
-			"allowed_values": utils.StringList(false),
+			"name":     {Required: true, Type: schema.TypeString},
+			"type":     {Required: true, Type: schema.TypeString},
+			"required": {Optional: true, Default: true, Type: schema.TypeBool},
+			"label":    {Optional: true, Type: schema.TypeString},
+			"default":  {Optional: true, Type: schema.TypeString},
+			"allowed_values": {
+				Type:     schema.TypeList,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+				Optional: true,
+			},
 		},
 	}
 }
+
 func (t *SymApprovalTemplate) ParamResource() *schema.Resource {
 	return &schema.Resource{
 		Schema: map[string]*schema.Schema{
-			"strategy_id":            utils.Optional(schema.TypeString),
-			"allow_revoke":           utils.OptionalWithDefault(schema.TypeBool, true),
-			"allowed_sources":        utils.StringList(false),
-			"schedule_deescalation":  utils.OptionalWithDefault(schema.TypeBool, true),
-			"prompt_fields":          utils.OptionalList(fieldResource()),
-			"additional_header_text": utils.Optional(schema.TypeString),
+			"strategy_id":  {Type: schema.TypeString, Optional: true},
+			"allow_revoke": {Type: schema.TypeBool, Optional: true, Default: true},
+			"allowed_sources": {
+				Type:     schema.TypeList,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+				Optional: true,
+			},
+			"schedule_deescalation": {Type: schema.TypeBool, Optional: true, Default: true},
+			"prompt_fields": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem:     fieldResource(),
+			},
+			"additional_header_text": {Type: schema.TypeString, Optional: true},
 		},
 	}
 }

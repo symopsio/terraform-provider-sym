@@ -58,12 +58,12 @@ resource "sym_log_destination" "s3_firehose" {
 
 ### Required
 
-- `type` (String)
+- `type` (String) The type of the Log Destination.
 
 ### Optional
 
-- `integration_id` (String)
-- `settings` (Map of String)
+- `integration_id` (String) The ID for the Integration associated with this Log Destination.
+- `settings` (Map of String) A map of settings specific to this Log Destination.
 
 ### Read-Only
 

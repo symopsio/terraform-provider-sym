@@ -17,13 +17,13 @@ Use this data source to get information about a Sym Secrets resource for use in 
 
 ### Required
 
-- `name` (String)
-- `type` (String)
+- `name` (String) A unique identifier for this Secrets source.
+- `type` (String) The type of Secrets source.
 
 ### Optional
 
-- `label` (String)
-- `settings` (Map of String)
+- `label` (String) A label for this Secrets source.
+- `settings` (Map of String) A map of settings specific to this type of Secrets source.
 
 ### Read-Only
 

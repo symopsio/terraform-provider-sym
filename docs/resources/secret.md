@@ -56,13 +56,13 @@ resource "sym_secret" "github_api_key" {
 
 ### Required
 
-- `path` (String)
-- `source_id` (String)
+- `path` (String) The name of the Secret in Secrets Manager.
+- `source_id` (String) The ID of the `sym_secrets` resource which serves as the source for this Secret.
 
 ### Optional
 
-- `label` (String)
-- `settings` (Map of String)
+- `label` (String) An optional label for the Secret.
+- `settings` (Map of String) Used to specify the key if the secret is stored as a JSON blob. E.g. settings = { json_key = "secret_key" }
 
 ### Read-Only
 

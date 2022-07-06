@@ -27,12 +27,12 @@ func Environment() *schema.Resource {
 			StateContext: getSlugImporter("environment"),
 		},
 		Schema: map[string]*schema.Schema{
-			"name":                utils.RequiredCaseInsentitiveString(),
-			"label":               utils.Optional(schema.TypeString),
-			"runtime_id":          utils.Required(schema.TypeString),
-			"integrations":        utils.SettingsMap(),
-			"error_logger_id":     utils.Optional(schema.TypeString),
-			"log_destination_ids": utils.StringList(false),
+			"name":                utils.RequiredCaseInsensitiveString("A unique identifier for the Environment"),
+			"label":               utils.Optional(schema.TypeString, "An optional label for the Environment"),
+			"runtime_id":          utils.Required(schema.TypeString, "The ID of the Runtime associated with this Environment"),
+			"integrations":        utils.SettingsMap("A map of Integrations available to this Environment"),
+			"error_logger_id":     utils.Optional(schema.TypeString, "The ID of the Error Logger"),
+			"log_destination_ids": utils.StringList(false, "IDs for each Log Destination to funnel logs to"),
 		},
 	}
 }
