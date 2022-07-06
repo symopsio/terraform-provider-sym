@@ -25,7 +25,7 @@ func Integration() *schema.Resource {
 			"type":        utils.Required(schema.TypeString, "The type of the Integration. E.g. 'slack' or 'pagerduty'"),
 			"settings":    utils.SettingsMap("A map of settings specific to this type of Integration."),
 			"name":        utils.RequiredCaseInsensitiveString("A unique identifier for this Integration."),
-			"external_id": utils.Required(schema.TypeString, "The external ID for this Integration."),
+			"external_id": utils.Required(schema.TypeString, "The external ID for this Integration. E.g. Slack workspace ID for Slack Integration"),
 			"label":       utils.Optional(schema.TypeString, "An optional label."),
 		},
 	}

@@ -39,7 +39,7 @@ resource "sym_integration" "slack" {
 
 ### Required
 
-- `external_id` (String) The external ID for this Integration.
+- `external_id` (String) The external ID for this Integration. E.g. Slack workspace ID for Slack Integration
 - `name` (String) A unique identifier for this Integration.
 - `type` (String) The type of the Integration. E.g. 'slack' or 'pagerduty'
 
