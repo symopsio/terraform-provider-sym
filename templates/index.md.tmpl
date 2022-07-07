@@ -1,7 +1,7 @@
 ---
 page_title: "Provider: Sym"
 description: |-
-  The Sym provider is used to generate access control workflows using the Sym platform.
+  The Sym Terraform Provider allows you to declaratively provision [Flows](https://docs.symops.com/docs/flows). It also provides several types of resources that can be used to configure Flows.
 ---
 
 # Sym Provider
