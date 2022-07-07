@@ -44,11 +44,45 @@ resource "aws_kinesis_firehose_delivery_stream" "this" {
   }
 }
 
+# kinesis firehose log destination
 resource "sym_log_destination" "s3_firehose" {
   type           = "kinesis_firehose"
   integration_id = sym_integration.runtime_context.id
+
+  # kinesis_firehose type needs the stream_name in the settings
   settings = {
+    # the name of the stream in AWS
     stream_name = aws_kinesis_firehose_delivery_stream.this.name
+  }
+}
+
+# kinesis data stream log destination
+resource "sym_log_destination" "data_stream" {
+  type           = "kinesis_data_stream"
+  integration_id = sym_integration.runtime_context.id
+
+  # kinesis_data_stream type needs the stream_name in the settings
+  settings = {
+    # the name of the stream in AWS
+    stream_name = aws_kinesis_firehose_delivery_stream.this.name
+  }
+}
+
+# segment log destination
+resource "sym_log_destination" "segment" {
+  type           = "segment"
+  integration_id = sym_integration.runtime_context.id
+}
+
+# HTTP log destination
+resource "sym_log_destination" "segment" {
+  type           = "http"
+  integration_id = sym_integration.runtime_context.id
+
+  # http type needs the url in the settings
+  settings = {
+    # the URL to funnel the logs
+    url = "https://example.com"
   }
 }
 ```
