@@ -1,12 +1,12 @@
 ---
 page_title: "Provider: Sym"
 description: |-
-  The Sym Terraform Provider allows you to declaratively provision [Flows](https://docs.symops.com/docs/flows). It also provides several types of resources that can be used to configure Flows.
+  The Sym Terraform Provider allows you to declaratively provision Flows. It also provides several types of resources that can be used to configure Flows.
 ---
 
 # Sym Provider
 
-The Sym Terraform Provider allows you to declaratively provision [Flows](https://docs.symops.com/docs/flows). It also provides several types of resources that can be used to configure Flows.
+The Sym Terraform Provider allows you to declaratively provision Flows. It also provides several types of resources that can be used to configure Flows.
 
 ## Example Usage
 
