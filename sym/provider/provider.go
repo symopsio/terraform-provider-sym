@@ -14,13 +14,10 @@ import (
 func Provider() *schema.Provider {
 	return &schema.Provider{
 		Schema: map[string]*schema.Schema{
-			"local_path": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
 			"org": {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "Your Sym org slug ",
 			},
 		},
 		ResourcesMap: map[string]*schema.Resource{
