@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/symopsio/terraform-provider-sym/sym/client"
+	"github.com/symopsio/terraform-provider-sym/sym/utils"
 )
 
 type SymApprovalTemplate struct{}
@@ -21,7 +22,8 @@ func fieldResource() *schema.Resource {
 			"label":    {Optional: true, Type: schema.TypeString},
 			"default":  {Optional: true, Type: schema.TypeString},
 			"allowed_values": {
-				Type:     schema.TypeList,
+				Type: schema.TypeList,
+				// Elem's type doesn't get validated, and actually allows types other than string (e.g. int)
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Optional: true,
 			},
@@ -62,6 +64,25 @@ func (t *SymApprovalTemplate) terraformToAPI(params *HCLParamMap) client.APIPara
 			params.addDiag("prompt_fields_json", "Error decoding prompt_fields_json")
 		}
 		raw["prompt_fields"] = fields
+
+		// Validate each defined prompt field for the purpose of surfacing warnings.
+		for _, f := range fields.([]interface{}) {
+			promptField := f.(map[string]interface{})
+			fieldType, fieldTypeOk := utils.GetStr(promptField, "type")
+			if !fieldTypeOk {
+				// If there is no "type", validation should hard fail later on, so just skip warning validation.
+				continue
+			}
+
+			if fieldType == "list" {
+				params.addWarning(
+					"prompt_fields_json",
+					"DEPRECATED: The 'list' field type is deprecated.",
+					"Instead, use 'allowed_values' with a 'string' or 'int' type field.",
+					"https://docs.symops.com/docs/prompt-fields",
+				)
+			}
+		}
 	} else {
 		params.addWarning(
 			"prompt_fields_json",
