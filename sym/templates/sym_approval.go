@@ -77,8 +77,8 @@ func (t *SymApprovalTemplate) terraformToAPI(params *HCLParamMap) client.APIPara
 			if fieldType == "list" {
 				params.addWarning(
 					"prompt_fields_json",
-					fmt.Sprintf("DEPRECATED: The 'list' field type is deprecated."),
-					fmt.Sprintf("Instead, use 'allowed_values' with a 'string' or 'int' type field."),
+					"DEPRECATED: The 'list' field type is deprecated.",
+					"Instead, use 'allowed_values' with a 'string' or 'int' type field.",
 					"https://docs.symops.com/docs/prompt-fields",
 				)
 			}
