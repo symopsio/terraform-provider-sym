@@ -57,7 +57,7 @@ jobs:
           name: Install tfplugindocs
           command: |
             wget https://github.com/hashicorp/terraform-plugin-docs/releases/download/v0.13.0/tfplugindocs_0.13.0_linux_amd64.zip
-            unzip tfplugindocs_0.13.0_linux_amd64.zip
+            unzip -o tfplugindocs_0.13.0_linux_amd64.zip
       - run: tfplugindocs
       - run:
           name: Check in documentation
