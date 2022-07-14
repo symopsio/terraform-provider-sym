@@ -96,7 +96,7 @@ workflows:
       - release:
           requires:
             - unit_and_acceptance_test
-            - documentation
+            - generate_docs
           filters:
             branches:
               ignore: /.*/
