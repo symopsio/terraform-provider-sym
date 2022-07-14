@@ -42,6 +42,8 @@ jobs:
                 template: basic_fail_1
 
   generate_docs:
+    docker:
+      - image: circleci/golang
     steps:
       - checkout
       - setup_remote_docker:
