@@ -40,6 +40,29 @@ jobs:
                 channel: eng-alerts-staging
                 event: fail
                 template: basic_fail_1
+
+  generate_docs:
+    steps:
+      - checkout
+      - setup_remote_docker:
+          docker_layer_caching: true
+      - run:
+          name: Configure github
+          command: |
+            git config user.email "infrastructure@symops.io"
+            git config user.name "infrastructure"
+      - run:
+          name: Install tfplugindocs
+          command: |
+            wget https://github.com/hashicorp/terraform-plugin-docs/releases/download/v0.13.0/tfplugindocs_0.13.0_linux_amd64.zip
+            unzip tfplugindocs_0.13.0_linux_amd64.zip
+      - run: tfplugindocs
+      - run:
+          name: Check in documentation
+          command: |
+            git add docs
+            git commit --allow-empty -m "[skip ci] Add auto-gen documentation."
+            git push https://infrastructure:${GITHUB_TOKEN}@github.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}.git
   release:
     docker:
       - image: cimg/go:1.16
@@ -67,9 +90,13 @@ workflows:
           filters:
             tags:
               only: /v.*/
+      - generate_docs:
+          context:
+            - infrastructure-github-token
       - release:
           requires:
             - unit_and_acceptance_test
+            - documentation
           filters:
             branches:
               ignore: /.*/
