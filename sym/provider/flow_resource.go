@@ -59,7 +59,7 @@ func flowSchema() map[string]*schema.Schema {
 			Required:         true,
 			DiffSuppressFunc: utils.SuppressFlowDiffs,
 			ValidateDiagFunc: validateParams,
-			Description:      "A set of parameters, as defined by the Template, which configure the Flow. See the documentation for your specific Template for more details.",
+			Description:      "A set of parameters which configure the Flow. See the [Sym Documentation](https://docs.symops.com/docs/flow-parameters).",
 		},
 	}
 }
