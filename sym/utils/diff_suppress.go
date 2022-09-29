@@ -45,10 +45,7 @@ func SuppressFlowDiffs(k string, old string, new string, d *schema.ResourceData)
 	// schedule_deescalation defaults to true, so don't show a diff if schedule_deescalation is not specified
 	suppressScheduleDeescalationDiffs := k == "params.schedule_deescalation" && old == "true" && new == ""
 
-    // allow_guest_interaction defaults to false, so don't show a diff if allow_guest_interaction is not specified
-    suppressAllowGuestInteractionDiffs := k == "params.allow_guest_interaction" && old == "false" && new == ""
-
-	return suppressJsonDiffs || suppressAllowRevokeDiffs || suppressScheduleDeescalationDiffs || suppressAllowGuestInteractionDiffs
+	return suppressJsonDiffs || suppressAllowRevokeDiffs || suppressScheduleDeescalationDiffs
 }
 
 // SuppressNullSettingsDiffs is a DiffSuppressFunc that can be passed into
