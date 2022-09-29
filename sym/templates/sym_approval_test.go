@@ -32,6 +32,7 @@ func Test_apiParamsToTFParams(t *testing.T) {
 				Params: map[string]string{
 					"allow_revoke":          "false",
 					"schedule_deescalation": "false",
+					"allow_guest_interaction": "false",
 					"prompt_fields_json":    `[{"name":"reason","type":"string","required":true,"label":"Reason"},{"name":"urgency","type":"string","required":true,"allowed_values":["Low","Medium","High"]}]`,
 				},
 			},
@@ -55,12 +56,14 @@ func Test_apiParamsToTFParams(t *testing.T) {
 				},
 				"allow_revoke":          true,
 				"schedule_deescalation": true,
+				"allow_guest_interaction": true,
 			},
 			&HCLParamMap{
 				Params: map[string]string{
 					"strategy_id":           "haha-business",
 					"allow_revoke":          "true",
 					"schedule_deescalation": "true",
+					"allow_guest_interaction": "true",
 					"prompt_fields_json":    `[{"name":"reason","type":"string","required":true,"label":"Reason"},{"name":"urgency","type":"string","required":true,"allowed_values":["Low","Medium","High"]}]`,
 				},
 			},
@@ -103,6 +106,7 @@ func Test_apiParamsToTFParams_allowed_sources(t *testing.T) {
 					"prompt_fields_json":     `[]`,
 					"allowed_sources_json":   `["slack","api"]`,
 					"additional_header_text": "Default Header Text",
+					"allow_guest_interaction": "false",
 				},
 			},
 			false,
@@ -113,6 +117,7 @@ func Test_apiParamsToTFParams_allowed_sources(t *testing.T) {
 			client.APIParams{
 				"prompt_fields":   []interface{}{},
 				"allowed_sources": []interface{}{},
+				"allow_guest_interaction": "false",
 			},
 			&HCLParamMap{
 				Params: map[string]string{
@@ -120,6 +125,7 @@ func Test_apiParamsToTFParams_allowed_sources(t *testing.T) {
 					"schedule_deescalation": "false",
 					"prompt_fields_json":    `[]`,
 					"allowed_sources_json":  `null`,
+					"allow_guest_interaction": "false",
 				},
 			},
 			false,
@@ -135,6 +141,7 @@ func Test_apiParamsToTFParams_allowed_sources(t *testing.T) {
 					"allow_revoke":          "false",
 					"schedule_deescalation": "false",
 					"prompt_fields_json":    `[]`,
+					"allow_guest_interaction": "false",
 				},
 			},
 			false,

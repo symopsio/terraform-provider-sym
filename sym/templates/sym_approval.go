@@ -48,6 +48,7 @@ func (t *SymApprovalTemplate) ParamResource() *schema.Resource {
 				Elem:     fieldResource(),
 			},
 			"additional_header_text": {Type: schema.TypeString, Optional: true},
+			"allow_guest_interaction": {Type: schema.TypeBool, Optional: true, Default: false},
 		},
 	}
 }
@@ -133,6 +134,17 @@ func (t *SymApprovalTemplate) terraformToAPI(params *HCLParamMap) client.APIPara
 		raw["schedule_deescalation"] = true
 	}
 
+	if field := params.checkKey("allow_guest_interaction"); field != nil {
+	    allowGuestInteraction, err := strconv.ParseBool(field.Value())
+	    if err != nil {
+			_ = params.checkError("allow_guest_interaction", "allow_guest_interaction must be a boolean value", err)
+		}
+		raw["allow_guest_interaction"] = allowGuestInteraction
+	} else {
+	    // Default allow_guest_interaction to false
+	    raw["allow_guest_interaction"] = false
+	}
+
 	return raw
 }
 
@@ -191,11 +203,13 @@ func apiParamsToTFParams(apiParams client.APIParams) (*HCLParamMap, error) {
 
 	allowRevoke, _ := apiParams["allow_revoke"].(bool)
 	scheduleDeescalation, _ := apiParams["schedule_deescalation"].(bool)
+	allowGuestInteraction, _ := apiParams["allow_guest_interaction"].(bool)
 
 	params := map[string]string{
 		"allow_revoke":          strconv.FormatBool(allowRevoke),
 		"schedule_deescalation": strconv.FormatBool(scheduleDeescalation),
 		"prompt_fields_json":    string(fieldsJSON),
+		"allow_guest_interaction": strconv.FormatBool(allowGuestInteraction),
 	}
 	if allowedSourcesOutput != "" {
 		params["allowed_sources_json"] = allowedSourcesOutput

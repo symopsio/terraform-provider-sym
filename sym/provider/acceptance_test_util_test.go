@@ -454,6 +454,7 @@ func Test_flowResource_String(t *testing.T) {
 					strategyId:           "sym_strategy.sso_main.id",
 					allowRevoke:          false,
 					scheduleDeescalation: false,
+					allowGuestInteraction: false,
 					promptFields: []field{
 						{
 							name:     "reason",
@@ -487,6 +488,7 @@ resource "sym_flow" "this" {
 		strategy_id = sym_strategy.sso_main.id
 		allow_revoke = false
 		schedule_deescalation = false
+		allow_guest_interaction = false
 		prompt_fields_json = jsonencode([
 			{
 			name = "reason"
@@ -523,6 +525,7 @@ resource "sym_flow" "this" {
 					strategyId:           "",
 					allowRevoke:          false,
 					scheduleDeescalation: false,
+					allowGuestInteraction: false,
 					promptFields: []field{
 						{
 							name:     "reason",
@@ -555,6 +558,7 @@ resource "sym_flow" "this" {
 	params = {
 		allow_revoke = false
 		schedule_deescalation = false
+		allow_guest_interaction = false
 		prompt_fields_json = jsonencode([
 			{
 			name = "reason"

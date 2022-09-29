@@ -368,6 +368,7 @@ func (r flowResource) String() string {
 	}
 	p.WriteString(fmt.Sprintf("		allow_revoke = %v\n", r.params.allowRevoke))
 	p.WriteString(fmt.Sprintf("		schedule_deescalation = %v\n", r.params.scheduleDeescalation))
+	p.WriteString(fmt.Sprintf("		allow_guest_interaction = %v\n", r.params.allowGuestInteraction))
 
 	if r.params.additionalHeaderText != "" {
 		p.WriteString(fmt.Sprintf("		additional_header_text = \"%s\"\n", r.params.additionalHeaderText))
@@ -423,6 +424,7 @@ type params struct {
 	allowedSources       string
 	additionalHeaderText string
 	scheduleDeescalation bool
+	allowGuestInteraction bool
 	promptFields         []field
 }
 
