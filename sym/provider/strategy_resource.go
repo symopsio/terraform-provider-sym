@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
-	"io/ioutil"
+	"os"
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -83,7 +83,7 @@ func createStrategy(_ context.Context, data *schema.ResourceData, meta interface
 	implementation := data.Get("implementation").(string)
 	// implementation is optional, so only set it if we actually have one
 	if implementation != "" {
-		if b, err := ioutil.ReadFile(implementation); err != nil {
+		if b, err := os.ReadFile(implementation); err != nil {
 			diags = append(diags, utils.DiagFromError(err, "Unable to read sym_strategy implementation file"))
 		} else {
 			strategy.Implementation = base64.StdEncoding.EncodeToString(b)
@@ -176,7 +176,7 @@ func updateStrategy(_ context.Context, data *schema.ResourceData, meta interface
 
 	// If the diff was suppressed, we'll have a text string here already, as it was decoded by the StateFunc.
 	// Therefore, check if this is a filename or not. If it's not, assume it is the decoded impl.
-	if b, err := ioutil.ReadFile(implementation); err != nil {
+	if b, err := os.ReadFile(implementation); err != nil {
 		implementation = base64.StdEncoding.EncodeToString([]byte(implementation))
 	} else {
 		implementation = base64.StdEncoding.EncodeToString(b)
@@ -186,7 +186,7 @@ func updateStrategy(_ context.Context, data *schema.ResourceData, meta interface
 		strategy.Implementation = implementation
 	} else {
 		// Normal case where the diff has not been suppressed, read our local file and send it.
-		if b, err := ioutil.ReadFile(implementation); err != nil {
+		if b, err := os.ReadFile(implementation); err != nil {
 			diags = append(diags, utils.DiagFromError(err, "Unable to read sym_strategy implementation file"))
 			return diags
 		} else {
