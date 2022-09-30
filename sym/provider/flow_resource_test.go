@@ -245,11 +245,11 @@ func flowConfig(data TestData, implPath string, allowRevoke bool, strategyId str
 			implementation: implPath,
 			environmentId:  "sym_environment.this.id",
 			params: params{
-				strategyId:           strategyId,
-				allowRevoke:          allowRevoke,
-				allowedSources:       allowedSources,
-				additionalHeaderText: additionalHeaderText,
-				scheduleDeescalation: scheduleDeescalation,
+				strategyId:            strategyId,
+				allowRevoke:           allowRevoke,
+				allowedSources:        allowedSources,
+				additionalHeaderText:  additionalHeaderText,
+				scheduleDeescalation:  scheduleDeescalation,
 				allowGuestInteraction: allowGuestInteraction,
 				promptFields: []field{
 					{
