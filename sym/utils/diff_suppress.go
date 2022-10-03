@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"encoding/base64"
 	"encoding/json"
-	"io/ioutil"
 	"log"
+	"os"
 	"strconv"
 	"strings"
 
@@ -122,7 +122,7 @@ func SuppressEquivalentFileContentDiffs(k string, old string, new string, _ *sch
 		return false
 	}
 
-	newBytes, err := ioutil.ReadFile(new)
+	newBytes, err := os.ReadFile(new)
 	if err != nil {
 		log.Printf("Error reading file %v for value %v", new, k)
 		return false
