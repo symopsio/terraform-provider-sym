@@ -305,6 +305,19 @@ func validateParams(input interface{}, path cty.Path) diag.Diagnostics {
 				}
 			}
 		}
+
+		if allowGuestInteraction, ok := params["allow_guest_interaction"]; ok {
+			if allowGuestInteraction, ok := allowGuestInteraction.(string); ok {
+				if _, err := strconv.ParseBool(allowGuestInteraction); err != nil {
+					diags = append(diags, diag.Diagnostic{
+						Severity:      diag.Error,
+						Summary:       "allow_guest_interaction must be a boolean value",
+						Detail:        fmt.Sprintf("failed to parse %q to bool", allowGuestInteraction),
+						AttributePath: append(path, cty.IndexStep{Key: cty.StringVal("allow_guest_interaction")}),
+					})
+				}
+			}
+		}
 	}
 
 	return diags
