@@ -2,7 +2,7 @@ package utils
 
 import (
 	"encoding/base64"
-	"io/ioutil"
+	"os"
 )
 
 // ParseImpl takes in an impl in base64, text, or filename format,
@@ -26,7 +26,7 @@ func ParseRemoteImpl(impl string) string {
 func parseImpl(impl string, isFilePath bool) string {
 	contents, err := base64.StdEncoding.DecodeString(impl)
 	if err != nil && isFilePath {
-		contents, err = ioutil.ReadFile(impl)
+		contents, err = os.ReadFile(impl)
 	}
 
 	if err != nil {
