@@ -44,6 +44,7 @@ jobs:
   generate_docs:
     docker:
       - image: cimg/go:1.16
+    working_directory: terraform-provider-sym
     steps:
       - checkout
       - setup_remote_docker:
@@ -58,7 +59,7 @@ jobs:
           command: |
             wget https://github.com/hashicorp/terraform-plugin-docs/releases/download/v0.13.0/tfplugindocs_0.13.0_linux_amd64.zip
             unzip -o tfplugindocs_0.13.0_linux_amd64.zip
-      - run: tfplugindocs
+      - run: ./tfplugindocs
       - run:
           name: Check in documentation
           command: |
