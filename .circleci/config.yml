@@ -43,7 +43,7 @@ jobs:
 
   generate_docs:
     docker:
-      - image: circleci/golang
+      - image: cimg/go:1.16
     steps:
       - checkout
       - setup_remote_docker:
