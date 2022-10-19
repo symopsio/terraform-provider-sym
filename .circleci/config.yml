@@ -44,7 +44,7 @@ jobs:
   generate_docs:
     docker:
       - image: cimg/go:1.16
-    working_directory: terraform-provider-sym
+    working_directory: ~/terraform-provider-sym
     steps:
       - checkout
       - setup_remote_docker:
