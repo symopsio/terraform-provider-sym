@@ -7,8 +7,8 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
-	"io/ioutil"
 	"log"
+	"os"
 	"strconv"
 	"strings"
 
@@ -59,7 +59,7 @@ func flowSchema() map[string]*schema.Schema {
 			Required:         true,
 			DiffSuppressFunc: utils.SuppressFlowDiffs,
 			ValidateDiagFunc: validateParams,
-			Description:      "A set of parameters, as defined by the Template, which configure the Flow. See the documentation for your specific Template for more details.",
+			Description:      "A set of parameters which configure the Flow. See the [Sym Documentation](https://docs.symops.com/docs/flow-parameters).",
 		},
 	}
 }
@@ -129,7 +129,7 @@ func createFlow(_ context.Context, data *schema.ResourceData, meta interface{}) 
 	}
 
 	implementation := data.Get("implementation").(string)
-	if b, err := ioutil.ReadFile(implementation); err != nil {
+	if b, err := os.ReadFile(implementation); err != nil {
 		diags = append(diags, utils.DiagFromError(err, "Unable to read sym_flow implementation file"))
 	} else {
 		flow.Implementation = base64.StdEncoding.EncodeToString(b)
@@ -230,7 +230,7 @@ func updateFlow(_ context.Context, data *schema.ResourceData, meta interface{}) 
 
 	// If the diff was suppressed, we'll have a text string here already, as it was decoded by the StateFunc.
 	// Therefore, check if this is a filename or not. If it's not, assume it is the decoded impl.
-	if b, err := ioutil.ReadFile(implementation); err != nil {
+	if b, err := os.ReadFile(implementation); err != nil {
 		implementation = base64.StdEncoding.EncodeToString([]byte(implementation))
 	} else {
 		implementation = base64.StdEncoding.EncodeToString(b)
@@ -240,7 +240,7 @@ func updateFlow(_ context.Context, data *schema.ResourceData, meta interface{}) 
 		flow.Implementation = implementation
 	} else {
 		// Normal case where the diff has not been suppressed, read our local file and send it.
-		if b, err := ioutil.ReadFile(implementation); err != nil {
+		if b, err := os.ReadFile(implementation); err != nil {
 			diags = append(diags, utils.DiagFromError(err, "Unable to read implementation file"))
 			return diags
 		} else {
@@ -301,6 +301,19 @@ func validateParams(input interface{}, path cty.Path) diag.Diagnostics {
 						Summary:       "schedule_deescalation must be a boolean value",
 						Detail:        fmt.Sprintf("failed to parse %q to bool", scheduleDeescalation),
 						AttributePath: append(path, cty.IndexStep{Key: cty.StringVal("schedule_deescalation")}),
+					})
+				}
+			}
+		}
+
+		if allowGuestInteraction, ok := params["allow_guest_interaction"]; ok {
+			if allowGuestInteraction, ok := allowGuestInteraction.(string); ok {
+				if _, err := strconv.ParseBool(allowGuestInteraction); err != nil {
+					diags = append(diags, diag.Diagnostic{
+						Severity:      diag.Error,
+						Summary:       "allow_guest_interaction must be a boolean value",
+						Detail:        fmt.Sprintf("failed to parse %q to bool", allowGuestInteraction),
+						AttributePath: append(path, cty.IndexStep{Key: cty.StringVal("allow_guest_interaction")}),
 					})
 				}
 			}

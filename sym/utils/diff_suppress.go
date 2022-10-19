@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"encoding/base64"
 	"encoding/json"
-	"io/ioutil"
 	"log"
+	"os"
 	"strconv"
 	"strings"
 
@@ -45,7 +45,10 @@ func SuppressFlowDiffs(k string, old string, new string, d *schema.ResourceData)
 	// schedule_deescalation defaults to true, so don't show a diff if schedule_deescalation is not specified
 	suppressScheduleDeescalationDiffs := k == "params.schedule_deescalation" && old == "true" && new == ""
 
-	return suppressJsonDiffs || suppressAllowRevokeDiffs || suppressScheduleDeescalationDiffs
+	// allow_guest_interaction defaults to false, so don't show a diff if allow_guest_interaction is not specified
+	suppressAllowGuestInteractionDiffs := k == "params.allow_guest_interaction" && old == "false" && new == ""
+
+	return suppressJsonDiffs || suppressAllowRevokeDiffs || suppressScheduleDeescalationDiffs || suppressAllowGuestInteractionDiffs
 }
 
 // SuppressNullSettingsDiffs is a DiffSuppressFunc that can be passed into
@@ -122,7 +125,7 @@ func SuppressEquivalentFileContentDiffs(k string, old string, new string, _ *sch
 		return false
 	}
 
-	newBytes, err := ioutil.ReadFile(new)
+	newBytes, err := os.ReadFile(new)
 	if err != nil {
 		log.Printf("Error reading file %v for value %v", new, k)
 		return false

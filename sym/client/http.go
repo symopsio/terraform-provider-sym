@@ -3,7 +3,7 @@ package client
 import (
 	"bytes"
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 	"strings"
@@ -61,7 +61,7 @@ func (c *symHttpClient) Do(method string, path string, payload interface{}) (str
 		return "", utils.ErrAPIConnect(path, requestID)
 	}
 
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if resp.StatusCode == 400 {
 		errorBody := utils.ErrorResponse{}
 		err = json.Unmarshal(body, &errorBody)
