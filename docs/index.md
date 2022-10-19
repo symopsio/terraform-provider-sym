@@ -8,6 +8,12 @@ description: |-
 
 The Sym Terraform Provider allows you to declaratively provision Flows. It also provides several types of resources that can be used to configure Flows.
 
+## Authentication
+Authentication for the Sym Provider can be derived from two sources, which are applied in the following order:
+1. A [Bot Token](https://docs.symops.com/docs/using-bot-tokens) set as the environment variable `SYM_JWT`
+2. The config generated from a successful`symflow login`.
+This order matches the precedence used by the `symflow` CLI.
+
 ## Example Usage
 
 ```terraform
