@@ -96,6 +96,9 @@ workflows:
       - generate_docs:
           context:
             - infrastructure-github-token
+          filters:
+            branches:
+              only: main
       - release:
           requires:
             - unit_and_acceptance_test
