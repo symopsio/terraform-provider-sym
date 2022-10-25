@@ -23,14 +23,14 @@ resource "sym_flow" "this" {
     schedule_deescalation = false
 
     prompt_field {
-      name = "reason"
+      name = "reasonssss"
       type = "string"
       required = true
       label = "Reason"
     }
 
     prompt_field {
-      name           = "urgency"
+      name           = "urgencys"
       type           = "string"
       required       = true
       allowed_values = ["Low", "Medium", "High"]

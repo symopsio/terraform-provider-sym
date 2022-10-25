@@ -32,6 +32,7 @@ func Flow() *schema.Resource {
 	}
 }
 
+// TODO(SYM-4246): Add descriptions to each field.
 func promptFieldResource() *schema.Resource {
 	return &schema.Resource{
 		Schema: map[string]*schema.Schema{
@@ -49,6 +50,7 @@ func promptFieldResource() *schema.Resource {
 	}
 }
 
+// TODO(SYM-4246): Add descriptions to each field.
 func flowParamsSchema() *schema.Resource {
 	return &schema.Resource{
 		Schema: map[string]*schema.Schema{
@@ -65,7 +67,8 @@ func flowParamsSchema() *schema.Resource {
 				Optional: true,
 				Elem:     promptFieldResource(),
 			},
-			"additional_header_text": {Type: schema.TypeString, Optional: true},
+			"additional_header_text":  {Type: schema.TypeString, Optional: true},
+			"allow_guest_interaction": {Type: schema.TypeBool, Optional: true, Default: false},
 		},
 	}
 }
@@ -88,19 +91,13 @@ func flowSchema() map[string]*schema.Schema {
 		"vars":           utils.SettingsMap("A map of variables and their values to pass to `impl.py`. Useful for making IDs generated dynamically by Terraform available to your `impl.py`. "),
 		"environment_id": utils.Required(schema.TypeString, "The ID of the Environment this Flow is associated with."),
 		"params": {
-			Type:     schema.TypeList,
-			Optional: true,
-			Computed: true,
-			MaxItems: 1,
-			Elem:     flowParamsSchema(),
+			Description: "A set of parameters which configure the Flow.",
+			Type:        schema.TypeList,
+			Optional:    true,
+			Computed:    true,
+			MaxItems:    1,
+			Elem:        flowParamsSchema(),
 		},
-		//"params": {
-		//	Type:             schema.TypeMap,
-		//	Required:         true,
-		//	DiffSuppressFunc: utils.SuppressFlowDiffs,
-		//	ValidateDiagFunc: validateParams,
-		//	Description:      "A set of parameters, as defined by the Template, which configure the Flow. See the documentation for your specific Template for more details.",
-		//},
 	}
 }
 
