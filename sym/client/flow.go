@@ -16,15 +16,35 @@ type ParamField struct {
 	AllowedValues []interface{} `json:"allowed_values,omitempty"`
 }
 
+type PromptField struct {
+	Name          string        `json:"name"`
+	Type          string        `json:"type"`
+	Required      bool          `json:"required"`
+	Label         string        `json:"label,omitempty"`
+	Default       string        `json:"default,omitempty"`
+	AllowedValues []interface{} `json:"allowed_values,omitempty"`
+}
+
+type FlowParams struct {
+	StrategyId            string        `json:"strategy_id,omitempty"`
+	PromptFields          []PromptField `json:"prompt_fields"`
+	AllowRevoke           bool          `json:"allow_revoke"`
+	ScheduleDeescalation  bool          `json:"schedule_deescalation"`
+	AllowGuestInteraction bool          `json:"allow_guest_interaction"`
+	AdditionalHeaderText  string        `json:"additional_header_text,omitempty"`
+	AllowedSources        []string      `json:"allowed_sources"`
+}
+
 type Flow struct {
-	Id             string    `json:"id,omitempty"`
-	Name           string    `json:"slug"`
-	Label          string    `json:"label,omitempty"`
-	Template       string    `json:"template"`
-	Implementation string    `json:"implementation"`
-	EnvironmentId  string    `json:"environment_id"`
-	Vars           Settings  `json:"vars"`
-	Params         APIParams `json:"params"`
+	Id             string                 `json:"id,omitempty"`
+	Name           string                 `json:"slug"`
+	Label          string                 `json:"label,omitempty"`
+	Template       string                 `json:"template"`
+	Implementation string                 `json:"implementation"`
+	EnvironmentId  string                 `json:"environment_id"`
+	Vars           Settings               `json:"vars"`
+	Params         map[string]interface{} `json:"params"`
+	//Params FlowParams `json:"params"`
 }
 
 // Helper Functions for Types ///////////////////

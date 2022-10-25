@@ -6,13 +6,10 @@ package provider
 import (
 	"context"
 	"encoding/base64"
-	"fmt"
 	"log"
 	"os"
-	"strconv"
 	"strings"
 
-	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/go-uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -37,6 +34,45 @@ func Flow() *schema.Resource {
 	}
 }
 
+func promptFieldResource() *schema.Resource {
+	return &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			"name":     {Required: true, Type: schema.TypeString},
+			"type":     {Required: true, Type: schema.TypeString},
+			"required": {Optional: true, Default: true, Type: schema.TypeBool},
+			"label":    {Optional: true, Type: schema.TypeString},
+			"default":  {Optional: true, Type: schema.TypeString},
+			"allowed_values": {
+				Type: schema.TypeList,
+				// Elem's type doesn't get validated, and actually allows types other than string (e.g. int)
+				Elem:     &schema.Schema{Type: schema.TypeString},
+				Optional: true,
+			},
+		},
+	}
+}
+
+func flowParamsSchema() *schema.Resource {
+	return &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			"strategy_id":  {Type: schema.TypeString, Optional: true},
+			"allow_revoke": {Type: schema.TypeBool, Optional: true, Default: true},
+			"allowed_sources": {
+				Type:     schema.TypeList,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+				Optional: true,
+			},
+			"schedule_deescalation": {Type: schema.TypeBool, Optional: true, Default: true},
+			"prompt_field": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem:     promptFieldResource(),
+			},
+			"additional_header_text": {Type: schema.TypeString, Optional: true},
+		},
+	}
+}
+
 // Map the resource's fields to types
 func flowSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
@@ -55,12 +91,20 @@ func flowSchema() map[string]*schema.Schema {
 		"vars":           utils.SettingsMap("A map of variables and their values to pass to `impl.py`. Useful for making IDs generated dynamically by Terraform available to your `impl.py`. "),
 		"environment_id": utils.Required(schema.TypeString, "The ID of the Environment this Flow is associated with."),
 		"params": {
-			Type:             schema.TypeMap,
-			Required:         true,
-			DiffSuppressFunc: utils.SuppressFlowDiffs,
-			ValidateDiagFunc: validateParams,
-			Description:      "A set of parameters which configure the Flow. See the [Sym Documentation](https://docs.symops.com/docs/flow-parameters).",
+			Type:     schema.TypeList,
+			Optional: true,
+			Computed: true,
+			MaxItems: 1,
+			//Default: []schema.Resource{},
+			Elem: flowParamsSchema(),
 		},
+		//"params": {
+		//	Type:             schema.TypeMap,
+		//	Required:         true,
+		//	DiffSuppressFunc: utils.SuppressFlowDiffs,
+		//	ValidateDiagFunc: validateParams,
+		//	Description:      "A set of parameters, as defined by the Template, which configure the Flow. See the documentation for your specific Template for more details.",
+		//},
 	}
 }
 
@@ -135,11 +179,38 @@ func createFlow(_ context.Context, data *schema.ResourceData, meta interface{}) 
 		flow.Implementation = base64.StdEncoding.EncodeToString(b)
 	}
 
-	if flowParams, d := buildAPIParamsFromResourceData(data); d.HasError() {
-		diags = append(diags, d...)
+	// This will either contain one map containing the defined params or will be an empty list
+	// if no params were defined in Terraform. The schema defines the MaxItems as 1, so there will
+	// never be more than one item in this list.
+	paramsList := data.Get("params").([]interface{})
+	if len(paramsList) == 1 {
+		// originalParamsMap will always contain the representation of Flow.params that
+		// Terraform accepts. This must be left alone for state to be saved properly.
+		originalParamsMap := paramsList[0].(map[string]interface{})
+
+		// ParamsMapCopy will contain the representation of Flow.params that the Sym API
+		// accepts. This will be modified to ensure the API receives the data it expects.
+		paramsMapCopy := map[string]interface{}{}
+		for k, v := range originalParamsMap {
+			paramsMapCopy[k] = v
+		}
+
+		// If strategy_id is an empty string, just omit it or the API will be unhappy.
+		if strategyId, found := paramsMapCopy["strategy_id"]; found && strategyId == "" {
+			delete(paramsMapCopy, "strategy_id")
+		}
+
+		// Because the Terraform block is called "prompt_field", it will be in params under that key.
+		// However, the API expects "prompt_fields", so change the key.
+		if promptFields, found := paramsMapCopy["prompt_field"]; found {
+			paramsMapCopy["prompt_fields"] = promptFields
+			delete(paramsMapCopy, "prompt_field")
+		}
+
+		flow.Params = paramsMapCopy
 	} else {
-		diags = append(diags, d...)
-		flow.Params = flowParams
+		// If no params were defined, make sure we still send an empty params blob to the API.
+		flow.Params = map[string]interface{}{}
 	}
 
 	if diags.HasError() {
@@ -151,13 +222,15 @@ func createFlow(_ context.Context, data *schema.ResourceData, meta interface{}) 
 	} else {
 		data.SetId(id)
 
-		// Setting params manually to save defaulted values like `allow_revoke` into the state
-		flowParamsMap, err := buildHCLParamsFromAPIParams(data, flow.Params)
-		if flowParamsMap != nil {
-			err = data.Set("params", flowParamsMap.Params)
-		}
+		//// Setting params manually to save defaulted values like `allow_revoke` into the state
+		//flowParamsMap, err := buildHCLParamsFromAPIParams(data, flow.Params)
+		//if flowParamsMap != nil {
+		//	err = data.Set("params", flowParamsMap.Params)
+		//}
 
-		diags = utils.DiagsCheckError(diags, err, "Unable to read Flow params")
+		log.Printf("\n\n\n!!! why are we here? %v", err)
+
+		//diags = utils.DiagsCheckError(diags, err, "Unable to read Flow params")
 	}
 	return diags
 }
@@ -203,12 +276,15 @@ func readFlow(_ context.Context, data *schema.ResourceData, meta interface{}) di
 	// Base64 -> Text
 	diags = utils.DiagsCheckError(diags, data.Set("implementation", utils.ParseRemoteImpl(flow.Implementation)), "Unable to read Flow implementation")
 
-	flowParamsMap, err := buildHCLParamsFromAPIParams(data, flow.Params)
-	if flowParamsMap != nil {
-		err = data.Set("params", flowParamsMap.Params)
-	}
+	log.Printf("\n\n\n!!! flow.Params is %v\n\n", flow.Params)
+	log.Printf("\n\n\n!!! wrapped in a list, flow.Params is %v\n\n", []map[string]interface{}{flow.Params})
 
-	diags = utils.DiagsCheckError(diags, err, "Unable to read Flow params")
+	// The Sym API defines "prompt_fields" as a list of promptFieldResource, but because the Terraform block is
+	// called "prompt_field", we must call it that here.
+	//flow.Parmaa
+	// Terraform must consider the params block a list of maps, but the list is only ever one item, and the Sym
+	// API considers it just a map, so we wrap it in a list here.
+	//diags = utils.DiagsCheckError(diags, data.Set("params", []map[string]interface{}{flow.Params}), "Unable to read Flow params")
 
 	return diags
 }
@@ -248,12 +324,15 @@ func updateFlow(_ context.Context, data *schema.ResourceData, meta interface{}) 
 		}
 	}
 
-	if flowParams, d := buildAPIParamsFromResourceData(data); d.HasError() {
-		diags = append(diags, d...)
-		return diags
+	// This will either contain one map containing the defined params or will be an empty list
+	// if no params were defined in Terraform. The schema defines the MaxItems as 1, so there will
+	// never be more than one item in this list.
+	paramsList := data.Get("params").([]interface{})
+	if len(paramsList) == 1 {
+		flow.Params = paramsList[0].(map[string]interface{})
 	} else {
-		diags = append(diags, d...)
-		flow.Params = flowParams
+		// If no params were defined, make sure we still send an empty params blob to the API.
+		flow.Params = map[string]interface{}{}
 	}
 
 	if _, err := c.Flow.Update(flow); err != nil {
@@ -270,54 +349,6 @@ func deleteFlow(_ context.Context, data *schema.ResourceData, meta interface{}) 
 
 	if _, err := c.Flow.Delete(id); err != nil {
 		diags = append(diags, utils.DiagFromError(err, "Unable to delete Flow"))
-	}
-
-	return diags
-}
-
-func validateParams(input interface{}, path cty.Path) diag.Diagnostics {
-	diags := diag.Diagnostics{}
-
-	if params, ok := input.(map[string]interface{}); ok {
-		if allowRevoke, ok := params["allow_revoke"]; ok {
-			if allowRevoke, ok := allowRevoke.(string); ok {
-				_, err := strconv.ParseBool(allowRevoke)
-				if err != nil {
-					diags = append(diags, diag.Diagnostic{
-						Severity:      diag.Error,
-						Summary:       "allow_revoke must be a boolean value",
-						Detail:        fmt.Sprintf("failed to parse %q to bool", allowRevoke),
-						AttributePath: append(path, cty.IndexStep{Key: cty.StringVal("allow_revoke")}),
-					})
-				}
-			}
-		}
-
-		if scheduleDeescalation, ok := params["schedule_deescalation"]; ok {
-			if scheduleDeescalation, ok := scheduleDeescalation.(string); ok {
-				if _, err := strconv.ParseBool(scheduleDeescalation); err != nil {
-					diags = append(diags, diag.Diagnostic{
-						Severity:      diag.Error,
-						Summary:       "schedule_deescalation must be a boolean value",
-						Detail:        fmt.Sprintf("failed to parse %q to bool", scheduleDeescalation),
-						AttributePath: append(path, cty.IndexStep{Key: cty.StringVal("schedule_deescalation")}),
-					})
-				}
-			}
-		}
-
-		if allowGuestInteraction, ok := params["allow_guest_interaction"]; ok {
-			if allowGuestInteraction, ok := allowGuestInteraction.(string); ok {
-				if _, err := strconv.ParseBool(allowGuestInteraction); err != nil {
-					diags = append(diags, diag.Diagnostic{
-						Severity:      diag.Error,
-						Summary:       "allow_guest_interaction must be a boolean value",
-						Detail:        fmt.Sprintf("failed to parse %q to bool", allowGuestInteraction),
-						AttributePath: append(path, cty.IndexStep{Key: cty.StringVal("allow_guest_interaction")}),
-					})
-				}
-			}
-		}
 	}
 
 	return diags
