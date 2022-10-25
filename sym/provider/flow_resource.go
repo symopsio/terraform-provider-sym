@@ -113,7 +113,7 @@ func createFlow(_ context.Context, data *schema.ResourceData, meta interface{}) 
 		Template:      data.Get("template").(string),
 		EnvironmentId: data.Get("environment_id").(string),
 		Vars:          getSettingsMap(data, "vars"),
-		Params: getAPISafeParams(data.Get("params").([]interface{})),
+		Params:        getAPISafeParams(data.Get("params").([]interface{})),
 	}
 
 	implementation := data.Get("implementation").(string)
@@ -202,7 +202,7 @@ func updateFlow(_ context.Context, data *schema.ResourceData, meta interface{}) 
 		Template:      data.Get("template").(string),
 		EnvironmentId: data.Get("environment_id").(string),
 		Vars:          getSettingsMap(data, "vars"),
-		Params: getAPISafeParams(data.Get("params").([]interface{})),
+		Params:        getAPISafeParams(data.Get("params").([]interface{})),
 	}
 
 	implementation := data.Get("implementation").(string)
