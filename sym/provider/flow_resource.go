@@ -113,6 +113,7 @@ func createFlow(_ context.Context, data *schema.ResourceData, meta interface{}) 
 		Template:      data.Get("template").(string),
 		EnvironmentId: data.Get("environment_id").(string),
 		Vars:          getSettingsMap(data, "vars"),
+		Params: getAPISafeParams(data.Get("params").([]interface{})),
 	}
 
 	implementation := data.Get("implementation").(string)
@@ -120,40 +121,6 @@ func createFlow(_ context.Context, data *schema.ResourceData, meta interface{}) 
 		diags = append(diags, utils.DiagFromError(err, "Unable to read sym_flow implementation file"))
 	} else {
 		flow.Implementation = base64.StdEncoding.EncodeToString(b)
-	}
-
-	// This will either contain one map containing the defined params or will be an empty list
-	// if no params were defined in Terraform. The schema defines the MaxItems as 1, so there will
-	// never be more than one item in this list.
-	paramsList := data.Get("params").([]interface{})
-	if len(paramsList) == 1 {
-		// originalParamsMap will always contain the representation of Flow.params that
-		// Terraform accepts. This must be left alone for state to be saved properly.
-		originalParamsMap := paramsList[0].(map[string]interface{})
-
-		// ParamsMapCopy will contain the representation of Flow.params that the Sym API
-		// accepts. This will be modified to ensure the API receives the data it expects.
-		paramsMapCopy := map[string]interface{}{}
-		for k, v := range originalParamsMap {
-			paramsMapCopy[k] = v
-		}
-
-		// If strategy_id is an empty string, just omit it or the API will be unhappy.
-		if strategyId, found := paramsMapCopy["strategy_id"]; found && strategyId == "" {
-			delete(paramsMapCopy, "strategy_id")
-		}
-
-		// Because the Terraform block is called "prompt_field", it will be in params under that key.
-		// However, the API expects "prompt_fields", so change the key.
-		if promptFields, found := paramsMapCopy["prompt_field"]; found {
-			paramsMapCopy["prompt_fields"] = promptFields
-			delete(paramsMapCopy, "prompt_field")
-		}
-
-		flow.Params = paramsMapCopy
-	} else {
-		// If no params were defined, make sure we still send an empty params blob to the API.
-		flow.Params = map[string]interface{}{}
 	}
 
 	if diags.HasError() {
@@ -207,18 +174,19 @@ func readFlow(_ context.Context, data *schema.ResourceData, meta interface{}) di
 	diags = utils.DiagsCheckError(diags, data.Set("template", flow.Template), "Unable to read Flow template")
 	diags = utils.DiagsCheckError(diags, data.Set("environment_id", flow.EnvironmentId), "Unable to read Flow environment_id")
 	diags = utils.DiagsCheckError(diags, data.Set("vars", flow.Vars), "Unable to read Flow vars")
+
 	// Base64 -> Text
 	diags = utils.DiagsCheckError(diags, data.Set("implementation", utils.ParseRemoteImpl(flow.Implementation)), "Unable to read Flow implementation")
 
-	log.Printf("\n\n\n!!! flow.Params is %v\n\n", flow.Params)
-	log.Printf("\n\n\n!!! wrapped in a list, flow.Params is %v\n\n", []map[string]interface{}{flow.Params})
+	// Terraform block is called "prompt_field", so that's what Terraform expects. The Sym API returns
+	// "prompt_fields", so change the key before giving it to Terraform.
+	if promptFields, found := flow.Params["prompt_fields"]; found {
+		flow.Params["prompt_field"] = promptFields
+		delete(flow.Params, "prompt_fields")
+	}
 
-	// The Sym API defines "prompt_fields" as a list of promptFieldResource, but because the Terraform block is
-	// called "prompt_field", we must call it that here.
-	//flow.Parmaa
-	// Terraform must consider the params block a list of maps, but the list is only ever one item, and the Sym
-	// API considers it just a map, so we wrap it in a list here.
-	//diags = utils.DiagsCheckError(diags, data.Set("params", []map[string]interface{}{flow.Params}), "Unable to read Flow params")
+	// Because sym_flow.params is a block, Terraform expects a list, even though there is only ever one item.
+	diags = utils.DiagsCheckError(diags, data.Set("params", []map[string]interface{}{flow.Params}), "Unable to read Flow params")
 
 	return diags
 }
@@ -234,6 +202,7 @@ func updateFlow(_ context.Context, data *schema.ResourceData, meta interface{}) 
 		Template:      data.Get("template").(string),
 		EnvironmentId: data.Get("environment_id").(string),
 		Vars:          getSettingsMap(data, "vars"),
+		Params: getAPISafeParams(data.Get("params").([]interface{})),
 	}
 
 	implementation := data.Get("implementation").(string)
@@ -258,17 +227,6 @@ func updateFlow(_ context.Context, data *schema.ResourceData, meta interface{}) 
 		}
 	}
 
-	// This will either contain one map containing the defined params or will be an empty list
-	// if no params were defined in Terraform. The schema defines the MaxItems as 1, so there will
-	// never be more than one item in this list.
-	paramsList := data.Get("params").([]interface{})
-	if len(paramsList) == 1 {
-		flow.Params = paramsList[0].(map[string]interface{})
-	} else {
-		// If no params were defined, make sure we still send an empty params blob to the API.
-		flow.Params = map[string]interface{}{}
-	}
-
 	if _, err := c.Flow.Update(flow); err != nil {
 		diags = append(diags, utils.DiagFromError(err, "Unable to update Flow"))
 	}
@@ -286,4 +244,41 @@ func deleteFlow(_ context.Context, data *schema.ResourceData, meta interface{}) 
 	}
 
 	return diags
+}
+
+// getAPISafeParams takes in the paramsList that Terraform constructs from a user's HCL configuration, and
+// returns a single map representing the sym_flow's params. It will also make any necessary transformations
+// to ensure the params map is compatible with the Sym API.
+//
+//For example, it will remove any empty "strategy_id", since the API will reject it.
+func getAPISafeParams(paramsList []interface{}) map[string]interface{} {
+	if len(paramsList) == 1 {
+		// originalParamsMap will always contain the representation of Flow.params that
+		// Terraform accepts. This must be left alone for state to be saved properly.
+		originalParamsMap := paramsList[0].(map[string]interface{})
+
+		// ParamsMapCopy will contain the representation of Flow.params that the Sym API
+		// accepts. This will be modified to ensure the API receives the data it expects.
+		paramsMapCopy := map[string]interface{}{}
+		for k, v := range originalParamsMap {
+			paramsMapCopy[k] = v
+		}
+
+		// If strategy_id is an empty string, just omit it or the API will be unhappy.
+		if strategyId, found := paramsMapCopy["strategy_id"]; found && strategyId == "" {
+			delete(paramsMapCopy, "strategy_id")
+		}
+
+		// Because the Terraform block is called "prompt_field", it will be in params under that key.
+		// However, the API expects "prompt_fields", so change the key.
+		if promptFields, found := paramsMapCopy["prompt_field"]; found {
+			paramsMapCopy["prompt_fields"] = promptFields
+			delete(paramsMapCopy, "prompt_field")
+		}
+
+		return paramsMapCopy
+	} else {
+		// If no params were defined, make sure we still send an empty params blob to the API.
+		return map[string]interface{}{}
+	}
 }
