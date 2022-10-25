@@ -171,8 +171,6 @@ func TestAccSymFlow_allowedSourcesOnlyAPI(t *testing.T) {
 					resource.TestCheckResourceAttrPair("sym_flow.this", "params.0.strategy_id", "sym_strategy.sso_main", "id"),
 					resource.TestCheckResourceAttr("sym_flow.this", "params.0.allow_revoke", "false"),
 					resource.TestCheckResourceAttr("sym_flow.this", "params.0.allowed_sources.#", "0"),
-
-
 				),
 			},
 		},
