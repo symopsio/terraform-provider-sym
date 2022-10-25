@@ -484,31 +484,29 @@ resource "sym_flow" "this" {
 	implementation = "internal/testdata/impl.py"
 	environment_id = sym_environment.this.id
 
-	params = {
+	params {
 		strategy_id = sym_strategy.sso_main.id
 		allow_revoke = false
 		schedule_deescalation = false
 		allow_guest_interaction = false
-		prompt_fields_json = jsonencode([
-			{
+		prompt_field {
 			name = "reason"
 			type = "string"
 			label = "Reason"
 			required = true
-			},
-			{
+		}
+		prompt_field {
 			name = "urgency"
 			type = "list"
 			required = true
 			allowed_values = ["Low", "Medium", "High"]
-			},
-			{
+		}
+		prompt_field {
 			name = "username"
 			type = "string"
 			default = "lolol"
 			required = false
-			},
-	])
+		}
 	}
 }
 `,
@@ -555,30 +553,28 @@ resource "sym_flow" "this" {
 	implementation = "internal/testdata/impl.py"
 	environment_id = sym_environment.this.id
 
-	params = {
+	params {
 		allow_revoke = false
 		schedule_deescalation = false
 		allow_guest_interaction = false
-		prompt_fields_json = jsonencode([
-			{
+		prompt_field {
 			name = "reason"
 			type = "string"
 			label = "Reason"
 			required = true
-			},
-			{
+		}
+		prompt_field {
 			name = "urgency"
 			type = "list"
 			required = true
 			allowed_values = ["Low", "Medium", "High"]
-			},
-			{
+		}
+		prompt_field {
 			name = "username"
 			type = "string"
 			default = "lolol"
 			required = false
-			},
-	])
+		}
 	}
 }
 `,
