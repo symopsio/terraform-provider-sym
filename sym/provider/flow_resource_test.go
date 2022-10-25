@@ -129,7 +129,7 @@ func TestAccSymFlow_noStrategy(t *testing.T) {
 					resource.TestCheckResourceAttr("sym_flow.this", "template", "sym:template:approval:1.0.0"),
 					resource.TestCheckResourceAttrSet("sym_flow.this", "implementation"),
 					resource.TestCheckResourceAttrPair("sym_flow.this", "environment_id", "sym_environment.this", "id"),
-					resource.TestCheckNoResourceAttr("sym_flow.this", "params.0.strategy_id"),
+					resource.TestCheckResourceAttr("sym_flow.this", "params.0.strategy_id", ""),
 					resource.TestCheckResourceAttr("sym_flow.this", "params.0.allow_revoke", "false"),
 					resource.TestCheckResourceAttr("sym_flow.this", "params.0.schedule_deescalation", "true"),
 					resource.TestCheckResourceAttr("sym_flow.this", "params.0.prompt_field.#", "2"),
