@@ -8,14 +8,12 @@ import (
 	"encoding/base64"
 	"log"
 	"os"
-	"strings"
 
 	"github.com/hashicorp/go-uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/symopsio/terraform-provider-sym/sym/client"
-	"github.com/symopsio/terraform-provider-sym/sym/templates"
 	"github.com/symopsio/terraform-provider-sym/sym/utils"
 )
 
@@ -43,8 +41,7 @@ func promptFieldResource() *schema.Resource {
 			"label":    {Optional: true, Type: schema.TypeString},
 			"default":  {Optional: true, Type: schema.TypeString},
 			"allowed_values": {
-				Type: schema.TypeList,
-				// Elem's type doesn't get validated, and actually allows types other than string (e.g. int)
+				Type:     schema.TypeList,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Optional: true,
 			},
@@ -95,8 +92,7 @@ func flowSchema() map[string]*schema.Schema {
 			Optional: true,
 			Computed: true,
 			MaxItems: 1,
-			//Default: []schema.Resource{},
-			Elem: flowParamsSchema(),
+			Elem:     flowParamsSchema(),
 		},
 		//"params": {
 		//	Type:             schema.TypeMap,
@@ -106,56 +102,6 @@ func flowSchema() map[string]*schema.Schema {
 		//	Description:      "A set of parameters, as defined by the Template, which configure the Flow. See the documentation for your specific Template for more details.",
 		//},
 	}
-}
-
-// Template Helper Functions ////////////////////
-
-// Remove the version from our template type for handling
-// e.g. sym:template:approval:1.0 becomes just sym:template:approval
-func getTemplateNameWithoutVersion(templateName string) string {
-	splitTemplateName := strings.Split(templateName, ":")
-	return splitTemplateName[0] + ":" + splitTemplateName[1] + ":" + splitTemplateName[2]
-}
-
-// Given a template ID string, return the appropriate template
-func getTemplateFromTemplateID(templateID string) templates.Template {
-	templateName := getTemplateNameWithoutVersion(templateID)
-	switch templateName {
-	case "sym:template:approval":
-		return &templates.SymApprovalTemplate{}
-	default:
-		return &templates.UnknownTemplate{Name: templateName}
-	}
-}
-
-// API Helper Functions /////////////////////////
-
-// Build a Flow's FlowParam from ResourceData based on a Template's specifications
-//
-// Terraform -> API
-func buildAPIParamsFromResourceData(data *schema.ResourceData) (client.APIParams, diag.Diagnostics) {
-	template := getTemplateFromTemplateID(data.Get("template").(string))
-	params := &templates.HCLParamMap{Params: getSettingsMap(data, "params")}
-
-	if apiParams, err := params.ToAPIParams(template); err != nil {
-		if params.Diags.HasError() {
-			return nil, params.Diags
-		} else {
-			return nil, utils.DiagsFromError(err, "Failed to create Flow")
-		}
-	} else {
-		return apiParams, params.Diags
-	}
-}
-
-// buildHCLParamsFromAPIParams turns the internal FlowParam struct into a map that can be set
-// on terraform's ResourceData so that the version from the API can be compared to the
-// version terraform pulls from the local files during diffs.
-//
-// API -> Terraform
-func buildHCLParamsFromAPIParams(data *schema.ResourceData, flowParam client.APIParams) (*templates.HCLParamMap, error) {
-	template := getTemplateFromTemplateID(data.Get("template").(string))
-	return template.APIToTerraform(flowParam)
 }
 
 // CRUD operations //////////////////////////////
@@ -221,17 +167,8 @@ func createFlow(_ context.Context, data *schema.ResourceData, meta interface{}) 
 		diags = append(diags, utils.DiagFromError(err, "Unable to create Flow"))
 	} else {
 		data.SetId(id)
-
-		//// Setting params manually to save defaulted values like `allow_revoke` into the state
-		//flowParamsMap, err := buildHCLParamsFromAPIParams(data, flow.Params)
-		//if flowParamsMap != nil {
-		//	err = data.Set("params", flowParamsMap.Params)
-		//}
-
-		log.Printf("\n\n\n!!! why are we here? %v", err)
-
-		//diags = utils.DiagsCheckError(diags, err, "Unable to read Flow params")
 	}
+
 	return diags
 }
 
