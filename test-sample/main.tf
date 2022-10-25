@@ -29,14 +29,14 @@ resource "sym_flow" "this" {
     allowed_sources         = ["api", "slack"]
 
     prompt_field {
-      name     = "reasonssss"
+      name     = "reason"
       type     = "string"
       required = true
       label    = "Reason"
     }
 
     prompt_field {
-      name           = "urgencys"
+      name           = "urgency"
       type           = "string"
       required       = true
       allowed_values = ["Low", "Medium", "High"]
