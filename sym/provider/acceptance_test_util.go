@@ -361,38 +361,37 @@ type flowResource struct {
 
 func (r flowResource) String() string {
 	var p strings.Builder
-	p.WriteString("params = {\n")
+	p.WriteString("params {\n")
 
 	if r.params.strategyId != "" {
-		p.WriteString(fmt.Sprintf("		strategy_id = %s\n", r.params.strategyId))
+		p.WriteString(fmt.Sprintf("\t\tstrategy_id = %s\n", r.params.strategyId))
 	}
-	p.WriteString(fmt.Sprintf("		allow_revoke = %v\n", r.params.allowRevoke))
-	p.WriteString(fmt.Sprintf("		schedule_deescalation = %v\n", r.params.scheduleDeescalation))
-	p.WriteString(fmt.Sprintf("		allow_guest_interaction = %v\n", r.params.allowGuestInteraction))
+	p.WriteString(fmt.Sprintf("\t\tallow_revoke = %v\n", r.params.allowRevoke))
+	p.WriteString(fmt.Sprintf("\t\tschedule_deescalation = %v\n", r.params.scheduleDeescalation))
+	p.WriteString(fmt.Sprintf("\t\tallow_guest_interaction = %v\n", r.params.allowGuestInteraction))
 
 	if r.params.additionalHeaderText != "" {
-		p.WriteString(fmt.Sprintf("		additional_header_text = \"%s\"\n", r.params.additionalHeaderText))
+		p.WriteString(fmt.Sprintf("\t\tadditional_header_text = \"%s\"\n", r.params.additionalHeaderText))
 	}
 
 	// if allowedSources is not nil, include it in the params
 	if r.params.allowedSources != "" {
-		p.WriteString(fmt.Sprintf("		allowed_sources_json = jsonencode(%v)\n", r.params.allowedSources))
+		p.WriteString(fmt.Sprintf("\t\tallowed_sources = %v\n", r.params.allowedSources))
 	}
 
-	p.WriteString("		prompt_fields_json = jsonencode([\n")
 	for _, f := range r.params.promptFields {
-		p.WriteString("			{\n")
-		p.WriteString(fmt.Sprintf("			name = %q\n", f.name))
-		p.WriteString(fmt.Sprintf("			type = %q\n", f.type_))
+		p.WriteString("\t\tprompt_field {\n")
+		p.WriteString(fmt.Sprintf("\t\t\tname = %q\n", f.name))
+		p.WriteString(fmt.Sprintf("\t\t\ttype = %q\n", f.type_))
 		if f.label != "" {
-			p.WriteString(fmt.Sprintf("			label = %q\n", f.label))
+			p.WriteString(fmt.Sprintf("\t\t\tlabel = %q\n", f.label))
 		}
 		if f.default_ != "" {
-			p.WriteString(fmt.Sprintf("			default = %q\n", f.default_))
+			p.WriteString(fmt.Sprintf("\t\t\tdefault = %q\n", f.default_))
 		}
-		p.WriteString(fmt.Sprintf("			required = %v\n", f.required))
+		p.WriteString(fmt.Sprintf("\t\t\trequired = %v\n", f.required))
 		if len(f.allowedValues) > 0 {
-			p.WriteString("			allowed_values = [")
+			p.WriteString("\t\t\tallowed_values = [")
 			for i, av := range f.allowedValues {
 				p.WriteString(fmt.Sprintf("%q", av))
 				if i != len(f.allowedValues)-1 {
@@ -401,10 +400,9 @@ func (r flowResource) String() string {
 			}
 			p.WriteString("]\n")
 		}
-		p.WriteString("			},\n")
+		p.WriteString("\t\t}\n")
 	}
-	p.WriteString("	])\n")
-	p.WriteString("	}")
+	p.WriteString("\t}")
 	return fmt.Sprintf(`
 resource "sym_flow" %[1]q {
 	name = %[2]q

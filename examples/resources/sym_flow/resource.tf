@@ -74,23 +74,22 @@ resource "sym_flow" "this" {
 
   environment_id = sym_environment.this.id
 
-  params = {
+  params {
     strategy_id = sym_strategy.sso_main.id
 
-    # This is called `fields` in the API
-    prompt_fields_json = jsonencode([
-      {
-        name     = "reason"
-        type     = "string"
-        required = true
-        label    = "Reason"
-      },
-      {
-        name           = "urgency"
-        type           = "string"
-        required       = true
-        allowed_values = ["Low", "Medium", "High"]
-      }])
+    prompt_field {
+      name     = "reason"
+      type     = "string"
+      required = true
+      label    = "Reason"
+    }
+
+    prompt_field {
+      name           = "urgency"
+      type           = "string"
+      required       = true
+      allowed_values = ["Low", "Medium", "High"]
+    }
   }
 }
 

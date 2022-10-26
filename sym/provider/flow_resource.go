@@ -6,19 +6,14 @@ package provider
 import (
 	"context"
 	"encoding/base64"
-	"fmt"
 	"log"
 	"os"
-	"strconv"
-	"strings"
 
-	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/go-uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/symopsio/terraform-provider-sym/sym/client"
-	"github.com/symopsio/terraform-provider-sym/sym/templates"
 	"github.com/symopsio/terraform-provider-sym/sym/utils"
 )
 
@@ -33,6 +28,47 @@ func Flow() *schema.Resource {
 		DeleteContext: deleteFlow,
 		Importer: &schema.ResourceImporter{
 			StateContext: getSlugImporter("flow"),
+		},
+	}
+}
+
+// TODO(SYM-4246): Add descriptions to each field.
+func promptFieldResource() *schema.Resource {
+	return &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			"name":     {Required: true, Type: schema.TypeString},
+			"type":     {Required: true, Type: schema.TypeString},
+			"required": {Optional: true, Default: true, Type: schema.TypeBool},
+			"label":    {Optional: true, Type: schema.TypeString},
+			"default":  {Optional: true, Type: schema.TypeString},
+			"allowed_values": {
+				Type:     schema.TypeList,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+				Optional: true,
+			},
+		},
+	}
+}
+
+// TODO(SYM-4246): Add descriptions to each field.
+func flowParamsSchema() *schema.Resource {
+	return &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			"strategy_id":  {Type: schema.TypeString, Optional: true},
+			"allow_revoke": {Type: schema.TypeBool, Optional: true, Default: true},
+			"allowed_sources": {
+				Type:     schema.TypeList,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+				Optional: true,
+			},
+			"schedule_deescalation": {Type: schema.TypeBool, Optional: true, Default: true},
+			"prompt_field": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem:     promptFieldResource(),
+			},
+			"additional_header_text":  {Type: schema.TypeString, Optional: true},
+			"allow_guest_interaction": {Type: schema.TypeBool, Optional: true, Default: false},
 		},
 	}
 }
@@ -52,66 +88,17 @@ func flowSchema() map[string]*schema.Schema {
 			},
 			Description: "Relative path of the implementation file written in python.",
 		},
-		"vars":           utils.SettingsMap("A map of variables and their values to pass to `impl.py`. Useful for making IDs generated dynamically by Terraform available to your `impl.py`. "),
+		"vars":           utils.SettingsMap("A map of variables and their values to pass to `impl.py`. Useful for making IDs generated dynamically by Terraform available to your `impl.py`."),
 		"environment_id": utils.Required(schema.TypeString, "The ID of the Environment this Flow is associated with."),
 		"params": {
-			Type:             schema.TypeMap,
-			Required:         true,
-			DiffSuppressFunc: utils.SuppressFlowDiffs,
-			ValidateDiagFunc: validateParams,
-			Description:      "A set of parameters which configure the Flow. See the [Sym Documentation](https://docs.symops.com/docs/flow-parameters).",
+			Description: "A set of parameters which configure the Flow.",
+			Type:        schema.TypeList,
+			Optional:    true,
+			Computed:    true,
+			MaxItems:    1, // Nested blocks are always parsed by Terraform as lists, but we only ever want 1 params block.
+			Elem:        flowParamsSchema(),
 		},
 	}
-}
-
-// Template Helper Functions ////////////////////
-
-// Remove the version from our template type for handling
-// e.g. sym:template:approval:1.0 becomes just sym:template:approval
-func getTemplateNameWithoutVersion(templateName string) string {
-	splitTemplateName := strings.Split(templateName, ":")
-	return splitTemplateName[0] + ":" + splitTemplateName[1] + ":" + splitTemplateName[2]
-}
-
-// Given a template ID string, return the appropriate template
-func getTemplateFromTemplateID(templateID string) templates.Template {
-	templateName := getTemplateNameWithoutVersion(templateID)
-	switch templateName {
-	case "sym:template:approval":
-		return &templates.SymApprovalTemplate{}
-	default:
-		return &templates.UnknownTemplate{Name: templateName}
-	}
-}
-
-// API Helper Functions /////////////////////////
-
-// Build a Flow's FlowParam from ResourceData based on a Template's specifications
-//
-// Terraform -> API
-func buildAPIParamsFromResourceData(data *schema.ResourceData) (client.APIParams, diag.Diagnostics) {
-	template := getTemplateFromTemplateID(data.Get("template").(string))
-	params := &templates.HCLParamMap{Params: getSettingsMap(data, "params")}
-
-	if apiParams, err := params.ToAPIParams(template); err != nil {
-		if params.Diags.HasError() {
-			return nil, params.Diags
-		} else {
-			return nil, utils.DiagsFromError(err, "Failed to create Flow")
-		}
-	} else {
-		return apiParams, params.Diags
-	}
-}
-
-// buildHCLParamsFromAPIParams turns the internal FlowParam struct into a map that can be set
-// on terraform's ResourceData so that the version from the API can be compared to the
-// version terraform pulls from the local files during diffs.
-//
-// API -> Terraform
-func buildHCLParamsFromAPIParams(data *schema.ResourceData, flowParam client.APIParams) (*templates.HCLParamMap, error) {
-	template := getTemplateFromTemplateID(data.Get("template").(string))
-	return template.APIToTerraform(flowParam)
 }
 
 // CRUD operations //////////////////////////////
@@ -126,6 +113,7 @@ func createFlow(_ context.Context, data *schema.ResourceData, meta interface{}) 
 		Template:      data.Get("template").(string),
 		EnvironmentId: data.Get("environment_id").(string),
 		Vars:          getSettingsMap(data, "vars"),
+		Params:        getAPISafeParams(data.Get("params").([]interface{})),
 	}
 
 	implementation := data.Get("implementation").(string)
@@ -133,13 +121,6 @@ func createFlow(_ context.Context, data *schema.ResourceData, meta interface{}) 
 		diags = append(diags, utils.DiagFromError(err, "Unable to read sym_flow implementation file"))
 	} else {
 		flow.Implementation = base64.StdEncoding.EncodeToString(b)
-	}
-
-	if flowParams, d := buildAPIParamsFromResourceData(data); d.HasError() {
-		diags = append(diags, d...)
-	} else {
-		diags = append(diags, d...)
-		flow.Params = flowParams
 	}
 
 	if diags.HasError() {
@@ -150,15 +131,8 @@ func createFlow(_ context.Context, data *schema.ResourceData, meta interface{}) 
 		diags = append(diags, utils.DiagFromError(err, "Unable to create Flow"))
 	} else {
 		data.SetId(id)
-
-		// Setting params manually to save defaulted values like `allow_revoke` into the state
-		flowParamsMap, err := buildHCLParamsFromAPIParams(data, flow.Params)
-		if flowParamsMap != nil {
-			err = data.Set("params", flowParamsMap.Params)
-		}
-
-		diags = utils.DiagsCheckError(diags, err, "Unable to read Flow params")
 	}
+
 	return diags
 }
 
@@ -200,15 +174,19 @@ func readFlow(_ context.Context, data *schema.ResourceData, meta interface{}) di
 	diags = utils.DiagsCheckError(diags, data.Set("template", flow.Template), "Unable to read Flow template")
 	diags = utils.DiagsCheckError(diags, data.Set("environment_id", flow.EnvironmentId), "Unable to read Flow environment_id")
 	diags = utils.DiagsCheckError(diags, data.Set("vars", flow.Vars), "Unable to read Flow vars")
+
 	// Base64 -> Text
 	diags = utils.DiagsCheckError(diags, data.Set("implementation", utils.ParseRemoteImpl(flow.Implementation)), "Unable to read Flow implementation")
 
-	flowParamsMap, err := buildHCLParamsFromAPIParams(data, flow.Params)
-	if flowParamsMap != nil {
-		err = data.Set("params", flowParamsMap.Params)
+	// Terraform block is called "prompt_field", so that's what Terraform expects. The Sym API returns
+	// "prompt_fields", so change the key before giving it to Terraform.
+	if promptFields, found := flow.Params["prompt_fields"]; found {
+		flow.Params["prompt_field"] = promptFields
+		delete(flow.Params, "prompt_fields")
 	}
 
-	diags = utils.DiagsCheckError(diags, err, "Unable to read Flow params")
+	// Because sym_flow.params is a block, Terraform expects a list, even though there is only ever one item.
+	diags = utils.DiagsCheckError(diags, data.Set("params", []map[string]interface{}{flow.Params}), "Unable to read Flow params")
 
 	return diags
 }
@@ -224,6 +202,7 @@ func updateFlow(_ context.Context, data *schema.ResourceData, meta interface{}) 
 		Template:      data.Get("template").(string),
 		EnvironmentId: data.Get("environment_id").(string),
 		Vars:          getSettingsMap(data, "vars"),
+		Params:        getAPISafeParams(data.Get("params").([]interface{})),
 	}
 
 	implementation := data.Get("implementation").(string)
@@ -248,14 +227,6 @@ func updateFlow(_ context.Context, data *schema.ResourceData, meta interface{}) 
 		}
 	}
 
-	if flowParams, d := buildAPIParamsFromResourceData(data); d.HasError() {
-		diags = append(diags, d...)
-		return diags
-	} else {
-		diags = append(diags, d...)
-		flow.Params = flowParams
-	}
-
 	if _, err := c.Flow.Update(flow); err != nil {
 		diags = append(diags, utils.DiagFromError(err, "Unable to update Flow"))
 	}
@@ -275,50 +246,41 @@ func deleteFlow(_ context.Context, data *schema.ResourceData, meta interface{}) 
 	return diags
 }
 
-func validateParams(input interface{}, path cty.Path) diag.Diagnostics {
-	diags := diag.Diagnostics{}
+// getAPISafeParams takes in the paramsList that Terraform constructs from a user's HCL configuration, and
+// returns a single map representing the sym_flow's params. It will also make any necessary transformations
+// to ensure the params map is compatible with the Sym API.
+//
+//For example, it will remove any empty "strategy_id", since the API will reject it.
+func getAPISafeParams(paramsList []interface{}) map[string]interface{} {
+	// paramsList is only ever 0 or 1 items because that is the max we set in Terraform.
+	// length of 1 means that params were defined in Terraform.
+	if len(paramsList) == 1 {
+		// originalParamsMap will always contain the representation of Flow.params that
+		// Terraform accepts. This must be left alone for state to be saved properly.
+		originalParamsMap := paramsList[0].(map[string]interface{})
 
-	if params, ok := input.(map[string]interface{}); ok {
-		if allowRevoke, ok := params["allow_revoke"]; ok {
-			if allowRevoke, ok := allowRevoke.(string); ok {
-				_, err := strconv.ParseBool(allowRevoke)
-				if err != nil {
-					diags = append(diags, diag.Diagnostic{
-						Severity:      diag.Error,
-						Summary:       "allow_revoke must be a boolean value",
-						Detail:        fmt.Sprintf("failed to parse %q to bool", allowRevoke),
-						AttributePath: append(path, cty.IndexStep{Key: cty.StringVal("allow_revoke")}),
-					})
-				}
-			}
+		// ParamsMapCopy will contain the representation of Flow.params that the Sym API
+		// accepts. This will be modified to ensure the API receives the data it expects.
+		paramsMapCopy := map[string]interface{}{}
+		for k, v := range originalParamsMap {
+			paramsMapCopy[k] = v
 		}
 
-		if scheduleDeescalation, ok := params["schedule_deescalation"]; ok {
-			if scheduleDeescalation, ok := scheduleDeescalation.(string); ok {
-				if _, err := strconv.ParseBool(scheduleDeescalation); err != nil {
-					diags = append(diags, diag.Diagnostic{
-						Severity:      diag.Error,
-						Summary:       "schedule_deescalation must be a boolean value",
-						Detail:        fmt.Sprintf("failed to parse %q to bool", scheduleDeescalation),
-						AttributePath: append(path, cty.IndexStep{Key: cty.StringVal("schedule_deescalation")}),
-					})
-				}
-			}
+		// If strategy_id is an empty string, just omit it or the API will be unhappy.
+		if strategyId, found := paramsMapCopy["strategy_id"]; found && strategyId == "" {
+			delete(paramsMapCopy, "strategy_id")
 		}
 
-		if allowGuestInteraction, ok := params["allow_guest_interaction"]; ok {
-			if allowGuestInteraction, ok := allowGuestInteraction.(string); ok {
-				if _, err := strconv.ParseBool(allowGuestInteraction); err != nil {
-					diags = append(diags, diag.Diagnostic{
-						Severity:      diag.Error,
-						Summary:       "allow_guest_interaction must be a boolean value",
-						Detail:        fmt.Sprintf("failed to parse %q to bool", allowGuestInteraction),
-						AttributePath: append(path, cty.IndexStep{Key: cty.StringVal("allow_guest_interaction")}),
-					})
-				}
-			}
+		// Because the Terraform block is called "prompt_field", it will be in params under that key.
+		// However, the API expects "prompt_fields", so change the key.
+		if promptFields, found := paramsMapCopy["prompt_field"]; found {
+			paramsMapCopy["prompt_fields"] = promptFields
+			delete(paramsMapCopy, "prompt_field")
 		}
+
+		return paramsMapCopy
+	} else {
+		// If no params were defined, make sure we still send an empty params blob to the API.
+		return map[string]interface{}{}
 	}
-
-	return diags
 }

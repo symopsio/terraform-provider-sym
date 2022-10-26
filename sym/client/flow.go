@@ -7,64 +7,18 @@ import (
 
 // Types ////////////////////////////////////////
 
-type ParamField struct {
-	Name          string        `json:"name"`
-	Type          string        `json:"type"`
-	Required      bool          `json:"required"`
-	Label         string        `json:"label,omitempty"`
-	Default       string        `json:"default,omitempty"`
-	AllowedValues []interface{} `json:"allowed_values,omitempty"`
-}
-
 type Flow struct {
-	Id             string    `json:"id,omitempty"`
-	Name           string    `json:"slug"`
-	Label          string    `json:"label,omitempty"`
-	Template       string    `json:"template"`
-	Implementation string    `json:"implementation"`
-	EnvironmentId  string    `json:"environment_id"`
-	Vars           Settings  `json:"vars"`
-	Params         APIParams `json:"params"`
+	Id             string                 `json:"id,omitempty"`
+	Name           string                 `json:"slug"`
+	Label          string                 `json:"label,omitempty"`
+	Template       string                 `json:"template"`
+	Implementation string                 `json:"implementation"`
+	EnvironmentId  string                 `json:"environment_id"`
+	Vars           Settings               `json:"vars"`
+	Params         map[string]interface{} `json:"params"`
 }
 
 // Helper Functions for Types ///////////////////
-
-func (p ParamField) String() string {
-	return fmt.Sprintf(
-		"{name=%s, type=%s, label=%s, default=%s, required=%t, allowed_values=%v}",
-		p.Name,
-		p.Type,
-		p.Label,
-		p.Default,
-		p.Required,
-		p.AllowedValues,
-	)
-}
-
-// Given an input map, construct a ParamField
-func ParamFieldFromMap(inputMap map[string]interface{}) *ParamField {
-	paramField := ParamField{
-		Name:     inputMap["name"].(string),
-		Type:     inputMap["type"].(string),
-		Required: inputMap["required"].(bool),
-	}
-
-	if label, ok := inputMap["label"]; ok && label != nil {
-		paramField.Label = label.(string)
-	}
-
-	if default_, ok := inputMap["default"]; ok && default_ != nil {
-		paramField.Default = default_.(string)
-	}
-
-	if allowedValues, ok := inputMap["allowed_values"]; ok {
-		if allowedValues, ok := allowedValues.([]interface{}); ok {
-			paramField.AllowedValues = allowedValues
-		}
-	}
-
-	return &paramField
-}
 
 func (s Flow) String() string {
 	return fmt.Sprintf(
