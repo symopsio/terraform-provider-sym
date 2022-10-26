@@ -95,7 +95,7 @@ func flowSchema() map[string]*schema.Schema {
 			Type:        schema.TypeList,
 			Optional:    true,
 			Computed:    true,
-			MaxItems:    1,  // Nested blocks are always parsed by Terraform as lists, but we only ever want 1 params block.
+			MaxItems:    1, // Nested blocks are always parsed by Terraform as lists, but we only ever want 1 params block.
 			Elem:        flowParamsSchema(),
 		},
 	}
