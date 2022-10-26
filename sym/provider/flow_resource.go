@@ -60,7 +60,7 @@ func promptFieldResource() *schema.Resource {
 	}
 }
 
-func flowParamsSchema() *schema.Resource {
+func flowParamsResource() *schema.Resource {
 	return &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"strategy_id":  {Type: schema.TypeString, Optional: true, Description: "The ID of a sym_strategy with sym_targets that this sym_flow will be managing access to. If not defined, this sym_flow will be approval-only."},
@@ -108,7 +108,7 @@ func flowSchema() map[string]*schema.Schema {
 			Optional:    true,
 			Computed:    true,
 			MaxItems:    1, // Nested blocks are always parsed by Terraform as lists, but we only ever want 1 params block.
-			Elem:        flowParamsSchema(),
+			Elem:        flowParamsResource(),
 		},
 	}
 }
@@ -276,15 +276,46 @@ func readFlow(_ context.Context, data *schema.ResourceData, meta interface{}) di
 	// Base64 -> Text
 	diags = utils.DiagsCheckError(diags, data.Set("implementation", utils.ParseRemoteImpl(flow.Implementation)), "Unable to read Flow implementation")
 
-	// Terraform block is called "prompt_field", so that's what Terraform expects. The Sym API returns
-	// "prompt_fields", so change the key before giving it to Terraform.
-	if promptFields, found := flow.Params["prompt_fields"]; found {
-		flow.Params["prompt_field"] = promptFields
-		delete(flow.Params, "prompt_fields")
+	// The API may add new parameters that we (the provider) don't know about yet, so rebuild the map and include
+	// only the parameters we do know about. Otherwise, the data.Set below will fail to set the Flow's state.
+	knownParams := map[string]interface{}{}
+	paramsSchema := flowParamsResource().Schema
+	promptFieldSchema := promptFieldResource().Schema
+
+	for paramKey, paramValue := range flow.Params {
+		if paramKey == "prompt_fields" {
+			// Do the same check for known parameters within each prompt field
+			var knownPromptFields []map[string]interface{}
+
+			// Iterate over each prompt field from the API response
+			for i := range paramValue.([]interface{}) {
+				promptField := paramValue.([]interface{})[i].(map[string]interface{})
+				knownPromptField := map[string]interface{}{}
+
+				// Iterate over each key/value pair in the prompt field and rebuild the
+				// prompt field including only known keys.
+				for promptFieldKey, promptFieldValue := range promptField {
+					if _, ok := promptFieldSchema[promptFieldKey]; ok {
+						knownPromptField[promptFieldKey] = promptFieldValue
+					}
+				}
+
+				knownPromptFields = append(knownPromptFields, knownPromptField)
+			}
+
+			// The Terraform block is called "prompt_field", so that's what Terraform expects. The Sym
+			// API returns "prompt_fields", so change the key to "prompt_field" before giving it to Terraform.
+			knownParams["prompt_field"] = knownPromptFields
+		}
+
+		// Include this particular param key/value pair only if the key is present in the known params Terraform schema.
+		if _, ok := paramsSchema[paramKey]; ok {
+			knownParams[paramKey] = paramValue
+		}
 	}
 
 	// Because sym_flow.params is a block, Terraform expects a list, even though there is only ever one item.
-	diags = utils.DiagsCheckError(diags, data.Set("params", []map[string]interface{}{flow.Params}), "Unable to read Flow params")
+	diags = utils.DiagsCheckError(diags, data.Set("params", []map[string]interface{}{knownParams}), "Unable to read Flow params")
 
 	return diags
 }
