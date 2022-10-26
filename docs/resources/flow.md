@@ -89,23 +89,22 @@ resource "sym_flow" "this" {
 
   environment_id = sym_environment.this.id
 
-  params = {
+  params {
     strategy_id = sym_strategy.sso_main.id
 
-    # This is called `fields` in the API
-    prompt_fields_json = jsonencode([
-      {
-        name     = "reason"
-        type     = "string"
-        required = true
-        label    = "Reason"
-      },
-      {
-        name           = "urgency"
-        type           = "string"
-        required       = true
-        allowed_values = ["Low", "Medium", "High"]
-      }])
+    prompt_field {
+      name     = "reason"
+      type     = "string"
+      required = true
+      label    = "Reason"
+    }
+
+    prompt_field {
+      name           = "urgency"
+      type           = "string"
+      required       = true
+      allowed_values = ["Low", "Medium", "High"]
+    }
   }
 }
 
@@ -128,17 +127,45 @@ def get_approvers(request):
 - `environment_id` (String) The ID of the Environment this Flow is associated with.
 - `implementation` (String) Relative path of the implementation file written in python.
 - `name` (String) A unique identifier for the Flow.
-- `params` (Map of String) A set of parameters which configure the Flow. See the [Sym Documentation](https://docs.symops.com/docs/flow-parameters).
 - `template` (String) The SRN of the template this flow uses. E.g. 'sym:template:approval:1.0.0'
 
 ### Optional
 
 - `label` (String) An optional label for the Flow.
+- `params` (Block List, Max: 1) A set of parameters which configure the Flow. (see [below for nested schema](#nestedblock--params))
 - `vars` (Map of String) A map of variables and their values to pass to `impl.py`. Useful for making IDs generated dynamically by Terraform available to your `impl.py`.
 
 ### Read-Only
 
 - `id` (String) The ID of this resource.
+
+<a id="nestedblock--params"></a>
+### Nested Schema for `params`
+
+Optional:
+
+- `additional_header_text` (String)
+- `allow_guest_interaction` (Boolean)
+- `allow_revoke` (Boolean)
+- `allowed_sources` (List of String)
+- `prompt_field` (Block List) (see [below for nested schema](#nestedblock--params--prompt_field))
+- `schedule_deescalation` (Boolean)
+- `strategy_id` (String)
+
+<a id="nestedblock--params--prompt_field"></a>
+### Nested Schema for `params.prompt_field`
+
+Required:
+
+- `name` (String)
+- `type` (String)
+
+Optional:
+
+- `allowed_values` (List of String)
+- `default` (String)
+- `label` (String)
+- `required` (Boolean)
 
 ## Import
 
