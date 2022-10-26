@@ -41,44 +41,47 @@ func Flow() *schema.Resource {
 	}
 }
 
-// TODO(SYM-4246): Add descriptions to each field.
 func promptFieldResource() *schema.Resource {
 	return &schema.Resource{
 		Schema: map[string]*schema.Schema{
-			"name":     {Required: true, Type: schema.TypeString},
-			"type":     {Required: true, Type: schema.TypeString},
-			"required": {Optional: true, Default: true, Type: schema.TypeBool},
-			"label":    {Optional: true, Type: schema.TypeString},
-			"default":  {Optional: true, Type: schema.TypeString},
+			"name":     {Required: true, Type: schema.TypeString, Description: "A unique identifier for this field."},
+			"type":     {Required: true, Type: schema.TypeString, Description: `The type of data stored in this field. One of: "string"", "int", "bool", "duration".`},
+			"required": {Optional: true, Default: true, Type: schema.TypeBool, Description: "Whether this field is a required input."},
+			"label":    {Optional: true, Type: schema.TypeString, Description: "A non-unique name for the field, to be displayed in Slack."},
+			"default":  {Optional: true, Type: schema.TypeString, Description: "A fallback value for optional fields if no value is provided."},
 			"allowed_values": {
-				Type:     schema.TypeList,
-				Elem:     &schema.Schema{Type: schema.TypeString},
-				Optional: true,
+				Type:        schema.TypeList,
+				Elem:        &schema.Schema{Type: schema.TypeString},
+				Optional:    true,
+				Description: "Defines the full list of valid choices for this field's value. If defined, this field will be displayed as a dropdown in Slack.",
 			},
 		},
+		Description: "Custom input field used to collect information from a user who is requesting access to a resource.",
 	}
 }
 
-// TODO(SYM-4246): Add descriptions to each field.
 func flowParamsSchema() *schema.Resource {
 	return &schema.Resource{
 		Schema: map[string]*schema.Schema{
-			"strategy_id":  {Type: schema.TypeString, Optional: true},
-			"allow_revoke": {Type: schema.TypeBool, Optional: true, Default: true},
+			"strategy_id":  {Type: schema.TypeString, Optional: true, Description: "The ID of a sym_strategy with sym_targets that this sym_flow will be managing access to. If not defined, this sym_flow will be approval-only."},
+			"allow_revoke": {Type: schema.TypeBool, Optional: true, Default: true, Description: `Whether access granted by a sym_strategy may be revoked before the requested duration is over. If true, shows a "Revoke" button in Slack that allows both the requester and approver to instantly revoke access. At least one of "schedule_deescalation" and "allow_revoke" must be true.`},
 			"allowed_sources": {
-				Type:     schema.TypeList,
-				Elem:     &schema.Schema{Type: schema.TypeString},
-				Optional: true,
+				Type:        schema.TypeList,
+				Elem:        &schema.Schema{Type: schema.TypeString},
+				Optional:    true,
+				Description: `A list of sources from which this sym_flow may be invoked. Valid sources are: "slack", "api".`,
 			},
-			"schedule_deescalation": {Type: schema.TypeBool, Optional: true, Default: true},
+			"schedule_deescalation": {Type: schema.TypeBool, Optional: true, Default: true, Description: `Whether automatic access de-escalation will occur after a requested duration. If false, de-escalation will only occur when manually revoked. At least one of "schedule_deescalation" and "allow_revoke" must be true.`},
 			"prompt_field": {
-				Type:     schema.TypeList,
-				Optional: true,
-				Elem:     promptFieldResource(),
+				Type:        schema.TypeList,
+				Optional:    true,
+				Elem:        promptFieldResource(),
+				Description: "Custom input field used to collect information from a user who is requesting access to a resource.",
 			},
-			"additional_header_text":  {Type: schema.TypeString, Optional: true},
-			"allow_guest_interaction": {Type: schema.TypeBool, Optional: true, Default: false},
+			"additional_header_text":  {Type: schema.TypeString, Optional: true, Description: "Additional text to append to the header text displayed at the top of the Slack request modal, after the default header text. Supports Slack markdown."},
+			"allow_guest_interaction": {Type: schema.TypeBool, Optional: true, Default: false, Description: `Whether to allow guest users to interact with this sym_flow. If true, guest users can click the "Approve", "Deny", and "Revoke" buttons in Slack. If false, guest users' clicks will not register in the Slack request.'`},
 		},
+		Description: "A set of parameters which configure the Flow.",
 	}
 }
 
