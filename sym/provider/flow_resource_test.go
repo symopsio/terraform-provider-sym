@@ -1,6 +1,7 @@
 package provider
 
 import (
+	"context"
 	"reflect"
 	"strings"
 	"testing"
@@ -370,7 +371,10 @@ func testFlowResourceStateUpgradeDataV1() map[string]interface{} {
 
 func TestFlowResourceStateUpgradeV0(t *testing.T) {
 	expected := testFlowResourceStateUpgradeDataV1()
-	actual, err := flowResourceStateUpgradeV0(nil, testFlowResourceStateUpgradeDataV0(), nil)
+
+	// "Code should use context.TODO when it's unclear which Context to use or it is not yet available"
+	// https://pkg.go.dev/context#TODO
+	actual, err := flowResourceStateUpgradeV0(context.TODO(), testFlowResourceStateUpgradeDataV0(), nil)
 	if err != nil {
 		t.Fatalf("error migrating state: %s", err)
 	}
