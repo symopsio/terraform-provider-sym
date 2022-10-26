@@ -1,6 +1,8 @@
 package provider
 
 import (
+	"context"
+	"reflect"
 	"strings"
 	"testing"
 
@@ -308,4 +310,76 @@ func updateFlowNoStrategyConfig(data TestData) string {
 
 func createFlowConfigWithOnlyAPISource(data TestData) string {
 	return flowConfig(data, "internal/testdata/after_impl.py", true, "sym_strategy.sso_main.id", true, `["api"]`, "", false)
+}
+
+//// Test the state upgrade from provider < 2.0.0 to 2.0.0 ////////////////////
+
+// testFlowResourceStateUpgradeDataV0 represents an example of pre-2.0 state
+func testFlowResourceStateUpgradeDataV0() map[string]interface{} {
+	return map[string]interface{}{
+		"environment_id": "60c49c8c-f181-41e4-8696-99cc0b0ffc4f",
+		"id":             "34ba01e4-fda8-4c57-bc48-9c4a3483d3fb",
+		"implementation": "from sym.sdk.annotations import reducer\nfrom sym.sdk.integrations import slack\n\n\n@reducer\ndef get_approvers(request):\n    return slack.channel(\"#access-requests\")\n",
+		"label":          "V2 Provider Test",
+		"name":           "flow-v2tftake2",
+		"params": map[string]interface{}{
+			"allow_guest_interaction": "true",
+			"allow_revoke":            "true",
+			"allowed_sources_json":    "[\"api\",\"slack\"]",
+			"prompt_fields_json":      "[{\"name\":\"reason\",\"type\":\"string\",\"required\":true,\"label\":\"Reason\"},{\"name\":\"urgency\",\"type\":\"string\",\"required\":true,\"allowed_values\":[\"Low\",\"Medium\",\"High\"]}]",
+			"schedule_deescalation":   "true",
+		},
+		"template": "sym:template:approval:1.0.0",
+		"vars":     map[string]string{},
+	}
+}
+
+// testFlowResourceStateUpgradeDataV1 represents an example of post-2.0 state
+func testFlowResourceStateUpgradeDataV1() map[string]interface{} {
+	return map[string]interface{}{
+		"environment_id": "60c49c8c-f181-41e4-8696-99cc0b0ffc4f",
+		"id":             "34ba01e4-fda8-4c57-bc48-9c4a3483d3fb",
+		"implementation": "from sym.sdk.annotations import reducer\nfrom sym.sdk.integrations import slack\n\n\n@reducer\ndef get_approvers(request):\n    return slack.channel(\"#access-requests\")\n",
+		"label":          "V2 Provider Test",
+		"name":           "flow-v2tftake2",
+		"params": []interface{}{
+			map[string]interface{}{
+				"allow_guest_interaction": "true",
+				"allow_revoke":            "true",
+				"allowed_sources":         []string{"api", "slack"},
+				"prompt_field": []interface{}{
+					map[string]interface{}{
+						"name":     "reason",
+						"type":     "string",
+						"required": true,
+						"label":    "Reason",
+					},
+					map[string]interface{}{
+						"name":           "urgency",
+						"type":           "string",
+						"required":       true,
+						"allowed_values": []string{"Low", "Medium", "High"},
+					},
+				},
+				"schedule_deescalation": "true",
+			},
+		},
+		"template": "sym:template:approval:1.0.0",
+		"vars":     map[string]string{},
+	}
+}
+
+func TestFlowResourceStateUpgradeV0(t *testing.T) {
+	expected := testFlowResourceStateUpgradeDataV1()
+
+	// "Code should use context.TODO when it's unclear which Context to use or it is not yet available"
+	// https://pkg.go.dev/context#TODO
+	actual, err := flowResourceStateUpgradeV0(context.TODO(), testFlowResourceStateUpgradeDataV0(), nil)
+	if err != nil {
+		t.Fatalf("error migrating state: %s", err)
+	}
+
+	if !reflect.DeepEqual(expected, actual) {
+		t.Fatalf("\n\nexpected:\n\n%#v\n\ngot:\n\n%#v\n\n", expected, actual)
+	}
 }

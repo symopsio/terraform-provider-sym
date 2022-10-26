@@ -6,6 +6,7 @@ package provider
 import (
 	"context"
 	"encoding/base64"
+	"encoding/json"
 	"log"
 	"os"
 
@@ -28,6 +29,14 @@ func Flow() *schema.Resource {
 		DeleteContext: deleteFlow,
 		Importer: &schema.ResourceImporter{
 			StateContext: getSlugImporter("flow"),
+		},
+		SchemaVersion: 1,
+		StateUpgraders: []schema.StateUpgrader{
+			{
+				Type:    flowResourceV0().CoreConfigSchema().ImpliedType(),
+				Upgrade: flowResourceStateUpgradeV0,
+				Version: 0,
+			},
 		},
 	}
 }
@@ -99,6 +108,92 @@ func flowSchema() map[string]*schema.Schema {
 			Elem:        flowParamsSchema(),
 		},
 	}
+}
+
+// flowResourceV0 returns the Terraform schema for sym_flow for the provider version < 2.0.0
+// and is used to programmatically migrate users' state between the old version and the new.
+func flowResourceV0() *schema.Resource {
+	return &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			"name":     utils.RequiredCaseInsensitiveString("A unique identifier for the Flow."),
+			"label":    utils.Optional(schema.TypeString, "An optional label for the Flow."),
+			"template": utils.Required(schema.TypeString, "The SRN of the template this flow uses. E.g. 'sym:template:approval:1.0.0'"),
+			"implementation": {
+				Type:             schema.TypeString,
+				Required:         true,
+				DiffSuppressFunc: utils.SuppressEquivalentFileContentDiffs,
+				StateFunc: func(val interface{}) string {
+					return utils.ParseImpl(val.(string))
+				},
+				Description: "Relative path of the implementation file written in python.",
+			},
+			"vars":           utils.SettingsMap("A map of variables and their values to pass to `impl.py`. Useful for making IDs generated dynamically by Terraform available to your `impl.py`. "),
+			"environment_id": utils.Required(schema.TypeString, "The ID of the Environment this Flow is associated with."),
+			"params": {
+				Type:        schema.TypeMap,
+				Required:    true,
+				Description: "A set of parameters which configure the Flow. See the [Sym Documentation](https://docs.symops.com/docs/flow-parameters).",
+			},
+		},
+	}
+}
+
+// flowResourceStateUpgradeV0 will programmatically migrate users' state from Terraform Provider < 2.0.0
+// to the version required by 2.0.0.
+func flowResourceStateUpgradeV0(ctx context.Context, rawState map[string]interface{}, meta interface{}) (map[string]interface{}, error) {
+	params, ok := rawState["params"].(map[string]interface{})
+	if !ok {
+		// Nothing to upgrade if there is no params map in state.
+		return rawState, nil
+	}
+
+	// Turn `allowed_sources_json` to an actual list at `allowed_sources`
+	if allowedSourcesJSONStr, ok := params["allowed_sources_json"].(string); ok {
+		// Parse the JSON string representing a list of strings and set that as the state
+		var allowedSources []string
+
+		// Ignore any json unmarshalling error and let go/tf raise it somewhere
+		_ = json.Unmarshal([]byte(allowedSourcesJSONStr), &allowedSources)
+		params["allowed_sources"] = allowedSources
+
+		// Delete the original JSON key
+		delete(params, "allowed_sources_json")
+	}
+
+	// Turn `prompt_fields_json` into a list at `prompt_field` that contains real maps.
+	if promptFieldsJSONStr, ok := params["prompt_fields_json"].(string); ok {
+		var promptFields []interface{}
+		_ = json.Unmarshal([]byte(promptFieldsJSONStr), &promptFields)
+
+		// Cast `allowed_values` within each field to []string instead of []interface{}
+		for i := range promptFields {
+			promptField := promptFields[i].(map[string]interface{})
+
+			// All values must be cast to string individually, so build a new list
+			// by iterating over the old one and casting each value to a string.
+			if allowedValuesOriginal, ok := promptField["allowed_values"]; ok {
+				var stringAllowedValues []string
+
+				if allowedValues, ok := allowedValuesOriginal.([]interface{}); ok {
+					for j := range allowedValues {
+						stringAllowedValues = append(stringAllowedValues, allowedValues[j].(string))
+					}
+				}
+
+				promptField["allowed_values"] = stringAllowedValues
+			}
+		}
+
+		params["prompt_field"] = promptFields
+
+		// Delete the original JSON key
+		delete(params, "prompt_fields_json")
+	}
+
+	// Params used to be a map, and is now a list with one map element in it.
+	rawState["params"] = []interface{}{params}
+
+	return rawState, nil
 }
 
 // CRUD operations //////////////////////////////
