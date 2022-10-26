@@ -10,7 +10,7 @@ At this point, the new release should be available in the [Public Terraform Regi
 
 ## Releasing
 
-**Before releasing a new major version,** create a branch called `release/vX` where `X` is the current major version. This allows us to continue to release fixes for old versions of the provider.
+**Before releasing a new major version / merging breaking changes,** create a branch called `release/vX` where `X` is the current major version. This allows us to continue to release fixes for old versions of the provider. For example, if the current version of the provider is `v2.0.0` and you need to merge a breaking change, create `release/v2` off `main` before merging the breaking change.
 
 To release a new version of the Sym provider, use GitHub's built in "Releases" functionality. Go there, and click "Draft a new release". Set the **tag** and **title** to a [semver](https://semver.org/) prefixed with "v" (e.g. `v1.0.0`).
 
