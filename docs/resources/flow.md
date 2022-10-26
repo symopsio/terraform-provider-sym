@@ -144,28 +144,28 @@ def get_approvers(request):
 
 Optional:
 
-- `additional_header_text` (String)
-- `allow_guest_interaction` (Boolean)
-- `allow_revoke` (Boolean)
-- `allowed_sources` (List of String)
-- `prompt_field` (Block List) (see [below for nested schema](#nestedblock--params--prompt_field))
-- `schedule_deescalation` (Boolean)
-- `strategy_id` (String)
+- `additional_header_text` (String) Additional text to append to the header text displayed at the top of the Slack request modal, after the default header text. Supports Slack markdown.
+- `allow_guest_interaction` (Boolean) Whether to allow guest users to interact with this sym_flow. If true, guest users can click the "Approve", "Deny", and "Revoke" buttons in Slack. If false, guest users' interactions with this sym_flow's requests will be rejected.'
+- `allow_revoke` (Boolean) Whether access granted by a sym_strategy may be revoked before the requested duration is over. If true, shows a "Revoke" button in Slack that allows both the requester and approver to instantly revoke access. At least one of "schedule_deescalation" or "allow_revoke" must be true.
+- `allowed_sources` (List of String) A list of sources from which this sym_flow may be invoked. Valid sources are: "slack", "api".
+- `prompt_field` (Block List) Custom input field used to collect information from a user who is requesting access to a resource. (see [below for nested schema](#nestedblock--params--prompt_field))
+- `schedule_deescalation` (Boolean) Whether automatic access de-escalation will occur after a requested duration. If false, de-escalation will only occur when manually revoked. At least one of "schedule_deescalation" or "allow_revoke" must be true.
+- `strategy_id` (String) The ID of a sym_strategy with sym_targets that this sym_flow will be managing access to. If not defined, this sym_flow will be approval-only.
 
 <a id="nestedblock--params--prompt_field"></a>
 ### Nested Schema for `params.prompt_field`
 
 Required:
 
-- `name` (String)
-- `type` (String)
+- `name` (String) A unique identifier for this field.
+- `type` (String) The type of data stored in this field. One of: "string", "int", "bool", "duration".
 
 Optional:
 
-- `allowed_values` (List of String)
-- `default` (String)
-- `label` (String)
-- `required` (Boolean)
+- `allowed_values` (List of String) Defines the full list of valid choices for this field's value. If defined, this field will be displayed as a dropdown in Slack.
+- `default` (String) A fallback value for optional fields if no value is provided.
+- `label` (String) A name for the field, to be displayed in Slack.
+- `required` (Boolean) Whether this field is a required input.
 
 ## Import
 
