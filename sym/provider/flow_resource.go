@@ -88,14 +88,14 @@ func flowSchema() map[string]*schema.Schema {
 			},
 			Description: "Relative path of the implementation file written in python.",
 		},
-		"vars":           utils.SettingsMap("A map of variables and their values to pass to `impl.py`. Useful for making IDs generated dynamically by Terraform available to your `impl.py`. "),
+		"vars":           utils.SettingsMap("A map of variables and their values to pass to `impl.py`. Useful for making IDs generated dynamically by Terraform available to your `impl.py`."),
 		"environment_id": utils.Required(schema.TypeString, "The ID of the Environment this Flow is associated with."),
 		"params": {
 			Description: "A set of parameters which configure the Flow.",
 			Type:        schema.TypeList,
 			Optional:    true,
 			Computed:    true,
-			MaxItems:    1,
+			MaxItems:    1,  // Nested blocks are always parsed by Terraform as lists, but we only ever want 1 params block.
 			Elem:        flowParamsSchema(),
 		},
 	}
@@ -252,6 +252,8 @@ func deleteFlow(_ context.Context, data *schema.ResourceData, meta interface{}) 
 //
 //For example, it will remove any empty "strategy_id", since the API will reject it.
 func getAPISafeParams(paramsList []interface{}) map[string]interface{} {
+	// paramsList is only ever 0 or 1 items because that is the max we set in Terraform.
+	// length of 1 means that params were defined in Terraform.
 	if len(paramsList) == 1 {
 		// originalParamsMap will always contain the representation of Flow.params that
 		// Terraform accepts. This must be left alone for state to be saved properly.

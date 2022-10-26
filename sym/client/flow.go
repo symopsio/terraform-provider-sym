@@ -7,25 +7,6 @@ import (
 
 // Types ////////////////////////////////////////
 
-type PromptField struct {
-	Name          string        `json:"name"`
-	Type          string        `json:"type"`
-	Required      bool          `json:"required"`
-	Label         string        `json:"label,omitempty"`
-	Default       string        `json:"default,omitempty"`
-	AllowedValues []interface{} `json:"allowed_values,omitempty"`
-}
-
-type FlowParams struct {
-	StrategyId            string        `json:"strategy_id,omitempty"`
-	PromptFields          []PromptField `json:"prompt_fields"`
-	AllowRevoke           bool          `json:"allow_revoke"`
-	ScheduleDeescalation  bool          `json:"schedule_deescalation"`
-	AllowGuestInteraction bool          `json:"allow_guest_interaction"`
-	AdditionalHeaderText  string        `json:"additional_header_text,omitempty"`
-	AllowedSources        []string      `json:"allowed_sources"`
-}
-
 type Flow struct {
 	Id             string                 `json:"id,omitempty"`
 	Name           string                 `json:"slug"`
@@ -38,18 +19,6 @@ type Flow struct {
 }
 
 // Helper Functions for Types ///////////////////
-
-func (p PromptField) String() string {
-	return fmt.Sprintf(
-		"{name=%s, type=%s, label=%s, default=%s, required=%t, allowed_values=%v}",
-		p.Name,
-		p.Type,
-		p.Label,
-		p.Default,
-		p.Required,
-		p.AllowedValues,
-	)
-}
 
 func (s Flow) String() string {
 	return fmt.Sprintf(
