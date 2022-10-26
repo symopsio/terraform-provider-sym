@@ -143,7 +143,7 @@ func flowResourceV0() *schema.Resource {
 func flowResourceStateUpgradeV0(ctx context.Context, rawState map[string]interface{}, meta interface{}) (map[string]interface{}, error) {
 	params, ok := rawState["params"].(map[string]interface{})
 	if !ok {
-		// Fail silently if there is no params map in state.
+		// Nothing to upgrade if there is no params map in state.
 		return rawState, nil
 	}
 
@@ -151,6 +151,8 @@ func flowResourceStateUpgradeV0(ctx context.Context, rawState map[string]interfa
 	if allowedSourcesJSONStr, ok := params["allowed_sources_json"].(string); ok {
 		// Parse the JSON string representing a list of strings and set that as the state
 		var allowedSources []string
+
+		// Ignore any json unmarshalling error and let go/tf raise it somewhere
 		_ = json.Unmarshal([]byte(allowedSourcesJSONStr), &allowedSources)
 		params["allowed_sources"] = allowedSources
 
