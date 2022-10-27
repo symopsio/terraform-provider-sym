@@ -165,6 +165,7 @@ Optional:
 - `allowed_values` (List of String) Defines the full list of valid choices for this field's value. If defined, this field will be displayed as a dropdown in Slack.
 - `default` (String) A fallback value for optional fields if no value is provided.
 - `label` (String) A name for the field, to be displayed in Slack.
+- `prefetch` (Boolean) Whether a prefetch reducer will be used to populate the options for this field.
 - `required` (Boolean) Whether this field is a required input.
 
 ## Import
