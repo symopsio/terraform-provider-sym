@@ -8,18 +8,30 @@ The sym terraform provider is released with the following steps:
 
 At this point, the new release should be available in the [Public Terraform Registry](https://registry.terraform.io/providers/symopsio/sym/latest)
 
+## Releasing
+
+**Before releasing a new major version / merging breaking changes,** create a branch called `release/vX` where `X` is the current major version. This allows us to continue to release fixes for old versions of the provider. For example, if the current version of the provider is `v2.0.0` and you need to merge a breaking change, create `release/v2` off `main` before merging the breaking change.
+
+To release a new version of the Sym provider, use GitHub's built in "Releases" functionality. Go there, and click "Draft a new release". Set the **tag** and **title** to a [semver](https://semver.org/) prefixed with "v" (e.g. `v1.0.0`). (Note: do _not_ add suffixes like `-alpha` or `-beta`. The Terraform registry does not support them.)
+
+Most of the time, the "target" should be the `main` branch. Default to that. The only time you should **not** select `main` as the target is if you are releasing an update to a **previous major version of the provider**.
+
+For example, if the current major version is `v3.2.0`, any further releases (`v4.0.0`, `v3.3.0`, or `v3.2.1`) should be done off `main`. However, any releases to `v2.x.x` or `v1.x.x` should select `release/v2` or `release/v1` as their target, respectively.
+
+Click "Generate release notes" to automatically include all commits since the last release in the description. Be sure to explicitly document any breaking changes separately.
+
 ## Development
 
 1. Add the asdf plugins: `asdf plugin add golang richgo terraform`
 2. Run `asdf install` to install necessary tools from .tool-versions
 3. Run `make local` to create the binary locally
 
-### Using the Example
+### Using the Test Sample
 
 Once you're set up with the binary, you can initialize the workspace and apply the sample configuration:
 
 ```shell
-cd example
+cd test-sample
 terraform init && terraform apply
 ```
 
@@ -54,7 +66,6 @@ Tips:
 1. On every PR
 2. Before every provider release
 3. Nightly at midnight (will notify #eng-alerts-staging on failure)
-4. On every PR in the [Doppio repo](https://github.com/symopsio/doppio)
 
 ## CI Setup
 
@@ -81,16 +92,3 @@ The GPG private key is stored in [1password](https://start.1password.com/open/i?
 The following environment variables must be set in Circle: `GPG_KEY` (private key), and `GPG_FINGERPRINT` (see 1password).
 
 The 1password note also includes the ascii armor (necessary for the registry), key id (same), private key and fingerprint.
-
-### AWS Credentials
-
-CI needs to be configured with AWS credentials that have permission to push artifacts to s3 to the `terraform-provider-sym`
-bucket in the `releases` account.
-
-An access key with these permissions can be found [here](https://start.1password.com/open/i?a=2TO6ZEW3SJD4LNVVDNSFUVV4EM&v=mmb6xlaf5eafg4r5btb4cqdrbi&i=mfjbvwhc6ndzxdquedk525v5oy&h=team-sym.1password.com).
-
-The following environment variables must be set in Circle: `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_DEFAULT_REGION`.
-
-### S3 Conventions
-
-The `goreleaser` artifact directory is synced to the following location in s3: `s3://terraform-provider-sym/$CIRCLE_TAG/`
