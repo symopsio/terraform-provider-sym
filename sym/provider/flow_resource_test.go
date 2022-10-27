@@ -364,7 +364,7 @@ func testFlowResourceStateUpgradeDataV1() map[string]interface{} {
 				"schedule_deescalation": "true",
 			},
 		},
-		"vars":     map[string]string{},
+		"vars": map[string]string{},
 	}
 }
 
