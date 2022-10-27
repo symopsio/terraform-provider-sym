@@ -21,7 +21,6 @@ func TestAccSymFlow_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("sym_flow.this", "name", data.ResourceName),
 					resource.TestCheckResourceAttr("sym_flow.this", "label", "SSO Access2"),
-					resource.TestCheckResourceAttr("sym_flow.this", "template", "sym:template:approval:1.0.0"),
 					resource.TestCheckResourceAttrSet("sym_flow.this", "implementation"),
 					resource.TestCheckResourceAttrPair("sym_flow.this", "environment_id", "sym_environment.this", "id"),
 					resource.TestCheckResourceAttrPair("sym_flow.this", "params.0.strategy_id", "sym_strategy.sso_main", "id"),
@@ -50,7 +49,6 @@ func TestAccSymFlow_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("sym_flow.this", "name", data.ResourceName),
 					resource.TestCheckResourceAttr("sym_flow.this", "label", "SSO Access2"),
-					resource.TestCheckResourceAttr("sym_flow.this", "template", "sym:template:approval:1.0.0"),
 					resource.TestCheckResourceAttrSet("sym_flow.this", "implementation"),
 					resource.TestCheckResourceAttrPair("sym_flow.this", "environment_id", "sym_environment.this", "id"),
 					resource.TestCheckResourceAttrPair("sym_flow.this", "params.0.strategy_id", "sym_strategy.sso_main", "id"),
@@ -76,7 +74,6 @@ func TestAccSymFlow_nameCaseInsensitive(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("sym_flow.this", "name", data.ResourceName),
 					resource.TestCheckResourceAttr("sym_flow.this", "label", "SSO Access2"),
-					resource.TestCheckResourceAttr("sym_flow.this", "template", "sym:template:approval:1.0.0"),
 					resource.TestCheckResourceAttrSet("sym_flow.this", "implementation"),
 					resource.TestCheckResourceAttrPair("sym_flow.this", "environment_id", "sym_environment.this", "id"),
 					resource.TestCheckResourceAttrPair("sym_flow.this", "params.0.strategy_id", "sym_strategy.sso_main", "id"),
@@ -89,7 +86,6 @@ func TestAccSymFlow_nameCaseInsensitive(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("sym_flow.this", "name", strings.ToLower(data.ResourceName)),
 					resource.TestCheckResourceAttr("sym_flow.this", "label", "SSO Access2"),
-					resource.TestCheckResourceAttr("sym_flow.this", "template", "sym:template:approval:1.0.0"),
 					resource.TestCheckResourceAttrSet("sym_flow.this", "implementation"),
 					resource.TestCheckResourceAttrPair("sym_flow.this", "environment_id", "sym_environment.this", "id"),
 					resource.TestCheckResourceAttrPair("sym_flow.this", "params.0.strategy_id", "sym_strategy.sso_main", "id"),
@@ -113,7 +109,6 @@ func TestAccSymFlow_noStrategy(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("sym_flow.this", "name", data.ResourceName),
 					resource.TestCheckResourceAttr("sym_flow.this", "label", "SSO Access2"),
-					resource.TestCheckResourceAttr("sym_flow.this", "template", "sym:template:approval:1.0.0"),
 					resource.TestCheckResourceAttrSet("sym_flow.this", "implementation"),
 					resource.TestCheckResourceAttrPair("sym_flow.this", "environment_id", "sym_environment.this", "id"),
 					resource.TestCheckResourceAttr("sym_flow.this", "params.0.strategy_id", ""),
@@ -128,7 +123,6 @@ func TestAccSymFlow_noStrategy(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("sym_flow.this", "name", data.ResourceName),
 					resource.TestCheckResourceAttr("sym_flow.this", "label", "SSO Access2"),
-					resource.TestCheckResourceAttr("sym_flow.this", "template", "sym:template:approval:1.0.0"),
 					resource.TestCheckResourceAttrSet("sym_flow.this", "implementation"),
 					resource.TestCheckResourceAttrPair("sym_flow.this", "environment_id", "sym_environment.this", "id"),
 					resource.TestCheckResourceAttr("sym_flow.this", "params.0.strategy_id", ""),
@@ -153,7 +147,6 @@ func TestAccSymFlow_allowedSourcesOnlyAPI(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("sym_flow.this", "name", data.ResourceName),
 					resource.TestCheckResourceAttr("sym_flow.this", "label", "SSO Access2"),
-					resource.TestCheckResourceAttr("sym_flow.this", "template", "sym:template:approval:1.0.0"),
 					resource.TestCheckResourceAttrSet("sym_flow.this", "implementation"),
 					resource.TestCheckResourceAttrPair("sym_flow.this", "environment_id", "sym_environment.this", "id"),
 					resource.TestCheckResourceAttrPair("sym_flow.this", "params.0.strategy_id", "sym_strategy.sso_main", "id"),
@@ -167,7 +160,6 @@ func TestAccSymFlow_allowedSourcesOnlyAPI(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("sym_flow.this", "name", data.ResourceName),
 					resource.TestCheckResourceAttr("sym_flow.this", "label", "SSO Access2"),
-					resource.TestCheckResourceAttr("sym_flow.this", "template", "sym:template:approval:1.0.0"),
 					resource.TestCheckResourceAttrSet("sym_flow.this", "implementation"),
 					resource.TestCheckResourceAttrPair("sym_flow.this", "environment_id", "sym_environment.this", "id"),
 					resource.TestCheckResourceAttrPair("sym_flow.this", "params.0.strategy_id", "sym_strategy.sso_main", "id"),
@@ -258,7 +250,6 @@ func flowConfig(data TestData, implPath string, allowRevoke bool, strategyId str
 			terraformName:  "this",
 			name:           data.ResourceName,
 			label:          "SSO Access2",
-			template:       "sym:template:approval:1.0.0",
 			implementation: implPath,
 			environmentId:  "sym_environment.this.id",
 			params: params{

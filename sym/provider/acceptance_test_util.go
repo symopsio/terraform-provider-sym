@@ -353,7 +353,6 @@ type flowResource struct {
 	terraformName  string
 	name           string
 	label          string
-	template       string
 	implementation string
 	environmentId  string
 	params         params
@@ -407,13 +406,12 @@ func (r flowResource) String() string {
 resource "sym_flow" %[1]q {
 	name = %[2]q
 	label = %[3]q
-	template = %[4]q
-	implementation = %[5]q
-	environment_id = %[6]s
+	implementation = %[4]q
+	environment_id = %[5]s
 
-	%[7]s
+	%[6]s
 }
-`, r.terraformName, r.name, r.label, r.template, r.implementation, r.environmentId, p.String())
+`, r.terraformName, r.name, r.label, r.implementation, r.environmentId, p.String())
 }
 
 type params struct {
