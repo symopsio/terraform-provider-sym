@@ -106,7 +106,6 @@ func flowSchema() map[string]*schema.Schema {
 			Description: "A set of parameters which configure the Flow.",
 			Type:        schema.TypeList,
 			Optional:    true,
-			Computed:    true,
 			MaxItems:    1, // Nested blocks are always parsed by Terraform as lists, but we only ever want 1 params block.
 			Elem:        flowParamsResource(),
 		},
@@ -211,7 +210,7 @@ func createFlow(_ context.Context, data *schema.ResourceData, meta interface{}) 
 		Template:      data.Get("template").(string),
 		EnvironmentId: data.Get("environment_id").(string),
 		Vars:          getSettingsMap(data, "vars"),
-		Params:        getAPISafeParams(data.Get("params").([]interface{})),
+		Params:        getAPISafeParams(data.Get("params").([]interface{}), data),
 	}
 
 	implementation := data.Get("implementation").(string)
@@ -331,7 +330,7 @@ func updateFlow(_ context.Context, data *schema.ResourceData, meta interface{}) 
 		Template:      data.Get("template").(string),
 		EnvironmentId: data.Get("environment_id").(string),
 		Vars:          getSettingsMap(data, "vars"),
-		Params:        getAPISafeParams(data.Get("params").([]interface{})),
+		Params:        getAPISafeParams(data.Get("params").([]interface{}), data),
 	}
 
 	implementation := data.Get("implementation").(string)
@@ -375,12 +374,19 @@ func deleteFlow(_ context.Context, data *schema.ResourceData, meta interface{}) 
 	return diags
 }
 
-// getAPISafeParams takes in the paramsList that Terraform constructs from a user's HCL configuration, and
-// returns a single map representing the sym_flow's params. It will also make any necessary transformations
-// to ensure the params map is compatible with the Sym API.
+// getAPISafeParams takes in the paramsList that Terraform constructs from a user's HCL configuration,
+// as well as the ResourceData provided by Terraform for context about the configuration, and returns
+// a single map representing the sym_flow's params. It will also make any necessary transformations to
+// ensure the params map is compatible with the Sym API.
 //
-//For example, it will remove any empty "strategy_id", since the API will reject it.
-func getAPISafeParams(paramsList []interface{}) map[string]interface{} {
+// For example, it will remove any empty "strategy_id", since the API will reject it.
+func getAPISafeParams(paramsList []interface{}, data *schema.ResourceData) map[string]interface{} {
+	// rawConfig gives us the actual values that were configured in Terraform.
+	// Since data.Get will give us the config with any defaults filled in, the rawConfig is
+	// the only way we can tell the difference between something like allowed_sources being
+	// an empty list or not configured at all.
+	rawConfig := data.GetRawConfig().AsValueMap()
+
 	// paramsList is only ever 0 or 1 items because that is the max we set in Terraform.
 	// length of 1 means that params were defined in Terraform.
 	if len(paramsList) == 1 {
@@ -392,6 +398,19 @@ func getAPISafeParams(paramsList []interface{}) map[string]interface{} {
 		// accepts. This will be modified to ensure the API receives the data it expects.
 		paramsMapCopy := map[string]interface{}{}
 		for k, v := range originalParamsMap {
+			// For allowed_sources, an explicit empty list means that the sym_flow is not invokable
+			// by any method, Slack or API. However, a nil value for allowed_sources means that we
+			// should let the Sym platform decide the default. So we need to check whether it was
+			// present in the raw Terraform config, and if it was not, DO NOT send it in the API request.
+			if k == "allowed_sources" {
+				// Based on the earlier len check, we already know that params exists, so
+				// we can skip a few safety checks and skip right to the types we want.
+				paramsMap := rawConfig["params"].AsValueSlice()[0].AsValueMap()
+				if allowedSources, ok := paramsMap["allowed_sources"]; ok && allowedSources.IsNull() {
+					continue
+				}
+			}
+
 			paramsMapCopy[k] = v
 		}
 
