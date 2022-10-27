@@ -364,7 +364,6 @@ func testFlowResourceStateUpgradeDataV1() map[string]interface{} {
 				"schedule_deescalation": "true",
 			},
 		},
-		"template": "sym:template:approval:1.0.0",
 		"vars":     map[string]string{},
 	}
 }
