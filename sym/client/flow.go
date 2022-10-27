@@ -11,7 +11,6 @@ type Flow struct {
 	Id             string                 `json:"id,omitempty"`
 	Name           string                 `json:"slug"`
 	Label          string                 `json:"label,omitempty"`
-	Template       string                 `json:"template"`
 	Implementation string                 `json:"implementation"`
 	EnvironmentId  string                 `json:"environment_id"`
 	Vars           Settings               `json:"vars"`
@@ -22,11 +21,10 @@ type Flow struct {
 
 func (s Flow) String() string {
 	return fmt.Sprintf(
-		"{id=%s, name=%s, label=%s, template=%s, implementation=%s, params=%v}",
+		"{id=%s, name=%s, label=%s, implementation=%s, params=%v}",
 		s.Id,
 		s.Name,
 		s.Label,
-		s.Template,
 		s.Implementation,
 		s.Params,
 	)

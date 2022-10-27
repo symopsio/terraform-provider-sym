@@ -209,7 +209,6 @@ func createFlow(_ context.Context, data *schema.ResourceData, meta interface{}) 
 	flow := client.Flow{
 		Name:          data.Get("name").(string),
 		Label:         data.Get("label").(string),
-		Template:      data.Get("template").(string),
 		EnvironmentId: data.Get("environment_id").(string),
 		Vars:          getSettingsMap(data, "vars"),
 		Params:        getAPISafeParams(data.Get("params").([]interface{})),
@@ -270,7 +269,6 @@ func readFlow(_ context.Context, data *schema.ResourceData, meta interface{}) di
 
 	diags = utils.DiagsCheckError(diags, data.Set("name", flow.Name), "Unable to read Flow name")
 	diags = utils.DiagsCheckError(diags, data.Set("label", flow.Label), "Unable to read Flow label")
-	diags = utils.DiagsCheckError(diags, data.Set("template", flow.Template), "Unable to read Flow template")
 	diags = utils.DiagsCheckError(diags, data.Set("environment_id", flow.EnvironmentId), "Unable to read Flow environment_id")
 	diags = utils.DiagsCheckError(diags, data.Set("vars", flow.Vars), "Unable to read Flow vars")
 
@@ -329,7 +327,6 @@ func updateFlow(_ context.Context, data *schema.ResourceData, meta interface{}) 
 		Id:            data.Id(),
 		Name:          data.Get("name").(string),
 		Label:         data.Get("label").(string),
-		Template:      data.Get("template").(string),
 		EnvironmentId: data.Get("environment_id").(string),
 		Vars:          getSettingsMap(data, "vars"),
 		Params:        getAPISafeParams(data.Get("params").([]interface{})),
