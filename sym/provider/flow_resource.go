@@ -144,9 +144,7 @@ func flowResourceV0() *schema.Resource {
 // to the version required by 2.0.0.
 func flowResourceStateUpgradeV0(ctx context.Context, rawState map[string]interface{}, meta interface{}) (map[string]interface{}, error) {
 	// Remove `template` from state if present as it is no longer part of sym_flow.
-	if _, ok := rawState["template"]; ok {
-		delete(rawState, "template")
-	}
+	delete(rawState, "template")
 
 	// Only migrate params if they're actually present in state.
 	if params, ok := rawState["params"].(map[string]interface{}); ok {
