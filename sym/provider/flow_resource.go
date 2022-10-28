@@ -7,9 +7,11 @@ import (
 	"context"
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"log"
 	"os"
 
+	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/go-uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -45,7 +47,7 @@ func promptFieldResource() *schema.Resource {
 	return &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"name":     {Required: true, Type: schema.TypeString, Description: "A unique identifier for this field."},
-			"type":     {Required: true, Type: schema.TypeString, Description: `The type of data stored in this field. One of: "string", "int", "bool", "duration".`},
+			"type":     {Required: true, Type: schema.TypeString, Description: `The type of data stored in this field. One of: "string", "int", "bool", "duration".`, ValidateDiagFunc: validatePromptFieldType},
 			"required": {Optional: true, Default: true, Type: schema.TypeBool, Description: "Whether this field is a required input."},
 			"label":    {Optional: true, Type: schema.TypeString, Description: "A name for the field, to be displayed in Slack."},
 			"default":  {Optional: true, Type: schema.TypeString, Description: "A fallback value for optional fields if no value is provided."},
@@ -432,4 +434,17 @@ func getAPISafeParams(paramsList []interface{}, data *schema.ResourceData) map[s
 		// If no params were defined, make sure we still send an empty params blob to the API.
 		return map[string]interface{}{}
 	}
+}
+
+func validatePromptFieldType(typeName interface{}, _ cty.Path) diag.Diagnostics {
+	var results diag.Diagnostics
+
+	if !utils.ContainsString([]string{"string", "int", "bool", "duration"}, typeName.(string)) {
+		results = append(results, utils.DiagFromError(
+			fmt.Errorf(`"%v" is not a valid prompt_field type. Must be one of: "string", "int", "bool", "duration"`, typeName),
+			"Invalid prompt_field.type"),
+		)
+	}
+
+	return results
 }
