@@ -127,7 +127,6 @@ def get_approvers(request):
 - `environment_id` (String) The ID of the Environment this Flow is associated with.
 - `implementation` (String) Relative path of the implementation file written in python.
 - `name` (String) A unique identifier for the Flow.
-- `template` (String) The SRN of the template this flow uses. E.g. 'sym:template:approval:1.0.0'
 
 ### Optional
 
