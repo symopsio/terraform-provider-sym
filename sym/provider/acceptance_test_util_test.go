@@ -447,7 +447,6 @@ func Test_flowResource_String(t *testing.T) {
 				"this",
 				"my-env",
 				"SSO Access2",
-				"sym:template:approval:1.0.0",
 				"internal/testdata/impl.py",
 				"sym_environment.this.id",
 				params{
@@ -480,7 +479,6 @@ func Test_flowResource_String(t *testing.T) {
 resource "sym_flow" "this" {
 	name = "my-env"
 	label = "SSO Access2"
-	template = "sym:template:approval:1.0.0"
 	implementation = "internal/testdata/impl.py"
 	environment_id = sym_environment.this.id
 
@@ -516,7 +514,6 @@ resource "sym_flow" "this" {
 				"this",
 				"my-env",
 				"SSO Access2",
-				"sym:template:approval:1.0.0",
 				"internal/testdata/impl.py",
 				"sym_environment.this.id",
 				params{
@@ -549,7 +546,6 @@ resource "sym_flow" "this" {
 resource "sym_flow" "this" {
 	name = "my-env"
 	label = "SSO Access2"
-	template = "sym:template:approval:1.0.0"
 	implementation = "internal/testdata/impl.py"
 	environment_id = sym_environment.this.id
 

@@ -91,9 +91,8 @@ func flowParamsResource() *schema.Resource {
 // Map the resource's fields to types
 func flowSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-		"name":     utils.RequiredCaseInsensitiveString("A unique identifier for the Flow."),
-		"label":    utils.Optional(schema.TypeString, "An optional label for the Flow."),
-		"template": utils.Required(schema.TypeString, "The SRN of the template this flow uses. E.g. 'sym:template:approval:1.0.0'"),
+		"name":  utils.RequiredCaseInsensitiveString("A unique identifier for the Flow."),
+		"label": utils.Optional(schema.TypeString, "An optional label for the Flow."),
 		"implementation": {
 			Type:             schema.TypeString,
 			Required:         true,
@@ -146,57 +145,57 @@ func flowResourceV0() *schema.Resource {
 // flowResourceStateUpgradeV0 will programmatically migrate users' state from Terraform Provider < 2.0.0
 // to the version required by 2.0.0.
 func flowResourceStateUpgradeV0(ctx context.Context, rawState map[string]interface{}, meta interface{}) (map[string]interface{}, error) {
-	params, ok := rawState["params"].(map[string]interface{})
-	if !ok {
-		// Nothing to upgrade if there is no params map in state.
-		return rawState, nil
-	}
+	// Remove `template` from state if present as it is no longer part of sym_flow.
+	delete(rawState, "template")
 
-	// Turn `allowed_sources_json` to an actual list at `allowed_sources`
-	if allowedSourcesJSONStr, ok := params["allowed_sources_json"].(string); ok {
-		// Parse the JSON string representing a list of strings and set that as the state
-		var allowedSources []string
+	// Only migrate params if they're actually present in state.
+	if params, ok := rawState["params"].(map[string]interface{}); ok {
+		// Turn `allowed_sources_json` to an actual list at `allowed_sources`
+		if allowedSourcesJSONStr, ok := params["allowed_sources_json"].(string); ok {
+			// Parse the JSON string representing a list of strings and set that as the state
+			var allowedSources []string
 
-		// Ignore any json unmarshalling error and let go/tf raise it somewhere
-		_ = json.Unmarshal([]byte(allowedSourcesJSONStr), &allowedSources)
-		params["allowed_sources"] = allowedSources
+			// Ignore any json unmarshalling error and let go/tf raise it somewhere
+			_ = json.Unmarshal([]byte(allowedSourcesJSONStr), &allowedSources)
+			params["allowed_sources"] = allowedSources
 
-		// Delete the original JSON key
-		delete(params, "allowed_sources_json")
-	}
-
-	// Turn `prompt_fields_json` into a list at `prompt_field` that contains real maps.
-	if promptFieldsJSONStr, ok := params["prompt_fields_json"].(string); ok {
-		var promptFields []interface{}
-		_ = json.Unmarshal([]byte(promptFieldsJSONStr), &promptFields)
-
-		// Cast `allowed_values` within each field to []string instead of []interface{}
-		for i := range promptFields {
-			promptField := promptFields[i].(map[string]interface{})
-
-			// All values must be cast to string individually, so build a new list
-			// by iterating over the old one and casting each value to a string.
-			if allowedValuesOriginal, ok := promptField["allowed_values"]; ok {
-				var stringAllowedValues []string
-
-				if allowedValues, ok := allowedValuesOriginal.([]interface{}); ok {
-					for j := range allowedValues {
-						stringAllowedValues = append(stringAllowedValues, allowedValues[j].(string))
-					}
-				}
-
-				promptField["allowed_values"] = stringAllowedValues
-			}
+			// Delete the original JSON key
+			delete(params, "allowed_sources_json")
 		}
 
-		params["prompt_field"] = promptFields
+		// Turn `prompt_fields_json` into a list at `prompt_field` that contains real maps.
+		if promptFieldsJSONStr, ok := params["prompt_fields_json"].(string); ok {
+			var promptFields []interface{}
+			_ = json.Unmarshal([]byte(promptFieldsJSONStr), &promptFields)
 
-		// Delete the original JSON key
-		delete(params, "prompt_fields_json")
+			// Cast `allowed_values` within each field to []string instead of []interface{}
+			for i := range promptFields {
+				promptField := promptFields[i].(map[string]interface{})
+
+				// All values must be cast to string individually, so build a new list
+				// by iterating over the old one and casting each value to a string.
+				if allowedValuesOriginal, ok := promptField["allowed_values"]; ok {
+					var stringAllowedValues []string
+
+					if allowedValues, ok := allowedValuesOriginal.([]interface{}); ok {
+						for j := range allowedValues {
+							stringAllowedValues = append(stringAllowedValues, allowedValues[j].(string))
+						}
+					}
+
+					promptField["allowed_values"] = stringAllowedValues
+				}
+			}
+
+			params["prompt_field"] = promptFields
+
+			// Delete the original JSON key
+			delete(params, "prompt_fields_json")
+		}
+
+		// Params used to be a map, and is now a list with one map element in it.
+		rawState["params"] = []interface{}{params}
 	}
-
-	// Params used to be a map, and is now a list with one map element in it.
-	rawState["params"] = []interface{}{params}
 
 	return rawState, nil
 }
@@ -210,7 +209,6 @@ func createFlow(_ context.Context, data *schema.ResourceData, meta interface{}) 
 	flow := client.Flow{
 		Name:          data.Get("name").(string),
 		Label:         data.Get("label").(string),
-		Template:      data.Get("template").(string),
 		EnvironmentId: data.Get("environment_id").(string),
 		Vars:          getSettingsMap(data, "vars"),
 		Params:        getAPISafeParams(data.Get("params").([]interface{}), data),
@@ -271,7 +269,6 @@ func readFlow(_ context.Context, data *schema.ResourceData, meta interface{}) di
 
 	diags = utils.DiagsCheckError(diags, data.Set("name", flow.Name), "Unable to read Flow name")
 	diags = utils.DiagsCheckError(diags, data.Set("label", flow.Label), "Unable to read Flow label")
-	diags = utils.DiagsCheckError(diags, data.Set("template", flow.Template), "Unable to read Flow template")
 	diags = utils.DiagsCheckError(diags, data.Set("environment_id", flow.EnvironmentId), "Unable to read Flow environment_id")
 	diags = utils.DiagsCheckError(diags, data.Set("vars", flow.Vars), "Unable to read Flow vars")
 
@@ -330,7 +327,6 @@ func updateFlow(_ context.Context, data *schema.ResourceData, meta interface{}) 
 		Id:            data.Id(),
 		Name:          data.Get("name").(string),
 		Label:         data.Get("label").(string),
-		Template:      data.Get("template").(string),
 		EnvironmentId: data.Get("environment_id").(string),
 		Vars:          getSettingsMap(data, "vars"),
 		Params:        getAPISafeParams(data.Get("params").([]interface{}), data),
