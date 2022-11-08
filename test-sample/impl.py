@@ -3,5 +3,5 @@ from sym.sdk.integrations import slack
 
 
 @reducer
-def get_approvers(request):
+def get_approvers(event):
     return slack.channel("#access-requests")
