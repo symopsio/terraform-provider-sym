@@ -18,6 +18,7 @@ func DataSourceEnvironment() *schema.Resource {
 			"name":                utils.RequiredCaseInsensitiveString("The unique identifier for the Environment"),
 			"label":               utils.Optional(schema.TypeString, "An optional label for the Environment"),
 			"runtime_id":          utils.Optional(schema.TypeString, "The ID of the Runtime associated with this Environment"),
+			"error_logger_id":     utils.Optional(schema.TypeString, "The ID of the Error Logger"),
 			"log_destination_ids": utils.StringList(false, "IDs for each Log Destination to funnel logs to"),
 			"integrations":        utils.SettingsMap("A map of Integrations available to this Environment"),
 		},

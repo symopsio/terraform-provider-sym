@@ -13,7 +13,7 @@ type Environment struct {
 	Id                string            `json:"id,omitempty"`
 	Name              string            `json:"slug"`
 	Label             string            `json:"label,omitempty"`
-	RuntimeId         string            `json:"runtime_id"`
+	RuntimeId         string            `json:"runtime_id,omitempty"`
 	Integrations      map[string]string `json:"integrations"`
 	ErrorLoggerId     string            `json:"error_logger_id,omitempty"`
 	LogDestinationIds []string          `json:"log_destination_ids,omitempty"`
