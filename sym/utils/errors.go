@@ -26,8 +26,8 @@ func GenerateError(detail string, docs string) error {
 const (
 	DocsHome           = "https://docs.symops.com/"
 	DocsSupport        = "https://docs.symops.com/docs/support"
-	DocsSymflowInstall = "https://docs.symops.com/docs/install-sym-flow"
-	DocsSymflowLogin   = "https://docs.symops.com/docs/login-sym-flow"
+	DocsSymflowInstall = "https://docs.symops.com/docs/install-sym-flow-cli"
+	DocsSymflowLogin   = "https://docs.symops.com/docs/install-sym-flow-cli#login"
 	DocsImport         = "https://docs.symops.com/docs/reapplying-terraform"
 )
 
