@@ -22,7 +22,7 @@ Click "Generate release notes" to automatically include all commits since the la
 
 ## Development
 
-1. Add the asdf plugins: `asdf plugin add golang richgo terraform`
+1. Add the asdf plugins: `asdf plugin add golang` `brew install kyoh86/tap/richgo` and `asdf plugin add terraform`
 2. Run `asdf install` to install necessary tools from .tool-versions
 3. Run `make local` to create the binary locally
 
