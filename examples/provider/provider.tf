@@ -1,3 +1,3 @@
 provider "sym" {
-  org = "my-sym-org"
+  org = "S-VJ2IYOCQ74"
 }
