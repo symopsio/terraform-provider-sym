@@ -82,10 +82,10 @@ Followed [this guide](https://docs.github.com/en/free-pro-team@latest/github/aut
 * Email: ci@symops.io
 * Comment: CI key for Sym
 
-The key id is `52387210CDE53E82`.
+The key id is `EA609C8874A3E6C5`.
 
 To export private key to a string:
-`gpg -a --export-secret-keys 52387210CDE53E82 | awk -v ORS='\\n' '1'`
+`gpg -a --export-secret-keys EA609C8874A3E6C5 | awk -v ORS='\\n' '1'`
 
 The GPG private key is stored in [1password](https://start.1password.com/open/i?a=2TO6ZEW3SJD4LNVVDNSFUVV4EM&v=u22rzchdnmtttx65w2diswg5hu&i=n4dfszockvgxziiiznj6ogxstm&h=team-sym.1password.com).
 
