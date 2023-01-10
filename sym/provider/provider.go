@@ -17,7 +17,7 @@ func Provider() *schema.Provider {
 			"org": {
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: "Your Sym org slug ",
+				Description: "Your Sym Org ID",
 			},
 		},
 		ResourcesMap: map[string]*schema.Resource{
