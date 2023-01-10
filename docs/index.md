@@ -18,7 +18,7 @@ This order matches the precedence used by the `symflow` CLI.
 
 ```terraform
 provider "sym" {
-  org = "my-sym-org"
+  org = "S-VJ2IYOCQ74"
 }
 ```
 
@@ -27,4 +27,4 @@ provider "sym" {
 
 ### Required
 
-- `org` (String) Your Sym org slug
+- `org` (String) Your Sym Org ID
