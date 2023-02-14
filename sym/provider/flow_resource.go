@@ -438,7 +438,7 @@ func getAPISafeParams(paramsList []interface{}, data *schema.ResourceData) (map[
 			// after create/update, not during the plan step.
 			for i := range promptFields.([]interface{}) {
 				promptField := promptFields.([]interface{})[i].(map[string]interface{})
-				allowedValues, _ := promptField["allowed_values"]
+				allowedValues := promptField["allowed_values"]
 				if promptField["name"] == "target_id" && len(allowedValues.([]interface{})) > 0 {
 					diags = append(diags, utils.DiagWarning(fmt.Sprintf("prompt_field.%v.allowed_values will be ignored", i), "prompt_fields named 'target_id' have auto-populated allowed_values, so the defined allowed_values will be ignored."))
 				}
