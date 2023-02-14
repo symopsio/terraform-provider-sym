@@ -206,12 +206,15 @@ func createFlow(_ context.Context, data *schema.ResourceData, meta interface{}) 
 	var diags diag.Diagnostics
 	c := meta.(*client.ApiClient)
 
+	params, paramDiags := getAPISafeParams(data.Get("params").([]interface{}), data)
+	diags = append(diags, paramDiags...)
+
 	flow := client.Flow{
 		Name:          data.Get("name").(string),
 		Label:         data.Get("label").(string),
 		EnvironmentId: data.Get("environment_id").(string),
 		Vars:          getSettingsMap(data, "vars"),
-		Params:        getAPISafeParams(data.Get("params").([]interface{}), data),
+		Params:        params,
 	}
 
 	implementation := data.Get("implementation").(string)
@@ -323,13 +326,16 @@ func updateFlow(_ context.Context, data *schema.ResourceData, meta interface{}) 
 	var diags diag.Diagnostics
 	c := meta.(*client.ApiClient)
 
+	params, paramDiags := getAPISafeParams(data.Get("params").([]interface{}), data)
+	diags = append(diags, paramDiags...)
+
 	flow := client.Flow{
 		Id:            data.Id(),
 		Name:          data.Get("name").(string),
 		Label:         data.Get("label").(string),
 		EnvironmentId: data.Get("environment_id").(string),
 		Vars:          getSettingsMap(data, "vars"),
-		Params:        getAPISafeParams(data.Get("params").([]interface{}), data),
+		Params:        params,
 	}
 
 	implementation := data.Get("implementation").(string)
@@ -379,7 +385,9 @@ func deleteFlow(_ context.Context, data *schema.ResourceData, meta interface{}) 
 // ensure the params map is compatible with the Sym API.
 //
 // For example, it will remove any empty "strategy_id", since the API will reject it.
-func getAPISafeParams(paramsList []interface{}, data *schema.ResourceData) map[string]interface{} {
+func getAPISafeParams(paramsList []interface{}, data *schema.ResourceData) (map[string]interface{}, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
 	// rawConfig gives us the actual values that were configured in Terraform.
 	// Since data.Get will give us the config with any defaults filled in, the rawConfig is
 	// the only way we can tell the difference between something like allowed_sources being
@@ -418,17 +426,29 @@ func getAPISafeParams(paramsList []interface{}, data *schema.ResourceData) map[s
 			delete(paramsMapCopy, "strategy_id")
 		}
 
-		// Because the Terraform block is called "prompt_field", it will be in params under that key.
-		// However, the API expects "prompt_fields", so change the key.
 		if promptFields, found := paramsMapCopy["prompt_field"]; found {
+			// Because the Terraform block is called "prompt_field", it will be in params under that key.
+			// However, the API expects "prompt_fields", so change the key.
 			paramsMapCopy["prompt_fields"] = promptFields
 			delete(paramsMapCopy, "prompt_field")
+
+			// Warn users if they're using allowed_values for a prompt_field named "target_id", since it will
+			// be ignored by the Sym platform. We can't do this as part of a ValidateDiagFunc because it is
+			// a list field, which doesn't yet support ValidateDiagFunc. This means that the warning will appear
+			// after create/update, not during the plan step.
+			for i := range promptFields.([]interface{}) {
+				promptField := promptFields.([]interface{})[i].(map[string]interface{})
+				allowedValues, _ := promptField["allowed_values"]
+				if promptField["name"] == "target_id" && len(allowedValues.([]interface{})) > 0 {
+					diags = append(diags, utils.DiagWarning(fmt.Sprintf("prompt_field.%v.allowed_values will be ignored", i), "prompt_fields named 'target_id' have auto-populated allowed_values, so the defined allowed_values will be ignored."))
+				}
+			}
 		}
 
-		return paramsMapCopy
+		return paramsMapCopy, diags
 	} else {
 		// If no params were defined, make sure we still send an empty params blob to the API.
-		return map[string]interface{}{}
+		return map[string]interface{}{}, diags
 	}
 }
 

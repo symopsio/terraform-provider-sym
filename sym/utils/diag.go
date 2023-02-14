@@ -22,3 +22,12 @@ func DiagsCheckError(diags diag.Diagnostics, err error, summary string) diag.Dia
 	}
 	return diags
 }
+
+
+func DiagWarning(summary, detail string) diag.Diagnostic {
+	return diag.Diagnostic{
+		Severity: diag.Warning,
+		Summary: summary,
+		Detail: detail,
+	}
+}
