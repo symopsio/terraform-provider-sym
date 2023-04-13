@@ -47,17 +47,17 @@ func promptFieldResource() *schema.Resource {
 	return &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"name":     {Required: true, Type: schema.TypeString, Description: "A unique identifier for this field."},
-			"type":     {Required: true, Type: schema.TypeString, Description: `The type of data stored in this field. One of: "string", "int", "bool", "duration".`, ValidateDiagFunc: validatePromptFieldType},
+			"type":     {Required: true, Type: schema.TypeString, Description: `The type of data stored in this field. One of: "string", "int", "bool", "duration", "slack_user", "slack_user_list".`, ValidateDiagFunc: validatePromptFieldType},
 			"required": {Optional: true, Default: true, Type: schema.TypeBool, Description: "Whether this field is a required input."},
 			"label":    {Optional: true, Type: schema.TypeString, Description: "A name for the field, to be displayed in Slack."},
-			"default":  {Optional: true, Type: schema.TypeString, Description: "A fallback value for optional fields if no value is provided."},
+			"default":  {Optional: true, Type: schema.TypeString, Description: "A fallback value for optional fields if no value is provided. Not applicable for the \"slack_user\" and \"slack_user_list\" types."},
 			"allowed_values": {
 				Type:        schema.TypeList,
 				Elem:        &schema.Schema{Type: schema.TypeString},
 				Optional:    true,
-				Description: "Defines the full list of valid choices for this field's value. If defined, this field will be displayed as a dropdown in Slack.",
+				Description: "Defines the full list of valid choices for this field's value. If defined, this field will be displayed as a dropdown in Slack. Not applicable for the \"slack_user\" and \"slack_user_list\" types.",
 			},
-			"prefetch": {Optional: true, Type: schema.TypeBool, Default: false, Description: "Whether a prefetch reducer will be used to populate the options for this field."},
+			"prefetch": {Optional: true, Type: schema.TypeBool, Default: false, Description: "Whether a prefetch reducer will be used to populate the options for this field. Not applicable for the \"slack_user\" and \"slack_user_list\" types."},
 		},
 		Description: "Custom input field used to collect information from a user who is requesting access to a resource.",
 	}
@@ -459,9 +459,9 @@ func getAPISafeParams(paramsList []interface{}, data *schema.ResourceData) (map[
 func validatePromptFieldType(typeName interface{}, _ cty.Path) diag.Diagnostics {
 	var results diag.Diagnostics
 
-	if !utils.ContainsString([]string{"string", "int", "bool", "duration"}, typeName.(string)) {
+	if !utils.ContainsString([]string{"string", "int", "bool", "duration", "slack_user", "slack_user_list"}, typeName.(string)) {
 		results = append(results, utils.DiagFromError(
-			fmt.Errorf(`"%v" is not a valid prompt_field type. Must be one of: "string", "int", "bool", "duration"`, typeName),
+			fmt.Errorf(`"%v" is not a valid prompt_field type. Must be one of: "string", "int", "bool", "duration", "slack_user", "slack_user_list"`, typeName),
 			"Invalid prompt_field.type"),
 		)
 	}
