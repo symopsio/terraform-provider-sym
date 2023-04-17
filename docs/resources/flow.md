@@ -158,14 +158,14 @@ Optional:
 Required:
 
 - `name` (String) A unique identifier for this field.
-- `type` (String) The type of data stored in this field. One of: "string", "int", "bool", "duration".
+- `type` (String) The type of data stored in this field. One of: "string", "int", "bool", "duration", "slack_user", "slack_user_list".
 
 Optional:
 
-- `allowed_values` (List of String) Defines the full list of valid choices for this field's value. If defined, this field will be displayed as a dropdown in Slack.
-- `default` (String) A fallback value for optional fields if no value is provided.
+- `allowed_values` (List of String) Defines the full list of valid choices for this field's value. If defined, this field will be displayed as a dropdown in Slack. Not applicable for the "slack_user" and "slack_user_list" types.
+- `default` (String) A fallback value for optional fields if no value is provided. Not applicable for the "slack_user" and "slack_user_list" types.
 - `label` (String) A name for the field, to be displayed in Slack.
-- `prefetch` (Boolean) Whether a prefetch reducer will be used to populate the options for this field.
+- `prefetch` (Boolean) Whether a prefetch reducer will be used to populate the options for this field. Not applicable for the "slack_user" and "slack_user_list" types.
 - `required` (Boolean) Whether this field is a required input.
 
 ## Import
