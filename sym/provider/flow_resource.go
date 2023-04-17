@@ -102,7 +102,11 @@ func flowSchema() map[string]*schema.Schema {
 			},
 			Description: "Relative path of the implementation file written in python.",
 		},
-		"vars":           utils.SettingsMap("A map of variables and their values to pass to `impl.py`. Useful for making IDs generated dynamically by Terraform available to your `impl.py`."),
+		"vars": utils.SettingsMap(
+			"A map of variables and their string values to pass to `impl.py`. Useful for making IDs generated dynamically by Terraform available to your `impl.py`.\n\n" +
+				"~> **Note:** While you may pass in other primitives (e.g. bool, int) as a value to `sym_flow.vars`, they will be cast to strings when you apply your configuration. " +
+				"When accessing these values in your `impl.py`, you will need to recast them into the correct types before using them.",
+		),
 		"environment_id": utils.Required(schema.TypeString, "The ID of the Environment this Flow is associated with."),
 		"params": {
 			Description: "A set of parameters which configure the Flow.",
