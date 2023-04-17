@@ -22,5 +22,7 @@ jobs:
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v3
         with:
-          # Optional: version of golangci-lint to use in form of v1.2 or v1.2.3 or `latest` to use the latest version
+          # The version of golangci-lint to use.
+          # Note: We cannot upgrade to >= 1.48 because it uses the gofmt in go 1.19 instead of version
+          # of go configured in the workflow. See: https://github.com/golangci/golangci-lint-action/issues/535
           version: v1.47.3
