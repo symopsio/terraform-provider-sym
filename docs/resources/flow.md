@@ -131,7 +131,9 @@ def get_approvers(request):
 
 - `label` (String) An optional label for the Flow.
 - `params` (Block List, Max: 1) A set of parameters which configure the Flow. (see [below for nested schema](#nestedblock--params))
-- `vars` (Map of String) A map of variables and their values to pass to `impl.py`. Useful for making IDs generated dynamically by Terraform available to your `impl.py`.
+- `vars` (Map of String) A map of variables and their string values to pass to `impl.py`. Useful for making IDs generated dynamically by Terraform available to your `impl.py`.
+
+~> **Note:** While you may pass in other primitives (e.g. bool, int) as a value to `sym_flow.vars`, they will be cast to strings when you apply your configuration. When accessing these values in your `impl.py`, you will need to recast them into the correct types before using them.
 
 ### Read-Only
 
