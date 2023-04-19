@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strconv"
 
 	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/go-uuid"
@@ -206,6 +207,33 @@ func flowResourceStateUpgradeV0(ctx context.Context, rawState map[string]interfa
 
 // CRUD operations //////////////////////////////
 
+// checkFlowVars raises warnings if any values passed to sym_flow.vars are strings
+// that look like integers or booleans.
+func checkFlowVars(vars map[string]string) diag.Diagnostics {
+
+	var diags diag.Diagnostics
+
+	for key, value := range vars {
+		// The string could be converted to an integer.
+		if _, err := strconv.Atoi(value); err == nil {
+			diags = append(diags, utils.DiagWarning(
+				fmt.Sprintf("The value for %s provided in `vars` appears to be an integer.", key),
+				fmt.Sprintf("Please note that all sym_flow.vars values will be cast to strings. To use %s as an integer in an implementation file, it will need to be cast back to an integer using `int()`.", key)),
+			)
+		}
+
+		// The string could be converted to a boolean.
+		if _, err := strconv.ParseBool(value); err == nil {
+			diags = append(diags, utils.DiagWarning(
+				fmt.Sprintf("The value for %s provided in `vars` appears to be a boolean.", key),
+				fmt.Sprintf("Please note that all sym_flow.vars values will be cast to strings. To use %s as a boolean in an implementation file, it will need to be turned back into a boolean by comparing it against the string 'true' or 'false'.", key)),
+			)
+		}
+	}
+
+	return diags
+}
+
 func createFlow(_ context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 	c := meta.(*client.ApiClient)
@@ -213,11 +241,14 @@ func createFlow(_ context.Context, data *schema.ResourceData, meta interface{}) 
 	params, paramDiags := getAPISafeParams(data.Get("params").([]interface{}), data)
 	diags = append(diags, paramDiags...)
 
+	vars := getSettingsMap(data, "vars")
+	diags = append(diags, checkFlowVars(vars)...)
+
 	flow := client.Flow{
 		Name:          data.Get("name").(string),
 		Label:         data.Get("label").(string),
 		EnvironmentId: data.Get("environment_id").(string),
-		Vars:          getSettingsMap(data, "vars"),
+		Vars:          vars,
 		Params:        params,
 	}
 
@@ -333,12 +364,15 @@ func updateFlow(_ context.Context, data *schema.ResourceData, meta interface{}) 
 	params, paramDiags := getAPISafeParams(data.Get("params").([]interface{}), data)
 	diags = append(diags, paramDiags...)
 
+	vars := getSettingsMap(data, "vars")
+	diags = append(diags, checkFlowVars(vars)...)
+
 	flow := client.Flow{
 		Id:            data.Id(),
 		Name:          data.Get("name").(string),
 		Label:         data.Get("label").(string),
 		EnvironmentId: data.Get("environment_id").(string),
-		Vars:          getSettingsMap(data, "vars"),
+		Vars:          vars,
 		Params:        params,
 	}
 
