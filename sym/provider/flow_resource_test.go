@@ -434,7 +434,7 @@ func Test_checkFlowVars(t *testing.T) {
 				diag.Diagnostic{
 					Severity: diag.Warning,
 					Summary:  "The value for foo provided in `vars` appears to be a boolean.",
-					Detail:   "Please note that all sym_flow.vars values will be cast to strings. To use foo as a boolean in an implementation file, it will need to be turned back into a boolean by comparing it against the string 'true' or 'false'.",
+					Detail:   "Please note that all sym_flow.vars values will be cast to strings. To use foo as a boolean in an implementation file, it will need to be converted back into a boolean by comparing it against the string 'true' or 'false'.",
 				},
 			},
 		},
@@ -447,7 +447,7 @@ func Test_checkFlowVars(t *testing.T) {
 				diag.Diagnostic{
 					Severity: diag.Warning,
 					Summary:  "The value for bar provided in `vars` appears to be a boolean.",
-					Detail:   "Please note that all sym_flow.vars values will be cast to strings. To use bar as a boolean in an implementation file, it will need to be turned back into a boolean by comparing it against the string 'true' or 'false'.",
+					Detail:   "Please note that all sym_flow.vars values will be cast to strings. To use bar as a boolean in an implementation file, it will need to be converted back into a boolean by comparing it against the string 'true' or 'false'.",
 				},
 			},
 		},
@@ -467,7 +467,7 @@ func Test_checkFlowVars(t *testing.T) {
 				diag.Diagnostic{
 					Severity: diag.Warning,
 					Summary:  "The value for bar provided in `vars` appears to be a boolean.",
-					Detail:   "Please note that all sym_flow.vars values will be cast to strings. To use bar as a boolean in an implementation file, it will need to be turned back into a boolean by comparing it against the string 'true' or 'false'.",
+					Detail:   "Please note that all sym_flow.vars values will be cast to strings. To use bar as a boolean in an implementation file, it will need to be converted back into a boolean by comparing it against the string 'true' or 'false'.",
 				},
 			},
 		},

@@ -226,7 +226,7 @@ func checkFlowVars(vars map[string]string) diag.Diagnostics {
 		if _, err := strconv.ParseBool(value); err == nil {
 			diags = append(diags, utils.DiagWarning(
 				fmt.Sprintf("The value for %s provided in `vars` appears to be a boolean.", key),
-				fmt.Sprintf("Please note that all sym_flow.vars values will be cast to strings. To use %s as a boolean in an implementation file, it will need to be turned back into a boolean by comparing it against the string 'true' or 'false'.", key)),
+				fmt.Sprintf("Please note that all sym_flow.vars values will be cast to strings. To use %s as a boolean in an implementation file, it will need to be converted back into a boolean by comparing it against the string 'true' or 'false'.", key)),
 			)
 		}
 	}
