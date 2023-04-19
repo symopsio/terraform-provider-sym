@@ -407,7 +407,7 @@ func Test_checkFlowVars(t *testing.T) {
 		{
 			"no-warnings",
 			map[string]string{
-				"foo": "bar",
+				"foo":   "bar",
 				"false": "whoops",
 			},
 			diag.Diagnostics(nil),
@@ -420,8 +420,8 @@ func Test_checkFlowVars(t *testing.T) {
 			diag.Diagnostics{
 				diag.Diagnostic{
 					Severity: diag.Warning,
-					Summary: "The value for foo provided in `vars` appears to be an integer.",
-					Detail: "Please note that all sym_flow.vars values will be cast to strings. To use foo as an integer in an implementation file, it will need to be cast back to an integer using `int()`.",
+					Summary:  "The value for foo provided in `vars` appears to be an integer.",
+					Detail:   "Please note that all sym_flow.vars values will be cast to strings. To use foo as an integer in an implementation file, it will need to be cast back to an integer using `int()`.",
 				},
 			},
 		},
@@ -433,8 +433,8 @@ func Test_checkFlowVars(t *testing.T) {
 			diag.Diagnostics{
 				diag.Diagnostic{
 					Severity: diag.Warning,
-					Summary: "The value for foo provided in `vars` appears to be a boolean.",
-					Detail:"Please note that all sym_flow.vars values will be cast to strings. To use foo as a boolean in an implementation file, it will need to be turned back into a boolean by comparing it against the string 'true' or 'false'.",
+					Summary:  "The value for foo provided in `vars` appears to be a boolean.",
+					Detail:   "Please note that all sym_flow.vars values will be cast to strings. To use foo as a boolean in an implementation file, it will need to be turned back into a boolean by comparing it against the string 'true' or 'false'.",
 				},
 			},
 		},
@@ -446,8 +446,8 @@ func Test_checkFlowVars(t *testing.T) {
 			diag.Diagnostics{
 				diag.Diagnostic{
 					Severity: diag.Warning,
-					Summary: "The value for bar provided in `vars` appears to be a boolean.",
-					Detail:"Please note that all sym_flow.vars values will be cast to strings. To use bar as a boolean in an implementation file, it will need to be turned back into a boolean by comparing it against the string 'true' or 'false'.",
+					Summary:  "The value for bar provided in `vars` appears to be a boolean.",
+					Detail:   "Please note that all sym_flow.vars values will be cast to strings. To use bar as a boolean in an implementation file, it will need to be turned back into a boolean by comparing it against the string 'true' or 'false'.",
 				},
 			},
 		},
@@ -455,19 +455,19 @@ func Test_checkFlowVars(t *testing.T) {
 			"mixed-warnings",
 			map[string]string{
 				"stringy": "string",
-				"foo": "4",
-				"bar": "false",
+				"foo":     "4",
+				"bar":     "false",
 			},
 			diag.Diagnostics{
 				diag.Diagnostic{
 					Severity: diag.Warning,
-					Summary: "The value for foo provided in `vars` appears to be an integer.",
-					Detail: "Please note that all sym_flow.vars values will be cast to strings. To use foo as an integer in an implementation file, it will need to be cast back to an integer using `int()`.",
+					Summary:  "The value for foo provided in `vars` appears to be an integer.",
+					Detail:   "Please note that all sym_flow.vars values will be cast to strings. To use foo as an integer in an implementation file, it will need to be cast back to an integer using `int()`.",
 				},
 				diag.Diagnostic{
 					Severity: diag.Warning,
-					Summary: "The value for bar provided in `vars` appears to be a boolean.",
-					Detail:"Please note that all sym_flow.vars values will be cast to strings. To use bar as a boolean in an implementation file, it will need to be turned back into a boolean by comparing it against the string 'true' or 'false'.",
+					Summary:  "The value for bar provided in `vars` appears to be a boolean.",
+					Detail:   "Please note that all sym_flow.vars values will be cast to strings. To use bar as a boolean in an implementation file, it will need to be turned back into a boolean by comparing it against the string 'true' or 'false'.",
 				},
 			},
 		},
