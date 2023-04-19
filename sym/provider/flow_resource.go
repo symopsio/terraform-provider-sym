@@ -72,7 +72,7 @@ func flowParamsResource() *schema.Resource {
 				Type:        schema.TypeList,
 				Elem:        &schema.Schema{Type: schema.TypeString},
 				Optional:    true,
-				Description: `A list of sources from which this sym_flow may be invoked. Valid sources are: "slack", "api".`,
+				Description: `A list of sources from which this sym_flow may be invoked. Valid sources are: "slack", "api". If unspecified, all sources will be enabled. If an empty list is specified, it will not be possible for this sym_flow to be invoked.`,
 			},
 			"schedule_deescalation": {Type: schema.TypeBool, Optional: true, Default: true, Description: `Whether automatic access de-escalation will occur after a requested duration. If false, de-escalation will only occur when manually revoked. At least one of "schedule_deescalation" or "allow_revoke" must be true.`},
 			"prompt_field": {
