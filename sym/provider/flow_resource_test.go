@@ -6,7 +6,9 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestAccSymFlow_basic(t *testing.T) {
@@ -391,5 +393,88 @@ func TestFlowResourceStateUpgradeV0(t *testing.T) {
 
 	if !reflect.DeepEqual(expected, actual) {
 		t.Fatalf("\n\nexpected:\n\n%#v\n\ngot:\n\n%#v\n\n", expected, actual)
+	}
+}
+
+//// Test helper functions ////////////////////////////////////////////////////
+
+func Test_checkFlowVars(t *testing.T) {
+	tests := []struct {
+		name string
+		vars map[string]string
+		want diag.Diagnostics
+	}{
+		{
+			"no-warnings",
+			map[string]string{
+				"foo":   "bar",
+				"false": "whoops",
+			},
+			diag.Diagnostics(nil),
+		},
+		{
+			"integer-warning",
+			map[string]string{
+				"foo": "100",
+			},
+			diag.Diagnostics{
+				diag.Diagnostic{
+					Severity: diag.Warning,
+					Summary:  "The value for foo provided in `vars` appears to be an integer.",
+					Detail:   "Please note that all sym_flow.vars values will be cast to strings. To use foo as an integer in an implementation file, it will need to be cast back to an integer using `int()`.",
+				},
+			},
+		},
+		{
+			"boolean-warning-true",
+			map[string]string{
+				"foo": "true",
+			},
+			diag.Diagnostics{
+				diag.Diagnostic{
+					Severity: diag.Warning,
+					Summary:  "The value for foo provided in `vars` appears to be a boolean.",
+					Detail:   "Please note that all sym_flow.vars values will be cast to strings. To use foo as a boolean in an implementation file, it will need to be converted back into a boolean by comparing it against the string 'true' or 'false'.",
+				},
+			},
+		},
+		{
+			"boolean-warning-false",
+			map[string]string{
+				"bar": "false",
+			},
+			diag.Diagnostics{
+				diag.Diagnostic{
+					Severity: diag.Warning,
+					Summary:  "The value for bar provided in `vars` appears to be a boolean.",
+					Detail:   "Please note that all sym_flow.vars values will be cast to strings. To use bar as a boolean in an implementation file, it will need to be converted back into a boolean by comparing it against the string 'true' or 'false'.",
+				},
+			},
+		},
+		{
+			"mixed-warnings",
+			map[string]string{
+				"stringy": "string",
+				"foo":     "4",
+				"bar":     "false",
+			},
+			diag.Diagnostics{
+				diag.Diagnostic{
+					Severity: diag.Warning,
+					Summary:  "The value for foo provided in `vars` appears to be an integer.",
+					Detail:   "Please note that all sym_flow.vars values will be cast to strings. To use foo as an integer in an implementation file, it will need to be cast back to an integer using `int()`.",
+				},
+				diag.Diagnostic{
+					Severity: diag.Warning,
+					Summary:  "The value for bar provided in `vars` appears to be a boolean.",
+					Detail:   "Please note that all sym_flow.vars values will be cast to strings. To use bar as a boolean in an implementation file, it will need to be converted back into a boolean by comparing it against the string 'true' or 'false'.",
+				},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.Equalf(t, tt.want, checkFlowVars(tt.vars), "checkFlowVars(%v)", tt.vars)
+		})
 	}
 }
