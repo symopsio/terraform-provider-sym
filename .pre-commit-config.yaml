@@ -3,7 +3,6 @@ repos:
     hooks:
       - id: gofmt
         name: gofmt
-        entry: go fmt ./...
-        pass_filenames: false
+        entry: go fmt
         language: system
         types: [go]
