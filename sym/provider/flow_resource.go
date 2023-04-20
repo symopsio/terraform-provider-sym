@@ -210,7 +210,6 @@ func flowResourceStateUpgradeV0(ctx context.Context, rawState map[string]interfa
 // checkFlowVars raises warnings if any values passed to sym_flow.vars are strings
 // that look like integers or booleans.
 func checkFlowVars(vars map[string]string) diag.Diagnostics {
-
 	var diags diag.Diagnostics
 
 	for key, value := range vars {

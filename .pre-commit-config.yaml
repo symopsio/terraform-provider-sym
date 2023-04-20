@@ -1,0 +1,9 @@
+repos:
+  - repo: local
+    hooks:
+      - id: gofmt
+        name: gofmt
+        entry: go fmt ./...
+        pass_filenames: false
+        language: system
+        types: [go]
