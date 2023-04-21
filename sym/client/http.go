@@ -62,6 +62,8 @@ func (c *symHttpClient) Do(method string, path string, payload interface{}) (str
 	}
 
 	body, err := io.ReadAll(resp.Body)
+
+	// Return specific errors based on the status code from the Sym API.
 	if resp.StatusCode == 400 {
 		errorBody := utils.ErrorResponse{}
 		err = json.Unmarshal(body, &errorBody)
@@ -71,15 +73,19 @@ func (c *symHttpClient) Do(method string, path string, payload interface{}) (str
 		return "", utils.ErrAPIBadRequest(errorBody.Errors)
 	} else if resp.StatusCode == 401 {
 		return "", utils.ErrConfigFileNoJWT
+	} else if resp.StatusCode == 403 {
+		return "", utils.ErrUserIsNotAdmin
 	} else if resp.StatusCode == 404 {
 		return "", utils.ErrAPINotFound(path, requestID)
-	} else if resp.StatusCode >= 500 {
-		return "", utils.ErrAPIUnexpected(path, requestID, resp.StatusCode)
 	}
 
 	if err != nil {
+		// If we don't have a specific error for the status code, and we got an error message in the response,
+		// display the full error message to the user.
 		return "", err
 	} else if resp.StatusCode > 400 {
+		// We weren't able to get an error message from the API, and we don't have a specific error message
+		// for this status code, but we know it failed. Display a generic error message to the user.
 		return "", utils.ErrAPIUnexpected(path, requestID, resp.StatusCode)
 	}
 

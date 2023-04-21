@@ -29,6 +29,7 @@ const (
 	DocsSymflowInstall = "https://docs.symops.com/docs/install-sym-flow-cli"
 	DocsSymflowLogin   = "https://docs.symops.com/docs/install-sym-flow-cli#login"
 	DocsImport         = "https://docs.symops.com/docs/reapplying-terraform"
+	DocsNewAdmin       = "https://docs.symops.com/docs/adding-a-new-admin"
 )
 
 var (
@@ -36,6 +37,7 @@ var (
 	ErrConfigFileNoJWT        = GenerateError("Your Sym access token is missing or invalid. Have you run `symflow login` or set $SYM_JWT?", DocsSymflowLogin)
 	ErrSymflowNotInstalled    = GenerateError("`symflow` is not installed, please install it and run `symflow login`.", DocsSymflowInstall)
 	ErrSymflowNoOrgConfigured = GenerateError("You do not have an org configured via `symflow`, please run `symflow login` or set $SYM_JWT with your Sym access token", DocsSymflowLogin)
+	ErrUserIsNotAdmin         = GenerateError("You do not have permission to perform this action. Please ensure your role is `admin`. If it is not, have an existing Sym admin update your role.", DocsNewAdmin)
 )
 
 var ErrSymflowWrongOrg = func(symflowOrg string, providerOrg string) error {
