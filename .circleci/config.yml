@@ -106,6 +106,7 @@ workflows:
       - release:
           context:
             - infrastructure-github-token
+            - slack-secrets
           requires:
             - unit_and_acceptance_test
             - generate_docs
