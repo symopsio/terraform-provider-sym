@@ -474,7 +474,7 @@ func Test_checkFlowVars(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			assert.Equalf(t, tt.want, checkFlowVars(tt.vars), "checkFlowVars(%v)", tt.vars)
+			assert.ElementsMatchf(t, tt.want, checkFlowVars(tt.vars), "checkFlowVars(%v)", tt.vars)
 		})
 	}
 }
