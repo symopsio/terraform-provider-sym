@@ -33,6 +33,7 @@ func Flow() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: getSlugImporter("flow"),
 		},
+		SchemaVersion: 1,
 		StateUpgraders: []schema.StateUpgrader{
 			{
 				Type:    flowResourceV0().CoreConfigSchema().ImpliedType(),
