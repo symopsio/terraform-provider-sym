@@ -210,7 +210,7 @@ func ImplementationValidation(value interface{}, _ cty.Path) diag.Diagnostics {
 	if strings.HasSuffix(value.(string), ".py") {
 		results = append(results, utils.DiagFromError(
 			fmt.Errorf(`"%v" looks like a Python file name. Please use 'file("%v")' to provide the contents instead`, value, value),
-			fmt.Sprintf("Implementation values must be file contents, not file paths"),
+			"Implementation values must be file contents, not file paths",
 		),
 		)
 	}
