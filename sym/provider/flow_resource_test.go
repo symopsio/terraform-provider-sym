@@ -2,6 +2,7 @@ package provider
 
 import (
 	"context"
+	"fmt"
 	"reflect"
 	"strings"
 	"testing"
@@ -260,7 +261,7 @@ func flowConfig(data TestData, implPath string, allowRevoke bool, strategyId str
 			terraformName:  "this",
 			name:           data.ResourceName,
 			label:          "SSO Access2",
-			implementation: implPath,
+			implementation: fmt.Sprintf("file('%s')", implPath),
 			environmentId:  "sym_environment.this.id",
 			params: params{
 				strategyId:            strategyId,
