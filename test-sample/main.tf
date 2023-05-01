@@ -19,7 +19,7 @@ resource "sym_flow" "this" {
   name  = "flow-v2tf"
   label = "V2 Provider Test"
 
-  implementation = "impl.py"
+  implementation = file("impl.py")
   environment_id = sym_environment.this.id
 
   params {

@@ -9,8 +9,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"os"
 	"strconv"
+	"strings"
 
 	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/go-uuid"
@@ -33,7 +33,6 @@ func Flow() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: getSlugImporter("flow"),
 		},
-		SchemaVersion: 1,
 		StateUpgraders: []schema.StateUpgrader{
 			{
 				Type:    flowResourceV0().CoreConfigSchema().ImpliedType(),
@@ -97,11 +96,8 @@ func flowSchema() map[string]*schema.Schema {
 		"implementation": {
 			Type:             schema.TypeString,
 			Required:         true,
-			DiffSuppressFunc: utils.SuppressEquivalentFileContentDiffs,
-			StateFunc: func(val interface{}) string {
-				return utils.ParseImpl(val.(string))
-			},
-			Description: "Relative path of the implementation file written in python.",
+			ValidateDiagFunc: ImplementationValidation,
+			Description:      "Python code defining custom logic for the Flow.",
 		},
 		"vars": utils.SettingsMap(
 			"A map of variables and their string values to pass to `impl.py`. Useful for making IDs generated dynamically by Terraform available to your `impl.py`.\n\n" +
@@ -205,6 +201,23 @@ func flowResourceStateUpgradeV0(ctx context.Context, rawState map[string]interfa
 	return rawState, nil
 }
 
+// ImplementationValidation validates that a given implementation for a sym_flow is
+// not a path to a file. In v1 and v2 that was valid, but as of v3 only file contents
+// are accepted.
+func ImplementationValidation(value interface{}, _ cty.Path) diag.Diagnostics {
+	var results diag.Diagnostics
+
+	if strings.HasSuffix(value.(string), ".py") {
+		results = append(results, utils.DiagFromError(
+			fmt.Errorf(`"%v" looks like a Python file name. Please use 'file("%v")' to provide the contents instead`, value, value),
+			fmt.Sprintf("Implementation values must be file contents, not file paths"),
+		),
+		)
+	}
+
+	return results
+}
+
 // CRUD operations //////////////////////////////
 
 // checkFlowVars raises warnings if any values passed to sym_flow.vars are strings
@@ -251,12 +264,9 @@ func createFlow(_ context.Context, data *schema.ResourceData, meta interface{}) 
 		Params:        params,
 	}
 
+	// The Sym API stores and communicates Flow implementations in base64 to keep the payload smaller.
 	implementation := data.Get("implementation").(string)
-	if b, err := os.ReadFile(implementation); err != nil {
-		diags = append(diags, utils.DiagFromError(err, "Unable to read sym_flow implementation file"))
-	} else {
-		flow.Implementation = base64.StdEncoding.EncodeToString(b)
-	}
+	flow.Implementation = base64.StdEncoding.EncodeToString([]byte(implementation))
 
 	if diags.HasError() {
 		return diags
@@ -310,7 +320,13 @@ func readFlow(_ context.Context, data *schema.ResourceData, meta interface{}) di
 	diags = utils.DiagsCheckError(diags, data.Set("vars", flow.Vars), "Unable to read Flow vars")
 
 	// Base64 -> Text
-	diags = utils.DiagsCheckError(diags, data.Set("implementation", utils.ParseRemoteImpl(flow.Implementation)), "Unable to read Flow implementation")
+	// The payload from the Sym API contains the implementation but base64 encoded, so we must decode it
+	// to diff against the state, which has the readable file contents.
+	if decoded, err := base64.StdEncoding.DecodeString(flow.Implementation); err == nil {
+		diags = utils.DiagsCheckError(diags, data.Set("implementation", string(decoded)), "Unable to read Flow implementation")
+	} else {
+		diags = append(diags, utils.DiagFromError(err, "Unable to read Flow implementation"))
+	}
 
 	// The API may add new parameters that we (the provider) don't know about yet, so rebuild the map and include
 	// only the parameters we do know about. Otherwise, the data.Set below will fail to set the Flow's state.
@@ -375,27 +391,9 @@ func updateFlow(_ context.Context, data *schema.ResourceData, meta interface{}) 
 		Params:        params,
 	}
 
+	// The Sym API stores and communicates Flow implementations in base64 to keep the payload smaller.
 	implementation := data.Get("implementation").(string)
-
-	// If the diff was suppressed, we'll have a text string here already, as it was decoded by the StateFunc.
-	// Therefore, check if this is a filename or not. If it's not, assume it is the decoded impl.
-	if b, err := os.ReadFile(implementation); err != nil {
-		implementation = base64.StdEncoding.EncodeToString([]byte(implementation))
-	} else {
-		implementation = base64.StdEncoding.EncodeToString(b)
-	}
-
-	if _, err := base64.StdEncoding.DecodeString(implementation); err == nil {
-		flow.Implementation = implementation
-	} else {
-		// Normal case where the diff has not been suppressed, read our local file and send it.
-		if b, err := os.ReadFile(implementation); err != nil {
-			diags = append(diags, utils.DiagFromError(err, "Unable to read implementation file"))
-			return diags
-		} else {
-			flow.Implementation = base64.StdEncoding.EncodeToString(b)
-		}
-	}
+	flow.Implementation = base64.StdEncoding.EncodeToString([]byte(implementation))
 
 	if _, err := c.Flow.Update(flow); err != nil {
 		diags = append(diags, utils.DiagFromError(err, "Unable to update Flow"))
