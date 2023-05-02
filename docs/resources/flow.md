@@ -124,7 +124,7 @@ def get_approvers(request):
 ### Required
 
 - `environment_id` (String) The ID of the Environment this Flow is associated with.
-- `implementation` (String) Relative path of the implementation file written in python.
+- `implementation` (String) Python code defining custom logic for the Flow.
 - `name` (String) A unique identifier for the Flow.
 
 ### Optional
