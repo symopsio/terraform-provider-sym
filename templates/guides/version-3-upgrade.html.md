@@ -2,7 +2,7 @@
 subcategory: ""
 page_title: "Terraform Sym Provider Version 3 Upgrade Guide"
 description: |-
-Terraform Sym Provider Version 3 Upgrade Guide
+  Terraform Sym Provider Version 3 Upgrade Guide
 ---
 
 # Terraform Sym Provider Version 3 Upgrade Guide
