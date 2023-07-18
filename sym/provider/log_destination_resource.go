@@ -36,7 +36,7 @@ func LogDestinationSchema() map[string]*schema.Schema {
 
 func validateLogDestination(diags diag.Diagnostics, ld *client.LogDestination) diag.Diagnostics {
 	if ld.IntegrationId == "" {
-		if ld.Type == "http" {
+		if (ld.Type == "http" || ld.Type == "datadog") {
 			ld.IntegrationId = NullPlaceholder
 		} else {
 			diags = append(diags, diag.Diagnostic{
