@@ -358,6 +358,7 @@ func testFlowResourceStateUpgradeDataV0() map[string]interface{} {
 		"params": map[string]interface{}{
 			"allow_guest_interaction": "true",
 			"allow_revoke":            "true",
+			"include_decision_message": "true",
 			"allowed_sources_json":    "[\"api\",\"slack\"]",
 			"prompt_fields_json":      "[{\"name\":\"reason\",\"type\":\"string\",\"required\":true,\"label\":\"Reason\"},{\"name\":\"urgency\",\"type\":\"string\",\"required\":true,\"allowed_values\":[\"Low\",\"Medium\",\"High\"]}]",
 			"schedule_deescalation":   "true",
