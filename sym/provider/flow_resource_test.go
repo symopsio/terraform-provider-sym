@@ -33,6 +33,7 @@ func TestAccSymFlow_basic(t *testing.T) {
 					resource.TestCheckResourceAttr("sym_flow.this", "params.0.allowed_sources.1", "api"),
 					resource.TestCheckResourceAttr("sym_flow.this", "params.0.additional_header_text", "Additional Header Text"),
 					resource.TestCheckResourceAttr("sym_flow.this", "params.0.allow_guest_interaction", "false"),
+					resource.TestCheckResourceAttr("sym_flow.this", "params.0.include_decision_message", "false"),
 					resource.TestCheckResourceAttr("sym_flow.this", "params.0.schedule_deescalation", "false"),
 					resource.TestCheckResourceAttr("sym_flow.this", "params.0.prompt_field.#", "4"),
 					resource.TestCheckResourceAttr("sym_flow.this", "params.0.prompt_field.0.name", "reason"),
@@ -64,6 +65,7 @@ func TestAccSymFlow_basic(t *testing.T) {
 					resource.TestCheckResourceAttrPair("sym_flow.this", "environment_id", "sym_environment.this", "id"),
 					resource.TestCheckResourceAttrPair("sym_flow.this", "params.0.strategy_id", "sym_strategy.sso_main", "id"),
 					resource.TestCheckResourceAttr("sym_flow.this", "params.0.allow_revoke", "false"),
+					resource.TestCheckResourceAttr("sym_flow.this", "params.0.include_decision_message", "true"),
 					resource.TestCheckNoResourceAttr("sym_flow.this", "params.0.header_text"),
 					resource.TestCheckResourceAttr("sym_flow.this", "params.0.allow_guest_interaction", "true"),
 					resource.TestCheckResourceAttr("sym_flow.this", "params.0.schedule_deescalation", "true"),
@@ -88,6 +90,7 @@ func TestAccSymFlow_nameCaseInsensitive(t *testing.T) {
 					resource.TestCheckResourceAttrSet("sym_flow.this", "implementation"),
 					resource.TestCheckResourceAttrPair("sym_flow.this", "environment_id", "sym_environment.this", "id"),
 					resource.TestCheckResourceAttrPair("sym_flow.this", "params.0.strategy_id", "sym_strategy.sso_main", "id"),
+					resource.TestCheckResourceAttr("sym_flow.this", "params.0.include_decision_message", "false"),
 					resource.TestCheckResourceAttr("sym_flow.this", "params.0.allow_revoke", "true"),
 					resource.TestCheckResourceAttr("sym_flow.this", "params.0.prompt_field.#", "4"),
 				),
@@ -100,6 +103,7 @@ func TestAccSymFlow_nameCaseInsensitive(t *testing.T) {
 					resource.TestCheckResourceAttrSet("sym_flow.this", "implementation"),
 					resource.TestCheckResourceAttrPair("sym_flow.this", "environment_id", "sym_environment.this", "id"),
 					resource.TestCheckResourceAttrPair("sym_flow.this", "params.0.strategy_id", "sym_strategy.sso_main", "id"),
+					resource.TestCheckResourceAttr("sym_flow.this", "params.0.include_decision_message", "true"),
 					resource.TestCheckResourceAttr("sym_flow.this", "params.0.allow_revoke", "false"),
 					resource.TestCheckResourceAttr("sym_flow.this", "params.0.prompt_field.#", "4"),
 				),
@@ -123,6 +127,7 @@ func TestAccSymFlow_noStrategy(t *testing.T) {
 					resource.TestCheckResourceAttrSet("sym_flow.this", "implementation"),
 					resource.TestCheckResourceAttrPair("sym_flow.this", "environment_id", "sym_environment.this", "id"),
 					resource.TestCheckResourceAttr("sym_flow.this", "params.0.strategy_id", ""),
+					resource.TestCheckResourceAttr("sym_flow.this", "params.0.include_decision_message", "false"),
 					resource.TestCheckResourceAttr("sym_flow.this", "params.0.allow_revoke", "true"),
 					resource.TestCheckResourceAttr("sym_flow.this", "params.0.schedule_deescalation", "false"),
 					resource.TestCheckNoResourceAttr("sym_flow.this", "params.0.allowed_sources"),
@@ -137,6 +142,7 @@ func TestAccSymFlow_noStrategy(t *testing.T) {
 					resource.TestCheckResourceAttrSet("sym_flow.this", "implementation"),
 					resource.TestCheckResourceAttrPair("sym_flow.this", "environment_id", "sym_environment.this", "id"),
 					resource.TestCheckResourceAttr("sym_flow.this", "params.0.strategy_id", ""),
+					resource.TestCheckResourceAttr("sym_flow.this", "params.0.include_decision_message", "true"),
 					resource.TestCheckResourceAttr("sym_flow.this", "params.0.allow_revoke", "false"),
 					resource.TestCheckResourceAttr("sym_flow.this", "params.0.schedule_deescalation", "true"),
 					resource.TestCheckResourceAttr("sym_flow.this", "params.0.prompt_field.#", "4"),
@@ -161,6 +167,7 @@ func TestAccSymFlow_allowedSourcesOnlyAPI(t *testing.T) {
 					resource.TestCheckResourceAttrSet("sym_flow.this", "implementation"),
 					resource.TestCheckResourceAttrPair("sym_flow.this", "environment_id", "sym_environment.this", "id"),
 					resource.TestCheckResourceAttrPair("sym_flow.this", "params.0.strategy_id", "sym_strategy.sso_main", "id"),
+					resource.TestCheckResourceAttr("sym_flow.this", "params.0.include_decision_message", "false"),
 					resource.TestCheckResourceAttr("sym_flow.this", "params.0.allow_revoke", "true"),
 					resource.TestCheckResourceAttr("sym_flow.this", "params.0.allowed_sources.#", "1"),
 					resource.TestCheckResourceAttr("sym_flow.this", "params.0.allowed_sources.0", "api"),
@@ -174,6 +181,7 @@ func TestAccSymFlow_allowedSourcesOnlyAPI(t *testing.T) {
 					resource.TestCheckResourceAttrSet("sym_flow.this", "implementation"),
 					resource.TestCheckResourceAttrPair("sym_flow.this", "environment_id", "sym_environment.this", "id"),
 					resource.TestCheckResourceAttrPair("sym_flow.this", "params.0.strategy_id", "sym_strategy.sso_main", "id"),
+					resource.TestCheckResourceAttr("sym_flow.this", "params.0.include_decision_message", "true"),
 					resource.TestCheckResourceAttr("sym_flow.this", "params.0.allow_revoke", "false"),
 					resource.TestCheckResourceAttr("sym_flow.this", "params.0.allowed_sources.#", "0"),
 				),
@@ -182,7 +190,17 @@ func TestAccSymFlow_allowedSourcesOnlyAPI(t *testing.T) {
 	})
 }
 
-func flowConfig(data TestData, implPath string, allowRevoke bool, strategyId string, scheduleDeescalation bool, allowedSources string, additionalHeaderText string, allowGuestInteraction bool) string {
+func flowConfig(
+    data TestData,
+    implPath string,
+    allowRevoke bool,
+    includeDecisionMessage bool,
+    strategyId string,
+    scheduleDeescalation bool,
+    allowedSources string,
+    additionalHeaderText string,
+    allowGuestInteraction bool,
+) string {
 	return makeTerraformConfig(
 		providerResource{org: data.OrgSlug},
 		integrationResource{
@@ -264,12 +282,13 @@ func flowConfig(data TestData, implPath string, allowRevoke bool, strategyId str
 			implementation: fmt.Sprintf("file('%s')", implPath),
 			environmentId:  "sym_environment.this.id",
 			params: params{
-				strategyId:            strategyId,
-				allowRevoke:           allowRevoke,
-				allowedSources:        allowedSources,
-				additionalHeaderText:  additionalHeaderText,
-				scheduleDeescalation:  scheduleDeescalation,
-				allowGuestInteraction: allowGuestInteraction,
+				strategyId:             strategyId,
+				allowRevoke:            allowRevoke,
+				includeDecisionMessage: includeDecisionMessage,
+				allowedSources:         allowedSources,
+				additionalHeaderText:   additionalHeaderText,
+				scheduleDeescalation:   scheduleDeescalation,
+				allowGuestInteraction:  allowGuestInteraction,
 				promptFields: []field{
 					{
 						name:     "reason",
@@ -303,27 +322,27 @@ func flowConfig(data TestData, implPath string, allowRevoke bool, strategyId str
 }
 
 func createFlowConfig(data TestData) string {
-	return flowConfig(data, "internal/testdata/before_impl.py", true, "sym_strategy.sso_main.id", false,
+	return flowConfig(data, "internal/testdata/before_impl.py", true, false, "sym_strategy.sso_main.id", false,
 		`["slack", "api"]`, "Additional Header Text", false)
 }
 
 func updateFlowConfig(data TestData) string {
-	return flowConfig(data, "internal/testdata/after_impl.py", false, "sym_strategy.sso_main.id", true,
+	return flowConfig(data, "internal/testdata/after_impl.py", false, true, "sym_strategy.sso_main.id", true,
 		"", "", true)
 }
 
 func createFlowNoStrategyConfig(data TestData) string {
-	return flowConfig(data, "internal/testdata/before_impl.py", true, "", false,
+	return flowConfig(data, "internal/testdata/before_impl.py", true, false, "", false,
 		"", "", false)
 }
 
 func updateFlowNoStrategyConfig(data TestData) string {
-	return flowConfig(data, "internal/testdata/after_impl.py", false, "", true,
+	return flowConfig(data, "internal/testdata/after_impl.py", false, true, "", true,
 		"", "", false)
 }
 
 func createFlowConfigWithOnlyAPISource(data TestData) string {
-	return flowConfig(data, "internal/testdata/after_impl.py", true, "sym_strategy.sso_main.id", true, `["api"]`, "", false)
+	return flowConfig(data, "internal/testdata/after_impl.py", true, false, "sym_strategy.sso_main.id", true, `["api"]`, "", false)
 }
 
 //// Test the state upgrade from provider < 2.0.0 to 2.0.0 ////////////////////
@@ -360,6 +379,7 @@ func testFlowResourceStateUpgradeDataV1() map[string]interface{} {
 			map[string]interface{}{
 				"allow_guest_interaction": "true",
 				"allow_revoke":            "true",
+				"include_decision_message": "true",
 				"allowed_sources":         []string{"api", "slack"},
 				"prompt_field": []interface{}{
 					map[string]interface{}{

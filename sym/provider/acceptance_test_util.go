@@ -365,6 +365,7 @@ func (r flowResource) String() string {
 	if r.params.strategyId != "" {
 		p.WriteString(fmt.Sprintf("\t\tstrategy_id = %s\n", r.params.strategyId))
 	}
+	p.WriteString(fmt.Sprintf("\t\tinclude_decision_message = %v\n", r.params.includeDecisionMessage))
 	p.WriteString(fmt.Sprintf("\t\tallow_revoke = %v\n", r.params.allowRevoke))
 	p.WriteString(fmt.Sprintf("\t\tschedule_deescalation = %v\n", r.params.scheduleDeescalation))
 	p.WriteString(fmt.Sprintf("\t\tallow_guest_interaction = %v\n", r.params.allowGuestInteraction))
@@ -417,6 +418,7 @@ resource "sym_flow" %[1]q {
 type params struct {
 	strategyId            string
 	allowRevoke           bool
+	includeDecisionMessage bool
 	allowedSources        string
 	additionalHeaderText  string
 	scheduleDeescalation  bool

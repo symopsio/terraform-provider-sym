@@ -452,6 +452,7 @@ func Test_flowResource_String(t *testing.T) {
 				params{
 					strategyId:            "sym_strategy.sso_main.id",
 					allowRevoke:           false,
+					includeDecisionMessage: true,
 					scheduleDeescalation:  false,
 					allowGuestInteraction: false,
 					promptFields: []field{
@@ -484,6 +485,7 @@ resource "sym_flow" "this" {
 
 	params {
 		strategy_id = sym_strategy.sso_main.id
+		include_decision_message = true
 		allow_revoke = false
 		schedule_deescalation = false
 		allow_guest_interaction = false
@@ -519,6 +521,7 @@ resource "sym_flow" "this" {
 				params{
 					strategyId:            "",
 					allowRevoke:           false,
+					includeDecisionMessage: true,
 					scheduleDeescalation:  false,
 					allowGuestInteraction: false,
 					promptFields: []field{
@@ -550,6 +553,7 @@ resource "sym_flow" "this" {
 	environment_id = sym_environment.this.id
 
 	params {
+		include_decision_message = true
 		allow_revoke = false
 		schedule_deescalation = false
 		allow_guest_interaction = false
