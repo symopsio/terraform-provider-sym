@@ -67,8 +67,9 @@ func promptFieldResource() *schema.Resource {
 func flowParamsResource() *schema.Resource {
 	return &schema.Resource{
 		Schema: map[string]*schema.Schema{
-			"strategy_id":  {Type: schema.TypeString, Optional: true, Description: "The ID of a sym_strategy with sym_targets that this sym_flow will be managing access to. If not defined, this sym_flow will be approval-only."},
-			"allow_revoke": {Type: schema.TypeBool, Optional: true, Default: true, Description: `Whether access granted by a sym_strategy may be revoked before the requested duration is over. If true, shows a "Revoke" button in Slack that allows both the requester and approver to instantly revoke access. At least one of "schedule_deescalation" or "allow_revoke" must be true.`},
+			"strategy_id":              {Type: schema.TypeString, Optional: true, Description: "The ID of a sym_strategy with sym_targets that this sym_flow will be managing access to. If not defined, this sym_flow will be approval-only."},
+			"allow_revoke":             {Type: schema.TypeBool, Optional: true, Default: true, Description: `Whether access granted by a sym_strategy may be revoked before the requested duration is over. If true, shows a "Revoke" button in Slack that allows both the requester and approver to instantly revoke access. At least one of "schedule_deescalation" or "allow_revoke" must be true.`},
+			"include_decision_message": {Type: schema.TypeBool, Optional: true, Default: false, Description: `Whether users responding to requests may enter additional text as context for their decisions. If true, shows an input box on all open requests.`},
 			"allowed_sources": {
 				Type:        schema.TypeList,
 				Elem:        &schema.Schema{Type: schema.TypeString},
