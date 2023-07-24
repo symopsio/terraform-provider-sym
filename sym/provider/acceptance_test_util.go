@@ -416,14 +416,14 @@ resource "sym_flow" %[1]q {
 }
 
 type params struct {
-	strategyId            string
-	allowRevoke           bool
+	strategyId             string
+	allowRevoke            bool
 	includeDecisionMessage bool
-	allowedSources        string
-	additionalHeaderText  string
-	scheduleDeescalation  bool
-	allowGuestInteraction bool
-	promptFields          []field
+	allowedSources         string
+	additionalHeaderText   string
+	scheduleDeescalation   bool
+	allowGuestInteraction  bool
+	promptFields           []field
 }
 
 type field struct {

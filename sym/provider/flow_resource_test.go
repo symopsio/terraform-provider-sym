@@ -191,15 +191,15 @@ func TestAccSymFlow_allowedSourcesOnlyAPI(t *testing.T) {
 }
 
 func flowConfig(
-    data TestData,
-    implPath string,
-    allowRevoke bool,
-    includeDecisionMessage bool,
-    strategyId string,
-    scheduleDeescalation bool,
-    allowedSources string,
-    additionalHeaderText string,
-    allowGuestInteraction bool,
+	data TestData,
+	implPath string,
+	allowRevoke bool,
+	includeDecisionMessage bool,
+	strategyId string,
+	scheduleDeescalation bool,
+	allowedSources string,
+	additionalHeaderText string,
+	allowGuestInteraction bool,
 ) string {
 	return makeTerraformConfig(
 		providerResource{org: data.OrgSlug},
@@ -377,10 +377,10 @@ func testFlowResourceStateUpgradeDataV1() map[string]interface{} {
 		"name":           "flow-v2tftake2",
 		"params": []interface{}{
 			map[string]interface{}{
-				"allow_guest_interaction": "true",
-				"allow_revoke":            "true",
+				"allow_guest_interaction":  "true",
+				"allow_revoke":             "true",
 				"include_decision_message": "true",
-				"allowed_sources":         []string{"api", "slack"},
+				"allowed_sources":          []string{"api", "slack"},
 				"prompt_field": []interface{}{
 					map[string]interface{}{
 						"name":     "reason",
