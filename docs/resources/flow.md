@@ -84,7 +84,7 @@ resource "sym_flow" "this" {
   name  = "sso_access"
   label = "SSO Access"
 
-  implementation = "impl.py"
+  implementation = file("impl.py")
 
   environment_id = sym_environment.this.id
 
