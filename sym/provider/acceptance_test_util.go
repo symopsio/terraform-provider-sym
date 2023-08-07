@@ -390,6 +390,7 @@ func (r flowResource) String() string {
 			p.WriteString(fmt.Sprintf("\t\t\tdefault = %q\n", f.default_))
 		}
 		p.WriteString(fmt.Sprintf("\t\t\trequired = %v\n", f.required))
+		p.WriteString(fmt.Sprintf("\t\t\tvisible = %v\n", f.visible))
 		if len(f.allowedValues) > 0 {
 			p.WriteString("\t\t\tallowed_values = [")
 			for i, av := range f.allowedValues {
@@ -432,6 +433,7 @@ type field struct {
 	label         string
 	default_      string
 	required      bool
+	visible       bool
 	allowedValues []string
 }
 
