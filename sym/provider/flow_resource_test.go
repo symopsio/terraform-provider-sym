@@ -368,7 +368,7 @@ func testFlowResourceStateUpgradeDataV0() map[string]interface{} {
 			"allow_revoke":             "true",
 			"include_decision_message": "true",
 			"allowed_sources_json":     "[\"api\",\"slack\"]",
-			"prompt_fields_json":       "[{\"name\":\"reason\",\"type\":\"string\",\"required\":true,\"label\":\"Reason\"},{\"name\":\"urgency\",\"type\":\"string\",\"required\":true,\"allowed_values\":[\"Low\",\"Medium\",\"High\"]}]",
+			"prompt_fields_json":       "[{\"name\":\"reason\",\"type\":\"string\",\"required\":true,\"label\":\"Reason\",\"visible\":true},{\"name\":\"urgency\",\"type\":\"string\",\"required\":true,\"visible\":true,\"allowed_values\":[\"Low\",\"Medium\",\"High\"]}]",
 			"schedule_deescalation":    "true",
 		},
 		"template": "sym:template:approval:1.0.0",
