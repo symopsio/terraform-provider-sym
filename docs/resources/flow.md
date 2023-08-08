@@ -116,7 +116,7 @@ from sym.sdk.integrations import slack
 
 
 @reducer
-def get_approvers(event):
+def get_approvers(request):
     return slack.channel("#access-requests")
 ```
 
@@ -170,6 +170,7 @@ Optional:
 - `label` (String) A name for the field, to be displayed in Slack.
 - `prefetch` (Boolean) Whether a prefetch reducer will be used to populate the options for this field. Not applicable for the "slack_user" and "slack_user_list" types.
 - `required` (Boolean) Whether this field is a required input.
+- `visible` (Boolean) Whether this field is rendered in the prompt modal.
 
 ## Import
 
