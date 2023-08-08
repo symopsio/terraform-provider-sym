@@ -58,6 +58,16 @@ func TestAccSymFlow_basic(t *testing.T) {
 					resource.TestCheckResourceAttr("sym_flow.this", "params.0.prompt_field.3.type", "slack_user_list"),
 					resource.TestCheckResourceAttr("sym_flow.this", "params.0.prompt_field.3.required", "true"),
 					resource.TestCheckResourceAttr("sym_flow.this", "params.0.prompt_field.3.visible", "true"),
+					resource.TestCheckResourceAttr("sym_flow.this", "params.0.prompt_field.4.name", "int_list"),
+					resource.TestCheckResourceAttr("sym_flow.this", "params.0.prompt_field.4.label", "Integer List"),
+					resource.TestCheckResourceAttr("sym_flow.this", "params.0.prompt_field.4.type", "int_list"),
+					resource.TestCheckResourceAttr("sym_flow.this", "params.0.prompt_field.4.required", "false"),
+					resource.TestCheckResourceAttr("sym_flow.this", "params.0.prompt_field.4.visible", "true"),
+					resource.TestCheckResourceAttr("sym_flow.this", "params.0.prompt_field.5.name", "str_list"),
+					resource.TestCheckResourceAttr("sym_flow.this", "params.0.prompt_field.5.label", "String List"),
+					resource.TestCheckResourceAttr("sym_flow.this", "params.0.prompt_field.5.type", "str_list"),
+					resource.TestCheckResourceAttr("sym_flow.this", "params.0.prompt_field.5.required", "false"),
+					resource.TestCheckResourceAttr("sym_flow.this", "params.0.prompt_field.5.visible", "true"),
 				),
 			},
 			{
@@ -322,6 +332,20 @@ func flowConfig(
 						required: true,
 						label:    "Slack User List",
 						visible:  true,
+					},
+					{
+					    name: "int_list",
+					    type_: "int_list",
+					    required: false,
+					    label: "Integer List",
+					    visible: true
+					},
+										{
+					    name: "str_list",
+					    type_: "str_list",
+					    required: false,
+					    label: "String List",
+					    visible: true
 					},
 				},
 			},

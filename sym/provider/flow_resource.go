@@ -493,9 +493,9 @@ func getAPISafeParams(paramsList []interface{}, data *schema.ResourceData) (map[
 func validatePromptFieldType(typeName interface{}, _ cty.Path) diag.Diagnostics {
 	var results diag.Diagnostics
 
-	if !utils.ContainsString([]string{"string", "int", "bool", "duration", "slack_user", "slack_user_list"}, typeName.(string)) {
+	if !utils.ContainsString([]string{"string", "int", "bool", "duration", "slack_user", "slack_user_list", "str_list", "int_list"}, typeName.(string)) {
 		results = append(results, utils.DiagFromError(
-			fmt.Errorf(`"%v" is not a valid prompt_field type. Must be one of: "string", "int", "bool", "duration", "slack_user", "slack_user_list"`, typeName),
+			fmt.Errorf(`"%v" is not a valid prompt_field type. Must be one of: "string", "int", "bool", "duration", "slack_user", "slack_user_list", "str_list", "int_list"`, typeName),
 			"Invalid prompt_field.type"),
 		)
 	}
