@@ -39,8 +39,8 @@ resource "sym_flow" "this" {
       name           = "urgency"
       type           = "string"
       required       = true
-      visible        = true
       allowed_values = ["Low", "Medium", "High"]
+      on_change      = file("on_change.py")
     }
   }
 }
