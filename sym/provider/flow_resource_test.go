@@ -334,18 +334,18 @@ func flowConfig(
 						visible:  true,
 					},
 					{
-					    name: "int_list",
-					    type_: "int_list",
-					    required: false,
-					    label: "Integer List",
-					    visible: true
+						name:     "int_list",
+						type_:    "int_list",
+						required: false,
+						label:    "Integer List",
+						visible:  true,
 					},
-										{
-					    name: "str_list",
-					    type_: "str_list",
-					    required: false,
-					    label: "String List",
-					    visible: true
+					{
+						name:     "str_list",
+						type_:    "str_list",
+						required: false,
+						label:    "String List",
+						visible:  true,
 					},
 				},
 			},
