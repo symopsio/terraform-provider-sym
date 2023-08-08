@@ -48,6 +48,7 @@ func TestAccSymFlow_basic(t *testing.T) {
 					resource.TestCheckResourceAttr("sym_flow.this", "params.0.prompt_field.1.allowed_values.0", "Low"),
 					resource.TestCheckResourceAttr("sym_flow.this", "params.0.prompt_field.1.allowed_values.1", "Medium"),
 					resource.TestCheckResourceAttr("sym_flow.this", "params.0.prompt_field.1.allowed_values.2", "High"),
+					resource.TestCheckResourceAttr("sym_flow.this", "params.0.prompt_field.1.on_change", "file('before_on_change.py')"),
 					resource.TestCheckResourceAttr("sym_flow.this", "params.0.prompt_field.2.name", "slack_user"),
 					resource.TestCheckResourceAttr("sym_flow.this", "params.0.prompt_field.2.label", "Slack User"),
 					resource.TestCheckResourceAttr("sym_flow.this", "params.0.prompt_field.2.type", "slack_user"),
@@ -73,6 +74,7 @@ func TestAccSymFlow_basic(t *testing.T) {
 					resource.TestCheckNoResourceAttr("sym_flow.this", "params.0.header_text"),
 					resource.TestCheckResourceAttr("sym_flow.this", "params.0.allow_guest_interaction", "true"),
 					resource.TestCheckResourceAttr("sym_flow.this", "params.0.schedule_deescalation", "true"),
+					resource.TestCheckResourceAttr("sym_flow.this", "params.0.prompt_field.1.on_change", "file('after_on_change.py')"),
 				),
 			},
 		},
@@ -204,6 +206,7 @@ func flowConfig(
 	allowedSources string,
 	additionalHeaderText string,
 	allowGuestInteraction bool,
+	onChangeImplPath string,
 ) string {
 	return makeTerraformConfig(
 		providerResource{org: data.OrgSlug},
@@ -308,6 +311,7 @@ func flowConfig(
 						default_:      "Low",
 						visible:       true,
 						allowedValues: []string{"Low", "Medium", "High"},
+						onChange:      fmt.Sprintf("file('%s')", onChangeImplPath),
 					},
 					{
 						name:     "slack_user",
@@ -331,26 +335,26 @@ func flowConfig(
 
 func createFlowConfig(data TestData) string {
 	return flowConfig(data, "internal/testdata/before_impl.py", true, false, "sym_strategy.sso_main.id", false,
-		`["slack", "api"]`, "Additional Header Text", false)
+		`["slack", "api"]`, "Additional Header Text", false, "before_on_change.py")
 }
 
 func updateFlowConfig(data TestData) string {
 	return flowConfig(data, "internal/testdata/after_impl.py", false, true, "sym_strategy.sso_main.id", true,
-		"", "", true)
+		"", "", true, "after_on_change.py")
 }
 
 func createFlowNoStrategyConfig(data TestData) string {
 	return flowConfig(data, "internal/testdata/before_impl.py", true, false, "", false,
-		"", "", false)
+		"", "", false, "before_on_change.py")
 }
 
 func updateFlowNoStrategyConfig(data TestData) string {
 	return flowConfig(data, "internal/testdata/after_impl.py", false, true, "", true,
-		"", "", false)
+		"", "", false, "after_on_change.py")
 }
 
 func createFlowConfigWithOnlyAPISource(data TestData) string {
-	return flowConfig(data, "internal/testdata/after_impl.py", true, false, "sym_strategy.sso_main.id", true, `["api"]`, "", false)
+	return flowConfig(data, "internal/testdata/after_impl.py", true, false, "sym_strategy.sso_main.id", true, `["api"]`, "", false, "before_on_change.py")
 }
 
 //// Test the state upgrade from provider < 2.0.0 to 2.0.0 ////////////////////
