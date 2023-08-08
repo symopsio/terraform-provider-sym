@@ -35,7 +35,7 @@ func TestAccSymFlow_basic(t *testing.T) {
 					resource.TestCheckResourceAttr("sym_flow.this", "params.0.allow_guest_interaction", "false"),
 					resource.TestCheckResourceAttr("sym_flow.this", "params.0.include_decision_message", "false"),
 					resource.TestCheckResourceAttr("sym_flow.this", "params.0.schedule_deescalation", "false"),
-					resource.TestCheckResourceAttr("sym_flow.this", "params.0.prompt_field.#", "4"),
+					resource.TestCheckResourceAttr("sym_flow.this", "params.0.prompt_field.#", "6"),
 					resource.TestCheckResourceAttr("sym_flow.this", "params.0.prompt_field.0.name", "reason"),
 					resource.TestCheckResourceAttr("sym_flow.this", "params.0.prompt_field.0.label", "Reason"),
 					resource.TestCheckResourceAttr("sym_flow.this", "params.0.prompt_field.0.type", "string"),
