@@ -32,12 +32,14 @@ resource "sym_flow" "this" {
       type     = "string"
       required = true
       label    = "Reason"
+      visible  = true
     }
 
     prompt_field {
       name           = "urgency"
       type           = "string"
       required       = true
+      visible        = true
       allowed_values = ["Low", "Medium", "High"]
     }
   }

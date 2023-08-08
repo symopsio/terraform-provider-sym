@@ -459,13 +459,15 @@ func Test_flowResource_String(t *testing.T) {
 						{
 							name:     "reason",
 							type_:    "string",
-							required: true,
 							label:    "Reason",
+							required: true,
+							visible:  true,
 						},
 						{
 							name:          "urgency",
 							type_:         "list",
 							required:      true,
+							visible:       true,
 							allowedValues: []string{"Low", "Medium", "High"},
 						},
 						{
@@ -494,11 +496,13 @@ resource "sym_flow" "this" {
 			type = "string"
 			label = "Reason"
 			required = true
+			visible = true
 		}
 		prompt_field {
 			name = "urgency"
 			type = "list"
 			required = true
+			visible = true
 			allowed_values = ["Low", "Medium", "High"]
 		}
 		prompt_field {
@@ -506,6 +510,7 @@ resource "sym_flow" "this" {
 			type = "string"
 			default = "lolol"
 			required = false
+			visible = false
 		}
 	}
 }
@@ -528,13 +533,15 @@ resource "sym_flow" "this" {
 						{
 							name:     "reason",
 							type_:    "string",
-							required: true,
 							label:    "Reason",
+							required: true,
+							visible:  true,
 						},
 						{
 							name:          "urgency",
 							type_:         "list",
 							required:      true,
+							visible:       true,
 							allowedValues: []string{"Low", "Medium", "High"},
 						},
 						{
@@ -562,11 +569,13 @@ resource "sym_flow" "this" {
 			type = "string"
 			label = "Reason"
 			required = true
+			visible = true
 		}
 		prompt_field {
 			name = "urgency"
 			type = "list"
 			required = true
+			visible = true
 			allowed_values = ["Low", "Medium", "High"]
 		}
 		prompt_field {
@@ -574,6 +583,7 @@ resource "sym_flow" "this" {
 			type = "string"
 			default = "lolol"
 			required = false
+			visible = false
 		}
 	}
 }

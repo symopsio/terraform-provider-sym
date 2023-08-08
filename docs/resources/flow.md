@@ -96,12 +96,14 @@ resource "sym_flow" "this" {
       type     = "string"
       required = true
       label    = "Reason"
+      visible  = true
     }
 
     prompt_field {
       name           = "urgency"
       type           = "string"
       required       = true
+      visible        = true
       allowed_values = ["Low", "Medium", "High"]
     }
   }
@@ -114,7 +116,7 @@ from sym.sdk.integrations import slack
 
 
 @reducer
-def get_approvers(request):
+def get_approvers(event):
     return slack.channel("#access-requests")
 ```
 
