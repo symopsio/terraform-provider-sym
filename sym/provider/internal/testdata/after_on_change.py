@@ -1,3 +1,3 @@
-def on_change_urgency(event, prompt_field):
+def on_change_urgency(username, sym_prompt_form):
     print("foo")
-    return prompt_field
+    return sym_prompt_form

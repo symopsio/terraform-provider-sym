@@ -1,2 +1,2 @@
-def on_change_urgency(event, prompt_field):
-    return prompt_field
+def on_change_urgency(username, sym_prompt_form):
+    return sym_prompt_form
