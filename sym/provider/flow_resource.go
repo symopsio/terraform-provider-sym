@@ -59,7 +59,8 @@ func promptFieldResource() *schema.Resource {
 				Optional:    true,
 				Description: "Defines the full list of valid choices for this field's value. If defined, this field will be displayed as a dropdown in Slack. Not applicable for the \"slack_user\" and \"slack_user_list\" types.",
 			},
-			"prefetch": {Optional: true, Type: schema.TypeBool, Default: false, Description: "Whether a prefetch reducer will be used to populate the options for this field. Not applicable for the \"slack_user\" and \"slack_user_list\" types."},
+			"prefetch":  {Optional: true, Type: schema.TypeBool, Default: false, Description: "Whether a prefetch reducer will be used to populate the options for this field. Not applicable for the \"slack_user\" and \"slack_user_list\" types."},
+			"on_change": {Optional: true, Type: schema.TypeString, Description: "Python code defining logic to execute when this field's value changes.", ValidateDiagFunc: ImplementationValidation},
 		},
 		Description: "Custom input field used to collect information from a user who is requesting access to a resource.",
 	}

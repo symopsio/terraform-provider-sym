@@ -469,6 +469,7 @@ func Test_flowResource_String(t *testing.T) {
 							required:      true,
 							visible:       true,
 							allowedValues: []string{"Low", "Medium", "High"},
+							onChange:      "not a real implementation",
 						},
 						{
 							name:     "username",
@@ -504,6 +505,7 @@ resource "sym_flow" "this" {
 			required = true
 			visible = true
 			allowed_values = ["Low", "Medium", "High"]
+			on_change = "not a real implementation"
 		}
 		prompt_field {
 			name = "username"

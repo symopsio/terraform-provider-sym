@@ -383,14 +383,18 @@ func (r flowResource) String() string {
 		p.WriteString("\t\tprompt_field {\n")
 		p.WriteString(fmt.Sprintf("\t\t\tname = %q\n", f.name))
 		p.WriteString(fmt.Sprintf("\t\t\ttype = %q\n", f.type_))
+
 		if f.label != "" {
 			p.WriteString(fmt.Sprintf("\t\t\tlabel = %q\n", f.label))
 		}
+
 		if f.default_ != "" {
 			p.WriteString(fmt.Sprintf("\t\t\tdefault = %q\n", f.default_))
 		}
+
 		p.WriteString(fmt.Sprintf("\t\t\trequired = %v\n", f.required))
 		p.WriteString(fmt.Sprintf("\t\t\tvisible = %v\n", f.visible))
+
 		if len(f.allowedValues) > 0 {
 			p.WriteString("\t\t\tallowed_values = [")
 			for i, av := range f.allowedValues {
@@ -401,6 +405,11 @@ func (r flowResource) String() string {
 			}
 			p.WriteString("]\n")
 		}
+
+		if f.onChange != "" {
+			p.WriteString(fmt.Sprintf("\t\t\ton_change = %q\n", f.onChange))
+		}
+
 		p.WriteString("\t\t}\n")
 	}
 	p.WriteString("\t}")
@@ -435,6 +444,7 @@ type field struct {
 	required      bool
 	visible       bool
 	allowedValues []string
+	onChange      string
 }
 
 func makeTerraformConfig(resources ...resourceTemplate) string {
