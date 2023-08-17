@@ -68,6 +68,9 @@ func TestAccSymFlow_basic(t *testing.T) {
 					resource.TestCheckResourceAttr("sym_flow.this", "params.0.prompt_field.5.type", "str_list"),
 					resource.TestCheckResourceAttr("sym_flow.this", "params.0.prompt_field.5.required", "false"),
 					resource.TestCheckResourceAttr("sym_flow.this", "params.0.prompt_field.5.visible", "true"),
+					resource.TestCheckResourceAttr("sym_flow.this", "params.0.prompt_field.5.allowed_values.0", "Low"),
+					resource.TestCheckResourceAttr("sym_flow.this", "params.0.prompt_field.5.allowed_values.1", "Medium"),
+					resource.TestCheckResourceAttr("sym_flow.this", "params.0.prompt_field.5.allowed_values.2", "High"),
 				),
 			},
 			{
