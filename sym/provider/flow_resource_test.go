@@ -341,6 +341,7 @@ func flowConfig(
 						required: false,
 						label:    "Integer List",
 						visible:  true,
+						prefetch: true,
 					},
 					{
 						name:     "str_list",
@@ -348,6 +349,7 @@ func flowConfig(
 						required: false,
 						label:    "String List",
 						visible:  true,
+						prefetch: true,
 					},
 				},
 			},
