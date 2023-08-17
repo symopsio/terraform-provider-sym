@@ -341,7 +341,7 @@ func flowConfig(
 						required: false,
 						label:    "Integer List",
 						visible:  true,
-						prefetch: true,
+						allowedValues: []string{"Low", "Medium", "High"},
 					},
 					{
 						name:     "str_list",
@@ -349,7 +349,7 @@ func flowConfig(
 						required: false,
 						label:    "String List",
 						visible:  true,
-						prefetch: true,
+						allowedValues: []string{"Low", "Medium", "High"},
 					},
 				},
 			},
