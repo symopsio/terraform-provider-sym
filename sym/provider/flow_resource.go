@@ -474,29 +474,42 @@ func getAPISafeParams(paramsList []interface{}, data *schema.ResourceData) (map[
 			delete(paramsMapCopy, "strategy_id")
 		}
 
-		if promptFields, found := paramsMapCopy["prompt_field"]; found {
+		if originalPromptFields, found := paramsMapCopy["prompt_field"]; found {
 			// Because the Terraform block is called "prompt_field", it will be in params under that key.
 			// However, the API expects "prompt_fields", so change the key.
-			paramsMapCopy["prompt_fields"] = promptFields
 			delete(paramsMapCopy, "prompt_field")
 
-			// Warn users if they're using allowed_values for a prompt_field named "target_id", since it will
-			// be ignored by the Sym platform. We can't do this as part of a ValidateDiagFunc because it is
-			// a list field, which doesn't yet support ValidateDiagFunc. This means that the warning will appear
-			// after create/update, not during the plan step.
-			for i := range promptFields.([]interface{}) {
-				promptField := promptFields.([]interface{})[i].(map[string]interface{})
-				allowedValues := promptField["allowed_values"]
-				if promptField["name"] == "target_id" && len(allowedValues.([]interface{})) > 0 {
+			// Make new copies of each prompt field so the original is never modified. If the original is what will be
+			// saved to the state, and we don't want to change that.
+			var promptFieldsCopy []interface{}
+			for i := range originalPromptFields.([]interface{}) {
+				originalPromptField := originalPromptFields.([]interface{})[i].(map[string]interface{})
+
+				// Warn users if they're using allowed_values for a prompt_field named "target_id", since it will
+				// be ignored by the Sym platform. We can't do this as part of a ValidateDiagFunc because it is
+				// a list field, which doesn't yet support ValidateDiagFunc. This means that the warning will appear
+				// after create/update, not during the plan step.
+				allowedValues := originalPromptField["allowed_values"]
+				if originalPromptField["name"] == "target_id" && len(allowedValues.([]interface{})) > 0 {
 					diags = append(diags, utils.DiagWarning(fmt.Sprintf("params.prompt_field.%v.allowed_values will be ignored", i), "prompt_fields named 'target_id' have auto-populated allowed_values, so the defined allowed_values will be ignored."))
 				}
 
-				// on_change implementations should be base64 encoded for API communications.
-				if onChange, hasOnChange := promptField["on_change"]; hasOnChange {
-					onChangeImpl := onChange.(string)
-					promptField["on_change"] = base64.StdEncoding.EncodeToString([]byte(onChangeImpl))
+				// Construct a new prompt field.
+				promptFieldCopy := map[string]interface{}{}
+				for k, v := range originalPromptField {
+					if k == "on_change" {
+						// We want the state for on_change to stay as the human-readable version, but we should send the
+						// base64-encoded version to the Sym API.
+						promptFieldCopy[k] = base64.StdEncoding.EncodeToString([]byte(v.(string)))
+					} else {
+						promptFieldCopy[k] = v
+					}
 				}
+
+				promptFieldsCopy = append(promptFieldsCopy, promptFieldCopy)
 			}
+
+			paramsMapCopy["prompt_fields"] = promptFieldsCopy
 		}
 
 		return paramsMapCopy, diags
