@@ -352,7 +352,16 @@ func readFlow(_ context.Context, data *schema.ResourceData, meta interface{}) di
 				// prompt field including only known keys.
 				for promptFieldKey, promptFieldValue := range promptField {
 					if _, ok := promptFieldSchema[promptFieldKey]; ok {
-						knownPromptField[promptFieldKey] = promptFieldValue
+						// Convert base64 encoded on_change implementations back to human-readable Python code.
+						if promptFieldKey == "on_change" {
+							if decoded, err := base64.StdEncoding.DecodeString(promptFieldValue.(string)); err == nil {
+								knownPromptField[promptFieldKey] = string(decoded)
+							} else {
+								diags = append(diags, utils.DiagFromError(err, "Unable to read on_change implementation"))
+							}
+						} else {
+							knownPromptField[promptFieldKey] = promptFieldValue
+						}
 					}
 				}
 
@@ -480,6 +489,12 @@ func getAPISafeParams(paramsList []interface{}, data *schema.ResourceData) (map[
 				allowedValues := promptField["allowed_values"]
 				if promptField["name"] == "target_id" && len(allowedValues.([]interface{})) > 0 {
 					diags = append(diags, utils.DiagWarning(fmt.Sprintf("params.prompt_field.%v.allowed_values will be ignored", i), "prompt_fields named 'target_id' have auto-populated allowed_values, so the defined allowed_values will be ignored."))
+				}
+
+				// on_change implementations should be base64 encoded for API communications.
+				if onChange, hasOnChange := promptField["on_change"]; hasOnChange {
+					onChangeImpl := onChange.(string)
+					promptField["on_change"] = base64.StdEncoding.EncodeToString([]byte(onChangeImpl))
 				}
 			}
 		}
