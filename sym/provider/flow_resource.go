@@ -479,7 +479,7 @@ func getAPISafeParams(paramsList []interface{}, data *schema.ResourceData) (map[
 			// However, the API expects "prompt_fields", so change the key.
 			delete(paramsMapCopy, "prompt_field")
 
-			// Make new copies of each prompt field so the original is never modified. If the original is what will be
+			// Make new copies of each prompt field so the original is never modified. The original is what will be
 			// saved to the state, and we don't want to change that.
 			var promptFieldsCopy []interface{}
 			for i := range originalPromptFields.([]interface{}) {
