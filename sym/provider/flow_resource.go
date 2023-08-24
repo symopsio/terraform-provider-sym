@@ -48,10 +48,10 @@ func promptFieldResource() *schema.Resource {
 	return &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"name":     {Required: true, Type: schema.TypeString, Description: "A unique identifier for this field."},
-			"type":     {Required: true, Type: schema.TypeString, Description: `The type of data stored in this field. One of: "string", "int", "bool", "duration", "slack_user", "slack_user_list".`, ValidateDiagFunc: validatePromptFieldType},
+			"type":     {Required: true, Type: schema.TypeString, Description: `The type of data stored in this field. One of: "string", "str_list", "int", "int_list", "bool", "duration", "slack_user", "slack_user_list".`, ValidateDiagFunc: validatePromptFieldType},
 			"required": {Optional: true, Default: true, Type: schema.TypeBool, Description: "Whether this field is a required input."},
 			"label":    {Optional: true, Type: schema.TypeString, Description: "A name for the field, to be displayed in Slack."},
-			"default":  {Optional: true, Type: schema.TypeString, Description: "A fallback value for optional fields if no value is provided. Not applicable for the \"slack_user\" and \"slack_user_list\" types."},
+			"default":  {Optional: true, Type: schema.TypeString, Description: "A fallback value for optional fields if no value is provided. Not applicable for the \"slack_user\", \"slack_user_list\", \"int_list\", and \"str_list\" types."},
 			"visible":  {Optional: true, Default: true, Type: schema.TypeBool, Description: "Whether this field is rendered in the prompt modal."},
 			"allowed_values": {
 				Type:        schema.TypeList,
