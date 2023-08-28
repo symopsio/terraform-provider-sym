@@ -353,7 +353,7 @@ func readFlow(_ context.Context, data *schema.ResourceData, meta interface{}) di
 				for promptFieldKey, promptFieldValue := range promptField {
 					if _, ok := promptFieldSchema[promptFieldKey]; ok {
 						// Convert base64 encoded on_change implementations back to human-readable Python code.
-						if promptFieldKey == "on_change" {
+						if promptFieldKey == "on_change" && promptFieldValue != nil {
 							if decoded, err := base64.StdEncoding.DecodeString(promptFieldValue.(string)); err == nil {
 								knownPromptField[promptFieldKey] = string(decoded)
 							} else {
