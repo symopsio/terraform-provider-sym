@@ -1,7 +1,6 @@
 version: 2.1
 
 orbs:
-  aws-cli: circleci/aws-cli@1.3.0
   slack: circleci/slack@4.12.0
 
 commands:
@@ -75,12 +74,7 @@ jobs:
       - run:
           name: import GPG key
           command: echo -e "$GPG_KEY" | gpg --import
-      - aws-cli/setup
       - run: curl -sL https://git.io/goreleaser | bash
-      - run:
-          name: sync to s3
-          command: |
-            aws s3 sync dist s3://sym-releases/terraform-provider-sym/$CIRCLE_TAG --acl public-read
       - slack/notify:
           channel: "#eng-next-release"
           event: pass
