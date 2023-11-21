@@ -64,7 +64,7 @@ func (c *symHttpClient) Do(method string, path string, payload interface{}) (str
 	body, err := io.ReadAll(resp.Body)
 
 	// Return specific errors based on the status code from the Sym API.
-	if resp.StatusCode == 400 {
+	if resp.StatusCode == 400 || resp.StatusCode == 409 {
 		errorBody := utils.ErrorResponse{}
 		err = json.Unmarshal(body, &errorBody)
 		if err != nil {

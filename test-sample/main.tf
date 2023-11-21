@@ -126,3 +126,12 @@ resource "sym_integration" "runtime_context" {
     role_arn    = "arn:aws:iam::123456789012:role/sym/RuntimeConnectorRole"
   }
 }
+
+resource "sym_flows_filter" "this" {
+  implementation = file("get_flows.py")
+  vars = {
+    "my_stuff": "whoohoo",
+    "runtime_id_why_not": sym_runtime.this.id,
+  }
+  integrations = sym_environment.this.integrations
+}
