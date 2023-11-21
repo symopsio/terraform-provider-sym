@@ -7,12 +7,8 @@ import (
 )
 
 func TestAccSymFlowsFilter_basic(t *testing.T) {
-	//preData := BuildTestData("basic-environment")
 	createData := BuildTestData("flows-filter")
-	//postData := BuildTestData("basic-environment-updated")
 	updateData := BuildTestData("flows-filter-updated")
-	preSlack := slackIntegration(preData, "slack", "T12345")
-	postSlack := slackIntegration(postData, "new_slack", "T0011")
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
