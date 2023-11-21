@@ -24,17 +24,17 @@ func New(authToken string) *ApiClient {
 	httpClient := NewSymHttpClient(getApiUrl(), authToken)
 
 	return &ApiClient{
-		Integration:       NewIntegrationClient(httpClient),
-		Secret:            NewSecretClient(httpClient),
-		Secrets:           NewSecretsClient(httpClient),
-		Target:            NewTargetClient(httpClient),
-		Strategy:          NewStrategyClient(httpClient),
-		Flow:              NewFlowClient(httpClient),
-		Runtime:           NewRuntimeClient(httpClient),
-		Environment:       NewEnvironmentClient(httpClient),
-		ErrorLogger:       NewErrorLoggerClient(httpClient),
-		LogDestination:    NewLogDestinationClient(httpClient),
-		FlowsFilter: NewFlowsFilterClient(httpClient),
+		Integration:    NewIntegrationClient(httpClient),
+		Secret:         NewSecretClient(httpClient),
+		Secrets:        NewSecretsClient(httpClient),
+		Target:         NewTargetClient(httpClient),
+		Strategy:       NewStrategyClient(httpClient),
+		Flow:           NewFlowClient(httpClient),
+		Runtime:        NewRuntimeClient(httpClient),
+		Environment:    NewEnvironmentClient(httpClient),
+		ErrorLogger:    NewErrorLoggerClient(httpClient),
+		LogDestination: NewLogDestinationClient(httpClient),
+		FlowsFilter:    NewFlowsFilterClient(httpClient),
 	}
 }
 

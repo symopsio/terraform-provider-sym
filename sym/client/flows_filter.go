@@ -29,7 +29,6 @@ func (s FlowsFilter) String() string {
 
 // Client ///////////////////////////////////////
 
-
 // Interface defining methods that the client exposes
 type FlowsFilterClient interface {
 	Create(flowsFilter FlowsFilter) (string, error)
