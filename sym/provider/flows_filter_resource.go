@@ -2,8 +2,8 @@ package provider
 
 import (
 	"context"
-	"fmt"
 	"encoding/base64"
+	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -28,14 +28,14 @@ func FlowsFilter() *schema.Resource {
 			StateContext: getSlugImporter("flows_filter"),
 		},
 		Schema: map[string]*schema.Schema{
-		    "implementation": {
-                Type:             schema.TypeString,
-                Required:         true,
-                ValidateDiagFunc: ImplementationValidation,
-                Description:      "Python code defining the `get_flows` reducer for the FlowsFilter.",
-		    },
-		    "vars":                utils.SettingsMap("A map of variables and their values to pass to this filter's Python implementation file."),
-		    "integrations":        utils.SettingsMap("A map of Integrations available to this FlowsFilter's environment."),
+			"implementation": {
+				Type:             schema.TypeString,
+				Required:         true,
+				ValidateDiagFunc: ImplementationValidation,
+				Description:      "Python code defining the `get_flows` reducer for the FlowsFilter.",
+			},
+			"vars":         utils.SettingsMap("A map of variables and their values to pass to this filter's Python implementation file."),
+			"integrations": utils.SettingsMap("A map of Integrations available to this FlowsFilter's environment."),
 		},
 	}
 }
@@ -47,15 +47,15 @@ func createFlowsFilter(_ context.Context, data *schema.ResourceData, meta interf
 
 	flowsFilter := client.FlowsFilter{
 		//Id:                     data.Id(),
-		Vars:                   getSettingsMap(data, "vars"),
-		Integrations:           getSettingsMap(data, "integrations"),
+		Vars:         getSettingsMap(data, "vars"),
+		Integrations: getSettingsMap(data, "integrations"),
 	}
 
-    // base64 encode the implementation
+	// base64 encode the implementation
 	implementation := data.Get("implementation").(string)
 	flowsFilter.Implementation = base64.StdEncoding.EncodeToString([]byte(implementation))
 
-    // Make API call
+	// Make API call
 	if id, err := c.FlowsFilter.Create(flowsFilter); err != nil {
 		diags = append(diags, utils.DiagFromError(err, "Unable to create FlowsFilter"))
 	} else {
@@ -74,8 +74,8 @@ func readFlowsFilter(_ context.Context, data *schema.ResourceData, meta interfac
 	)
 	c := meta.(*client.ApiClient)
 
-    // We only allow one FlowsFilter object per org, so we do not need to retrieve by ID.
-    // We can just do a GET without any params
+	// We only allow one FlowsFilter object per org, so we do not need to retrieve by ID.
+	// We can just do a GET without any params
 	flowsFilter, err = c.FlowsFilter.Read()
 
 	if err != nil {
@@ -97,7 +97,7 @@ func readFlowsFilter(_ context.Context, data *schema.ResourceData, meta interfac
 	diags = utils.DiagsCheckError(diags, data.Set("vars", flowsFilter.Vars), "Unable to read FlowsFilter vars")
 	diags = utils.DiagsCheckError(diags, data.Set("integrations", flowsFilter.Integrations), "Unable to read FlowsFilter integrations")
 
-    // Decode the implementation so that it is human readable. Error if it is not decode-able
+	// Decode the implementation so that it is human readable. Error if it is not decode-able
 	if decoded, err := base64.StdEncoding.DecodeString(flowsFilter.Implementation); err == nil {
 		diags = utils.DiagsCheckError(diags, data.Set("implementation", string(decoded)), "Unable to read FlowsFilter implementation")
 	} else {
@@ -114,11 +114,11 @@ func updateFlowsFilter(_ context.Context, data *schema.ResourceData, meta interf
 
 	flowsFilter := client.FlowsFilter{
 		//Id:                     data.Id(),
-		Vars:                   getSettingsMap(data, "vars"),
-		Integrations:           getSettingsMap(data, "integrations"),
+		Vars:         getSettingsMap(data, "vars"),
+		Integrations: getSettingsMap(data, "integrations"),
 	}
 
-    // base64 encode the implementation
+	// base64 encode the implementation
 	implementation := data.Get("implementation").(string)
 	flowsFilter.Implementation = base64.StdEncoding.EncodeToString([]byte(implementation))
 

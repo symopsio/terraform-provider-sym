@@ -9,10 +9,10 @@ import (
 
 // Type to be marshalled into JSON
 type FlowsFilter struct {
-	Id                string            `json:"id,omitempty"`
-	Implementation    string            `json:"implementation"`
-	Vars              Settings          `json:"vars"`
-	Integrations      map[string]string `json:"integrations"`
+	Id             string            `json:"id,omitempty"`
+	Implementation string            `json:"implementation"`
+	Vars           Settings          `json:"vars"`
+	Integrations   map[string]string `json:"integrations"`
 }
 
 // String representation

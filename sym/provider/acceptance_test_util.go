@@ -456,14 +456,14 @@ func makeTerraformConfig(resources ...resourceTemplate) string {
 }
 
 type flowsFilterResource struct {
-    terraformName  string
+	terraformName  string
 	implementation string
-	vars      map[string]string
-	integrations      map[string]string
+	vars           map[string]string
+	integrations   map[string]string
 }
 
 func (r flowsFilterResource) String() string {
-    var integrations strings.Builder
+	var integrations strings.Builder
 	if len(r.integrations) > 0 {
 		integrations.WriteString("	integrations = {\n")
 		keys := make([]string, len(r.integrations))
@@ -480,7 +480,7 @@ func (r flowsFilterResource) String() string {
 	}
 
 	var vars strings.Builder
-		if len(r.vars) > 0 {
+	if len(r.vars) > 0 {
 		integrations.WriteString("	vars = {\n")
 		keys := make([]string, len(r.vars))
 		i := 0
