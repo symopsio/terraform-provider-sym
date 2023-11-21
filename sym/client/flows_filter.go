@@ -8,6 +8,7 @@ import (
 )
 
 // Type to be marshalled into JSON
+
 type FlowsFilter struct {
 	Id             string            `json:"id,omitempty"`
 	Implementation string            `json:"implementation"`
@@ -25,6 +26,9 @@ func (s FlowsFilter) String() string {
 		s.Integrations,
 	)
 }
+
+// Client ///////////////////////////////////////
+
 
 // Interface defining methods that the client exposes
 type FlowsFilterClient interface {

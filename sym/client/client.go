@@ -34,7 +34,7 @@ func New(authToken string) *ApiClient {
 		Environment:       NewEnvironmentClient(httpClient),
 		ErrorLogger:       NewErrorLoggerClient(httpClient),
 		LogDestination:    NewLogDestinationClient(httpClient),
-		FlowsFilterClient: NewFlowsFilterClient(httpClient),
+		FlowsFilter: NewFlowsFilterClient(httpClient),
 	}
 }
 
