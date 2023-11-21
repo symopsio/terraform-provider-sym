@@ -80,7 +80,7 @@ func readFlowsFilter(_ context.Context, data *schema.ResourceData, meta interfac
 
 	if err != nil {
 		if isNotFoundError(err) {
-			fmt.Sprintf("[WARN] Sym FlowsFilter not found, removing from state")
+			fmt.Printf("[WARN] Sym FlowsFilter not found, removing from state")
 			data.SetId("")
 			return nil
 		}
