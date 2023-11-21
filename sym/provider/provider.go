@@ -31,6 +31,7 @@ func Provider() *schema.Provider {
 			"sym_environment":     Environment(),
 			"sym_error_logger":    ErrorLogger(),
 			"sym_log_destination": LogDestination(),
+			"sym_flows_filter":    FlowsFilter(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"sym_integration": DataSourceIntegration(),

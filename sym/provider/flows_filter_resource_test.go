@@ -1,8 +1,8 @@
 package provider
 
 import (
-	"testing"
 	"fmt"
+	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
@@ -18,14 +18,14 @@ func TestAccSymFlowsFilter_basic(t *testing.T) {
 			{
 				Config: flowsFilterConfig(
 					createData,
-					"internal/testdata/before_impl.py", // fmt.Sprintf("file('%s')", implPath)
+					"internal/testdata/before_impl.py",
 					map[string]string{"my_var": "is_cool"},
-					map[string]string{"slack_id": "T12345"},
+					map[string]string{"slack_id": "sym_integration.slack.id"},
 				),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet("sym_flows_filter.this", "id"),
 					resource.TestCheckResourceAttrSet("sym_flows_filter.this", "implementation"),
-					resource.TestCheckResourceAttr("sym_flows_filter.this", "integrations.slack_id", "T12345"),
+					resource.TestCheckResourceAttrPair("sym_flows_filter.this", "integrations.slack_id", "sym_integration.slack", "id"),
 					resource.TestCheckResourceAttr("sym_flows_filter.this", "vars.my_var", "is_cool"),
 				),
 			},
@@ -34,12 +34,12 @@ func TestAccSymFlowsFilter_basic(t *testing.T) {
 					updateData,
 					"internal/testdata/after_impl.py",
 					map[string]string{"my_new_var": "is_cooler"},
-					map[string]string{"slack_id": "T45678"},
+					map[string]string{"slack_id": "sym_integration.slack.id"},
 				),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet("sym_flows_filter.this", "id"),
 					resource.TestCheckResourceAttrSet("sym_flows_filter.this", "implementation"),
-					resource.TestCheckResourceAttr("sym_flows_filter.this", "integrations.slack_id", "T45678"),
+					resource.TestCheckResourceAttrPair("sym_flows_filter.this", "integrations.slack_id", "sym_integration.slack", "id"),
 					resource.TestCheckResourceAttr("sym_flows_filter.this", "vars.my_new_var", "is_cooler"),
 				),
 			},
@@ -56,7 +56,7 @@ func flowsFilterConfig(data TestData, implPath string, vars map[string]string, i
 		type_:         "slack",
 		name:          data.ResourcePrefix + "-tf-flows-filter-test",
 		label:         "Slack",
-		externalId:    integrations["slack_id"],
+		externalId:    "T12345",
 	}
 
 	return makeTerraformConfig(

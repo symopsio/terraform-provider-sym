@@ -465,7 +465,7 @@ type flowsFilterResource struct {
 func (r flowsFilterResource) String() string {
 	var integrations strings.Builder
 	if len(r.integrations) > 0 {
-		integrations.WriteString("	integrations = {\n")
+		integrations.WriteString("integrations = {\n")
 		keys := make([]string, len(r.integrations))
 		i := 0
 		for k := range r.integrations {
@@ -481,7 +481,7 @@ func (r flowsFilterResource) String() string {
 
 	var vars strings.Builder
 	if len(r.vars) > 0 {
-		integrations.WriteString("	vars = {\n")
+		vars.WriteString("vars = {\n")
 		keys := make([]string, len(r.vars))
 		i := 0
 		for k := range r.vars {
@@ -490,7 +490,7 @@ func (r flowsFilterResource) String() string {
 		}
 		sort.Strings(keys)
 		for _, k := range keys {
-			vars.WriteString(fmt.Sprintf("		%s = %s\n", k, r.vars[k]))
+			vars.WriteString(fmt.Sprintf("		%s = \"%s\"\n", k, r.vars[k]))
 		}
 		vars.WriteString("	}\n")
 	}
