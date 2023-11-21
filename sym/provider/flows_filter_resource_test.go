@@ -49,7 +49,7 @@ func TestAccSymFlowsFilter_basic(t *testing.T) {
 
 func flowsFilterConfig(data TestData, implPath string, vars map[string]string, integrations map[string]string) string {
 	// creat the Slack Integration
-	var slackData := integrationResource{
+	slackData := integrationResource{
 		terraformName: "slack",
 		type_:         "slack",
 		name:          data.ResourcePrefix + "-tf-flows-filter-test",
