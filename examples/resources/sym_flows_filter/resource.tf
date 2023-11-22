@@ -5,25 +5,6 @@ resource "sym_integration" "pagerduty" {
   external_id = "example.pagerduty.com"
 }
 
-resource "sym_runtime" "this" {
-  name = "sandbox-runtime"
-  label = "Sandbox Runtime"
-  context_id = sym_integration.runtime_context.id
-}
-
-resource "sym_integration" "runtime_context" {
-  type = "permission_context"
-  name = "runtime-sandbox"
-
-  external_id = "12345678"
-
-  settings = {
-    cloud       = "aws"
-    external_id = "1478F2AD-6091-41E6-B3D2-766CA2F173CB" # optional
-    region      = "us-east-1"
-    role_arn    = "arn:aws:iam::123456789012:role/sym/RuntimeConnectorRole"
-  }
-}
 
 resource "sym_flows_filter" "this" {
   implementation = file("implementation.py")
@@ -44,10 +25,10 @@ from sym.sdk.integrations import pagerduty
 def get_flows(user, flows, flow_vars):
     if (
           pagerduty.is_on_call(user) and
-          len(pagerduty.get_incidents()) > flow_vars[incident_threshold]
+          len(pagerduty.get_incidents()) > flow_vars["incident_threshold"]
         ):
-        # user is on call and there is more than one incident. show admin flows
+        # Show all flows, including admin flows, if the user is on-call and there is more than one incident.
         return flows
     else:
-        # user is not on call/there are not enough incidents. hide admin flows
+        # The user is not on call or there are not enough incidents. Hide admin flows from being requested.
         return [flow for flow in flows if "admin" not in flow.name]

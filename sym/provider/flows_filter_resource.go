@@ -18,12 +18,11 @@ import (
 // using a Python `implementation` file
 func FlowsFilter() *schema.Resource {
 	return &schema.Resource{
-		Description:   "The `sym_flows_filter` resource provides a FlowsFilter that can be used to filter out flows for certain users. You may only have one FlowsFilter resource in your organization.",
+		Description:   "The `sym_flows_filter` resource provides a FlowsFilter that can be used to filter the Flows displayed to the requester. You may only have one FlowsFilter resource in your organization.",
 		CreateContext: createFlowsFilter,
 		ReadContext:   readFlowsFilter,
 		UpdateContext: updateFlowsFilter,
 		DeleteContext: deleteFlowsFilter,
-		// change this to be import by resource name (since there's only one) or ID? prob ID
 		Importer: &schema.ResourceImporter{
 			StateContext: getSlugImporter("flows_filter"),
 		},
@@ -35,7 +34,7 @@ func FlowsFilter() *schema.Resource {
 				Description:      "Python code defining the `get_flows` reducer for the FlowsFilter.",
 			},
 			"vars":         utils.SettingsMap("A map of variables and their values to pass to this filter's Python implementation file."),
-			"integrations": utils.SettingsMap("A map of Integrations available to this FlowsFilter's environment."),
+			"integrations": utils.SettingsMap("A map of Integrations available when executing this FlowsFilter's implementation."),
 		},
 	}
 }
@@ -46,7 +45,6 @@ func createFlowsFilter(_ context.Context, data *schema.ResourceData, meta interf
 	c := meta.(*client.ApiClient)
 
 	flowsFilter := client.FlowsFilter{
-		//Id:                     data.Id(),
 		Vars:         getSettingsMap(data, "vars"),
 		Integrations: getSettingsMap(data, "integrations"),
 	}
@@ -113,7 +111,6 @@ func updateFlowsFilter(_ context.Context, data *schema.ResourceData, meta interf
 	c := meta.(*client.ApiClient)
 
 	flowsFilter := client.FlowsFilter{
-		//Id:                     data.Id(),
 		Vars:         getSettingsMap(data, "vars"),
 		Integrations: getSettingsMap(data, "integrations"),
 	}
