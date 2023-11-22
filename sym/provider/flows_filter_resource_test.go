@@ -48,7 +48,7 @@ func TestAccSymFlowsFilter_basic(t *testing.T) {
 }
 
 func flowsFilterConfig(data TestData, implPath string, vars map[string]string, integrations map[string]string) string {
-	// creat the Slack Integration
+	// create the Slack Integration
 	slackData := integrationResource{
 		terraformName: "slack",
 		type_:         "slack",
@@ -60,25 +60,6 @@ func flowsFilterConfig(data TestData, implPath string, vars map[string]string, i
 	return makeTerraformConfig(
 		providerResource{org: data.OrgSlug},
 		slackData,
-		integrationResource{
-			terraformName: "runtime_context",
-			type_:         "permission_context",
-			name:          data.ResourcePrefix + "-tf-flows-filter-test-context",
-			label:         "Runtime Context",
-			externalId:    "123456789012",
-			settings: map[string]string{
-				"cloud":       "aws",
-				"external_id": "1478F2AD-6091-41E6-B3D2-766CA2F173CB",
-				"region":      "us-east-1",
-				"role_arn":    "arn:aws:iam::123456789012:role/sym/RuntimeConnectorRole",
-			},
-		},
-		runtimeResource{
-			terraformName: "this",
-			name:          data.ResourcePrefix + "-test-flows-filter-runtime",
-			label:         "Test Runtime",
-			contextId:     "sym_integration.runtime_context.id",
-		},
 		flowsFilterResource{
 			terraformName:  "this",
 			implementation: fmt.Sprintf("file('%s')", implPath),
