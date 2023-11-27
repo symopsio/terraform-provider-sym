@@ -33,7 +33,7 @@ func FlowsFilter() *schema.Resource {
 				ValidateDiagFunc: ImplementationValidation,
 				Description:      "Python code defining the `get_flows` reducer for the FlowsFilter.",
 			},
-			"vars":         utils.SettingsMap("A map of variables and their values to pass to this filter's Python implementation file."),
+			"vars":         utils.SettingsMap("A map of variables and their values to pass to this FlowsFilter implementation."),
 			"integrations": utils.SettingsMap("A map of Integrations available when executing this FlowsFilter's implementation."),
 		},
 	}
