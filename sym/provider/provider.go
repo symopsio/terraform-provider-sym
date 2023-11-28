@@ -19,6 +19,11 @@ func Provider() *schema.Provider {
 				Required:    true,
 				Description: "Your Sym Org ID",
 			},
+			"jwt_env_var": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Environment variable storing your Sym Access Key",
+			},
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"sym_flow":            Flow(),
@@ -45,8 +50,9 @@ func Provider() *schema.Provider {
 func providerConfigure(_ context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
 	var diags diag.Diagnostics
 	terraformOrg := d.Get("org").(string)
+	terraformJwtEnvVar := d.Get("jwt_env_var").(string)
 
-	cfg, err := utils.GetDefaultConfig()
+	cfg, err := utils.GetDefaultConfig(terraformJwtEnvVar)
 	if err != nil {
 		diags = append(diags, utils.DiagFromError(err, "Validation failed"))
 		return nil, diags

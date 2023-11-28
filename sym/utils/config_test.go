@@ -8,8 +8,9 @@ import (
 
 func Test_Config(t *testing.T) {
 	type args struct {
-		path  string
-		tfOrg string
+		path        string
+		tfOrg       string
+		tfJwtEnvVar string
 	}
 	tests := []struct {
 		name          string
@@ -21,8 +22,9 @@ func Test_Config(t *testing.T) {
 		{
 			"good-config",
 			args{
-				path:  "./testdata/good-config.yml",
-				tfOrg: "my-fancy-org",
+				path:        "./testdata/good-config.yml",
+				tfOrg:       "my-fancy-org",
+				tfJwtEnvVar: "",
 			},
 			nil,
 			&Config{
@@ -37,8 +39,9 @@ func Test_Config(t *testing.T) {
 		{
 			"org-mismatch",
 			args{
-				path:  "./testdata/good-config.yml",
-				tfOrg: "bad-wrong-org",
+				path:        "./testdata/good-config.yml",
+				tfOrg:       "bad-wrong-org",
+				tfJwtEnvVar: "",
 			},
 			nil,
 			&Config{
@@ -53,8 +56,9 @@ func Test_Config(t *testing.T) {
 		{
 			"org-mismatch-skip-validation",
 			args{
-				path:  "./testdata/good-config.yml",
-				tfOrg: "bad-wrong-org",
+				path:        "./testdata/good-config.yml",
+				tfOrg:       "bad-wrong-org",
+				tfJwtEnvVar: "",
 			},
 			func() {
 				_ = os.Setenv(SkipValidationEnvVar, "1")
@@ -71,10 +75,24 @@ func Test_Config(t *testing.T) {
 		{
 			"good-jwt",
 			args{
-				path:  "./bad-path.fake",
-				tfOrg: "my-fancy-org",
+				path:        "./bad-path.fake",
+				tfOrg:       "my-fancy-org",
+				tfJwtEnvVar: "",
 			},
-			func() { _ = os.Setenv(JWTEnvVar, "something") },
+			func() { _ = os.Setenv(JWTDefaultEnvVar, "something") },
+			&Config{
+				AuthToken: &AuthToken{AccessToken: "something"},
+			},
+			nil,
+		},
+		{
+			"custom-env-jwt",
+			args{
+				path:        "./bad-path.fake",
+				tfOrg:       "my-fancy-org",
+				tfJwtEnvVar: "MY_SYM_JWT",
+			},
+			func() { _ = os.Setenv("MY_SYM_JWT", "something") },
 			&Config{
 				AuthToken: &AuthToken{AccessToken: "something"},
 			},
@@ -83,8 +101,9 @@ func Test_Config(t *testing.T) {
 		{
 			"no-config-no-jwt",
 			args{
-				path:  "./bad-path.fake",
-				tfOrg: "my-fancy-org",
+				path:        "./bad-path.fake",
+				tfOrg:       "my-fancy-org",
+				tfJwtEnvVar: "",
 			},
 			nil,
 			nil,
@@ -93,8 +112,9 @@ func Test_Config(t *testing.T) {
 		{
 			"incomplete-config-no-jwt",
 			args{
-				path:  "./testdata/only-last-updated.yml",
-				tfOrg: "my-fancy-org",
+				path:        "./testdata/only-last-updated.yml",
+				tfOrg:       "my-fancy-org",
+				tfJwtEnvVar: "",
 			},
 			nil,
 			nil,
@@ -103,10 +123,11 @@ func Test_Config(t *testing.T) {
 		{
 			"use-jwt-if-both-config-and-jwt",
 			args{
-				path:  "./testdata/good-config.yml",
-				tfOrg: "bad-wrong-org", // org is not validated if SYM_JWT is set
+				path:        "./testdata/good-config.yml",
+				tfOrg:       "bad-wrong-org", // org is not validated if SYM_JWT is set
+				tfJwtEnvVar: "",
 			},
-			func() { _ = os.Setenv(JWTEnvVar, "something") },
+			func() { _ = os.Setenv(JWTDefaultEnvVar, "something") },
 			&Config{
 				AuthToken: &AuthToken{AccessToken: "something"},
 			},
@@ -115,12 +136,12 @@ func Test_Config(t *testing.T) {
 	}
 	for _, tt := range tests {
 		_ = os.Unsetenv(SkipValidationEnvVar)
-		_ = os.Unsetenv(JWTEnvVar)
+		_ = os.Unsetenv(JWTDefaultEnvVar)
 		if tt.precondition != nil {
 			tt.precondition()
 		}
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := GetConfig(tt.args.path)
+			got, err := GetConfig(tt.args.tfJwtEnvVar, tt.args.path)
 			if err != nil && !strings.Contains(err.Error(), tt.expectedError.Error()) {
 				t.Errorf("GetConfig() error = %v, wantErr %q", err, tt.expectedError)
 				return
