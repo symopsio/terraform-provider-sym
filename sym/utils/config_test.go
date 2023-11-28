@@ -6,6 +6,8 @@ import (
 	"testing"
 )
 
+const TestCustomEnvVar = "MY_SYM_JWT"
+
 func Test_Config(t *testing.T) {
 	type args struct {
 		path        string
@@ -90,9 +92,9 @@ func Test_Config(t *testing.T) {
 			args{
 				path:        "./bad-path.fake",
 				tfOrg:       "my-fancy-org",
-				tfJwtEnvVar: "MY_SYM_JWT",
+				tfJwtEnvVar: TestCustomEnvVar,
 			},
-			func() { _ = os.Setenv("MY_SYM_JWT", "something") },
+			func() { _ = os.Setenv(TestCustomEnvVar, "something") },
 			&Config{
 				AuthToken: &AuthToken{AccessToken: "something"},
 			},
@@ -137,6 +139,7 @@ func Test_Config(t *testing.T) {
 	for _, tt := range tests {
 		_ = os.Unsetenv(SkipValidationEnvVar)
 		_ = os.Unsetenv(JWTDefaultEnvVar)
+		_ = os.Unsetenv(TestCustomEnvVar)
 		if tt.precondition != nil {
 			tt.precondition()
 		}
