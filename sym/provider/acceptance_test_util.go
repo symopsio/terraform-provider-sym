@@ -454,3 +454,53 @@ func makeTerraformConfig(resources ...resourceTemplate) string {
 	}
 	return sb.String()
 }
+
+type flowsFilterResource struct {
+	terraformName  string
+	implementation string
+	vars           map[string]string
+	integrations   map[string]string
+}
+
+func (r flowsFilterResource) String() string {
+	var integrations strings.Builder
+	if len(r.integrations) > 0 {
+		integrations.WriteString("integrations = {\n")
+		keys := make([]string, len(r.integrations))
+		i := 0
+		for k := range r.integrations {
+			keys[i] = k
+			i++
+		}
+		sort.Strings(keys)
+		for _, k := range keys {
+			integrations.WriteString(fmt.Sprintf("		%s = %s\n", k, r.integrations[k]))
+		}
+		integrations.WriteString("	}\n")
+	}
+
+	var vars strings.Builder
+	if len(r.vars) > 0 {
+		vars.WriteString("vars = {\n")
+		keys := make([]string, len(r.vars))
+		i := 0
+		for k := range r.vars {
+			keys[i] = k
+			i++
+		}
+		sort.Strings(keys)
+		for _, k := range keys {
+			vars.WriteString(fmt.Sprintf("		%s = \"%s\"\n", k, r.vars[k]))
+		}
+		vars.WriteString("	}\n")
+	}
+
+	return fmt.Sprintf(`
+resource "sym_flows_filter" %[1]q {
+	implementation = %[2]q
+	%[3]s
+
+	%[4]s
+}
+`, r.terraformName, r.implementation, vars.String(), integrations.String())
+}
