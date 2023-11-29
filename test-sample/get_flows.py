@@ -3,5 +3,5 @@ from sym.sdk.integrations import slack
 
 
 @reducer
-def get_flows(user, flows, flow_vars):
+def get_flows(user, flows, flows_filter_vars):
     return flows

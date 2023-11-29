@@ -56,10 +56,10 @@ from sym.sdk.integrations import pagerduty
 
 
 @reducer
-def get_flows(user, flows, flow_vars):
+def get_flows(user, flows, flow_filter_vars):
     if (
           pagerduty.is_on_call(user) and
-          len(pagerduty.get_incidents()) > flow_vars[incident_threshold]
+          len(pagerduty.get_incidents()) > flows_filter_vars[incident_threshold]
         ):
         # user is on call and there is more than one incident. show admin flows
         return flows
