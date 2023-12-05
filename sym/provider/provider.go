@@ -22,7 +22,7 @@ func Provider() *schema.Provider {
 			"jwt_env_var": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Environment variable storing your Sym Access Key",
+				Description: "Environment variable storing your Sym Bot Token",
 			},
 		},
 		ResourcesMap: map[string]*schema.Resource{
