@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	JWTEnvVar            = "SYM_JWT"
+	JWTDefaultEnvVar     = "SYM_JWT"
 	SkipValidationEnvVar = "SYM_TF_SKIP_VALIDATION"
 )
 
@@ -45,11 +45,13 @@ func (c *Config) ValidateOrg(tfOrg string) error {
 
 // GetConfig reads the Sym config file at the given path and relevant environment variables
 // and returns a Config
-func GetConfig(path string) (*Config, error) {
+func GetConfig(jwtEnvVar string, path string) (*Config, error) {
 	var cfg Config
-
+	if jwtEnvVar == "" {
+		jwtEnvVar = JWTDefaultEnvVar
+	}
 	// If SYM_JWT is set, just use that.
-	jwt := os.Getenv(JWTEnvVar)
+	jwt := os.Getenv(jwtEnvVar)
 	if jwt != "" {
 		cfg.AuthToken = &AuthToken{
 			AccessToken: jwt,
@@ -79,7 +81,7 @@ func GetConfig(path string) (*Config, error) {
 }
 
 // GetDefaultConfig reads the Sym config at the default config path
-func GetDefaultConfig() (*Config, error) {
+func GetDefaultConfig(jwtEnvVar string) (*Config, error) {
 	path := os.ExpandEnv("$HOME/.config/symflow/default/config.yml")
-	return GetConfig(path)
+	return GetConfig(jwtEnvVar, path)
 }

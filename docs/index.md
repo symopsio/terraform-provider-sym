@@ -28,3 +28,7 @@ provider "sym" {
 ### Required
 
 - `org` (String) Your Sym Org ID
+
+### Optional
+
+- `jwt_env_var` (String) Environment variable storing your Sym Bot Token
