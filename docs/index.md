@@ -31,4 +31,4 @@ provider "sym" {
 
 ### Optional
 
-- `jwt_env_var` (String) Environment variable storing your Sym Access Key
+- `jwt_env_var` (String) Environment variable storing your Sym Bot Token
